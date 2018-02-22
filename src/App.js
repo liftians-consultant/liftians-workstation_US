@@ -1,21 +1,30 @@
-import React, { Component } from 'react';
+import React from "react";
+import { connect } from "react-redux";
+import PropTypes from "prop-types";
+import { Route } from "react-router-dom";
 import logo from './logo.svg';
 import './App.css';
+import LoginPage from "./components/pages/LoginPage";
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
+const App = ({ location, isAuthenticated }) => (
+  <div className="ui container">
+  <h1>test</h1>
+    {/* {isAuthenticated && <TopNavigation />} */}
+    <Route location={location} path="/" exact component={LoginPage} />
+  </div>
+);
+
+App.propTypes = {
+  location: PropTypes.shape({
+    pathname: PropTypes.string.isRequired
+  }).isRequired,
+  // isAuthenticated: PropTypes.bool.isRequired
+};
+
+function mapStateToProps(state) {
+  return {
+    // isAuthenticated: !!state.user.email
+  };
 }
 
-export default App;
+export default connect(mapStateToProps)(App);
