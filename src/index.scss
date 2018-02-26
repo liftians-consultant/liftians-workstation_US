@@ -1,0 +1,17 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+// Colors
+$bg-color: rgb(84, 84, 99);
+$dot-color: rgb(242, 242, 253);
+
+// Dimensions
+$dot-size: 2px;
+$dot-space: 25px;
+
+body {
+	background: $bg-color;
+}
