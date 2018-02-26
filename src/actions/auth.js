@@ -2,9 +2,9 @@ import { USER_LOGGED_IN, USER_LOGGED_OUT } from "../types";
 import api from "../api";
 import setAuthorizationHeader from "../utils/setAuthorizationHeader";
 
-export const userLoggedIn = username => ({
+export const userLoggedIn = user => ({
   type: USER_LOGGED_IN,
-  username
+  user
 });
 
 export const userLoggedOut = () => ({
@@ -15,11 +15,15 @@ export const login = credentials => dispatch =>
   api.user.login(credentials).then(token => {
     localStorage.liftiansJWT = token;
     setAuthorizationHeader(token);
-    dispatch(userLoggedIn(credentials.username));
+    const user = {
+      token: token,
+      username: credentials.username
+    }
+    dispatch(userLoggedIn(user));
   });
 
 export const logout = () => dispatch => {
-  localStorage.removeItem("bookwormJWT");
+  localStorage.removeItem("liftiansJWT");
   setAuthorizationHeader();
   dispatch(userLoggedOut());
 };

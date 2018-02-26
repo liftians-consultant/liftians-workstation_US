@@ -5,31 +5,29 @@ import "semantic-ui-css/semantic.min.css";
 import { createStore, applyMiddleware } from "redux";
 import { Provider } from "react-redux";
 import thunk from "redux-thunk";
-// import decode from "jwt-decode";
+import decode from "jwt-decode";
 import { composeWithDevTools } from "redux-devtools-extension";
-import logger from 'redux-logger';
-
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
 import rootReducer from "./rootReducer";
-// import { userLoggedIn } from "./actions/auth";
+import { userLoggedIn } from "./actions/auth";
 import setAuthorizationHeader from "./utils/setAuthorizationHeader";
+import './index.css';
 
 const store = createStore(
   rootReducer,
   composeWithDevTools(applyMiddleware(thunk))
 );
 
-// if (localStorage.bookwormJWT) {
-//   const payload = decode(localStorage.bookwormJWT);
-//   const user = {
-//     token: localStorage.bookwormJWT,
-//     email: payload.email,
-//     confirmed: payload.confirmed
-//   };
-//   setAuthorizationHeader(localStorage.bookwormJWT);
-//   store.dispatch(userLoggedIn(user));
-// }
+if (localStorage.liftiansJWT) {
+  const payload = decode(localStorage.liftiansJWT); // {sub: "10001", exp: 1519504053}
+  const user = {
+    token: localStorage.liftiansJWT,
+    username: payload.sub,
+  };
+  setAuthorizationHeader(localStorage.liftiansJWT);
+  store.dispatch(userLoggedIn(user));
+}
 
 ReactDOM.render(
   <BrowserRouter>

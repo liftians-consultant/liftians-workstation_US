@@ -1,19 +1,35 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import { Button, Form, Grid, Header, Image, Message, Segment } from 'semantic-ui-react'
 import LoginForm from '../forms/LoginForm';
 import { login } from "../../actions/auth";
+import logo from '../../assets/images/loginPage.png';
 
 class LoginPage extends Component {
 
   submit = data =>
-    this.props.login(data).then(() => { console.log("yay"); return this.props.history.push("/dashboard")});
+    this.props.login(data).then(() => this.props.history.push("/"));
 
   render() {
     return (
-      <div>
-        <h1>Liftians Login Page</h1>
-        <LoginForm submit={this.submit}></LoginForm>
+      <div className="login-form">
+        <style>{`
+        body > div,
+        body > div > div,
+        body > div > div > div.login-form {
+          height: 100%;
+        }
+        `}</style>
+        <Grid
+          textAlign='center'
+          style={{ height: '100%' }}
+          verticalAlign='middle'>
+          <Grid.Column style={{ maxWidth: 450 }}>
+            <Image src={logo} size='small' centered />
+            <LoginForm submit={this.submit}></LoginForm>
+          </Grid.Column>
+        </Grid>
       </div>
     );
   }

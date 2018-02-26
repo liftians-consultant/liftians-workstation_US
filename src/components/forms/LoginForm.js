@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Form, Button, Message } from "semantic-ui-react";
+import { Form, Button, Message, Segment } from "semantic-ui-react";
 import Validator from "validator";
 import InlineError from "../messages/InlineError";
 
@@ -45,15 +45,38 @@ class LoginForm extends React.Component {
     const { data, errors, loading } = this.state;
 
     return (
-      <Form onSubmit={this.onSubmit} loading={loading}>
+
+      // <Form size='large'>
+      //       <Segment stacked>
+      //         <Form.Input
+      //           fluid
+      //           icon='user'
+      //           iconPosition='left'
+      //           placeholder='E-mail address'
+      //         />
+      //         <Form.Input
+      //           fluid
+      //           icon='lock'
+      //           iconPosition='left'
+      //           placeholder='Password'
+      //           type='password'
+      //         />
+
+      //         <Button color='teal' fluid size='large'>Login</Button>
+      //       </Segment>
+      //     </Form>
+
+
+      <Form onSubmit={this.onSubmit} loading={loading} size='large'>
+        <Segment>
         {errors.global && (
           <Message negative>
             <Message.Header>Something went wrong</Message.Header>
             <p>{errors.global}</p>
           </Message>
         )}
-        <Form.Field error={!!errors.email}>
-          <label htmlFor="username">Username</label>
+        <Form.Field fluid="true" error={!!errors.email}>
+          {/* <label htmlFor="username">Username</label> */}
           <input
             type="text"
             id="username"
@@ -64,8 +87,8 @@ class LoginForm extends React.Component {
           />
           {errors.username && <InlineError text={errors.email} />}
         </Form.Field>
-        <Form.Field error={!!errors.password}>
-          <label htmlFor="password">Password</label>
+        <Form.Field fluid="true" error={!!errors.password}>
+          {/* <label htmlFor="password">Password</label> */}
           <input
             type="password"
             id="password"
@@ -77,6 +100,7 @@ class LoginForm extends React.Component {
           {errors.password && <InlineError text={errors.password} />}
         </Form.Field>
         <Button primary>Login</Button>
+        </Segment>
       </Form>
     );
   }
