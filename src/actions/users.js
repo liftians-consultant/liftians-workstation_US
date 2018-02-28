@@ -3,7 +3,7 @@ import { USER_INFO_FETCHED } from '../types';
 
 export const userInfoFetched = userInfo => ({
   type: USER_INFO_FETCHED,
-  userInfo
+  userInfo: userInfo
 });
 
 export const getUserInfoById = (empId) => dispatch => 

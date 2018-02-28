@@ -1,19 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
-const menuBtnStyle = {
-  width: '150px',
-  height: '150px',
-  backgroundColor: 'darkblue',
-  textAlign: 'center',
-  lineHeight: '150px',
-  marginLeft: 'auto',
-  marginRight: 'auto'
-}
-
-const spanStyle = {
-  color: 'white'
-}
+import classNames from 'classnames';
+import './MenuButton.css';
 
 class MenuButton extends Component {
 
@@ -22,10 +10,15 @@ class MenuButton extends Component {
   }
 
   render() {
-    const { title } = this.props;
+    const { title, isDisabled } = this.props;
+    const menuClass = classNames({
+      'menuBtn': true,
+      'btn-disabled': isDisabled
+    });
     return (
-      <div style={ menuBtnStyle } onClick={ (event) => { this.clickHandler(event) } }>
-        <span style={ spanStyle }>{ title }</span>
+      <div className={menuClass}
+           onClick={ (event) => { this.clickHandler(event) } }>
+        <span className="menuBtn-span">{ title }</span>
       </div>
     );
   }
@@ -33,6 +26,7 @@ class MenuButton extends Component {
 
 MenuButton.propTypes = {
   title: PropTypes.string.isRequired,
+  isDisabled: PropTypes.bool,
 };
 
 export default MenuButton;

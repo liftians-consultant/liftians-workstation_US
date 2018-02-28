@@ -26,7 +26,7 @@ const TopNavigation = ({ logout }) => ({
               <Button as='a' onClick={() => logout() }>Menu</Button>
             </Menu.Item>
             <Menu.Item position='right'>
-              <Button as='a' onClick={() => {}}>Logout</Button>
+              <Button as='a' onClick={() => logout() }>Logout</Button>
             </Menu.Item>
             <Menu.Item position='right'>
               <Button as='a' onClick={() => {}}>Operation</Button>
