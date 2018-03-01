@@ -6,7 +6,7 @@ import './MenuButton.css';
 class MenuButton extends Component {
 
   clickHandler(event) {
-    console.log("clicked", event.target);
+    this.props.goTo('/' + this.props.name);
   }
 
   render() {
@@ -26,7 +26,9 @@ class MenuButton extends Component {
 
 MenuButton.propTypes = {
   title: PropTypes.string.isRequired,
+  name: PropTypes.string,
   isDisabled: PropTypes.bool,
+  goTo: PropTypes.func
 };
 
 export default MenuButton;

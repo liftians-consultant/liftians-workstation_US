@@ -24,6 +24,9 @@ class HomePage extends Component {
 
   }
 
+  goToPage = data =>
+    this.props.history.push('/pick-task');
+
   checkCurrentUnFinishTaskCall() {
     // TODO: station id
     this.props.checkCurrentUnFinishTask(1).then(res => {
@@ -43,19 +46,19 @@ class HomePage extends Component {
           <Grid columns={3} centered>
             <Grid.Row>
               <Grid.Column>
-                <MenuButton title="入貨" isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'R' ? true : false }/>
+                <MenuButton title="Replenish" name="replenish" goTo={this.goToPage} isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'R' ? true : false }/>
               </Grid.Column>
               <Grid.Column>
-                <MenuButton title="出貨" isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'P' ? true : false }/>
+                <MenuButton title="Pick" name="pick-task" goTo={this.goToPage} isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'P' ? true : false }/>
               </Grid.Column>
               <Grid.Column>
-                <MenuButton title="盤點" isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'C' ? true : false }/>
+                <MenuButton title="Count" name="count" isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'C' ? true : false }/>
               </Grid.Column>
             </Grid.Row>
 
             <Grid.Row>
               <Grid.Column>
-                <MenuButton title="系統設置" />
+                <MenuButton title="System Setting" />
               </Grid.Column>
               <Grid.Column>
                 <MenuButton title="庫存查詢" />
@@ -72,6 +75,9 @@ class HomePage extends Component {
 }
 
 HomePage.propTypes = {
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired
+  }).isRequired,
   isAuthenticated: PropTypes.bool.isRequired,
   logout: PropTypes.func.isRequired
 };

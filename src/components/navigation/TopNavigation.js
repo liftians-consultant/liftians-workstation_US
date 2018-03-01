@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Button, Menu, Container, Segment, Image } from 'semantic-ui-react';
+import { Button, Menu, Container, Image } from 'semantic-ui-react';
 import * as actions from '../../actions/auth';
 import leftLogo from '../../assets/images/logo@2x.png';
 
@@ -13,7 +13,6 @@ const menuStyle = {
 
 const TopNavigation = ({ logout }) => ({
   render() {
-    const fixed = false;
 
     return (
       <div>

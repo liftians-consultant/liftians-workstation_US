@@ -13,13 +13,10 @@ export default function user(state = {}, action = {}) {
       return { ...state, stationActivated: false}
     case STATION_CURRENT_UNFINISH_TASK_FETCHED:
       return { ...state, info: action.stationInfo};
-      break;
     case AT_STATION_POD_LAYOUT_INFO_FETCHED:
       return { ...state, ...action};
-      break;
     case COMING_PODS_FETCHED: 
       return { ...state, ...action.pods };
-      break
     default:
       return state;
   }

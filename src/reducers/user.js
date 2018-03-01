@@ -8,7 +8,6 @@ export default function user(state = {}, action = {}) {
       return {};
     case USER_INFO_FETCHED:
       return { ...state, info: action.userInfo };
-      break;
     default:
       return state;
   }
