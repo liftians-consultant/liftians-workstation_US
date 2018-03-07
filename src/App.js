@@ -6,7 +6,8 @@ import PropTypes from "prop-types";
 import './App.css';
 import HomePage from "./components/pages/HomePage";
 import LoginPage from "./components/pages/LoginPage";
-import PickTaskPage from "./components/pages/PickTaskPage";
+import PickTaskPage from "./components/pages/PickTaskPage/PickTaskPage";
+import OperationPage from './components/pages/OperationPage/OperationPage';
 import GuestRoute from "./components/routes/GuestRoute";
 import UserRoute from "./components/routes/UserRoute";
 // import TopNavigation from './components/navigation/TopNavigation';
@@ -17,6 +18,7 @@ const App = ({ location, isAuthenticated }) => (
     <UserRoute location={location} path="/" exact component={HomePage} />
     <GuestRoute location={location} path="/login" exact component={LoginPage} />
     <UserRoute location={location} path="/pick-task" exact component={PickTaskPage} />
+    <UserRoute location={location} path="/operation" exact component={OperationPage} />
   </div>
 );
 

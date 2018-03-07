@@ -3,13 +3,14 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-import { Grid, Menu, Dropdown, Message, Dimmer, Loader, Accordion, Button } from 'semantic-ui-react';
-import TopNavigation from '../navigation/TopNavigation';
-import api from '../../api';
-import InlineError from '../messages/InlineError';
-import { PickOrderTableColumns } from '../../models/PickOrderTableModel';
+import { Grid, Menu, Dropdown, Loader, Button } from 'semantic-ui-react';
+import TopNavigation from '../../navigation/TopNavigation';
+import api from '../../../api';
+import InlineError from '../../messages/InlineError';
+import { PickOrderTableColumns } from '../../../models/PickOrderTableModel';
+import OrderDetailTable from '../../common/OrderDetailTable/OrderDetailTable';
 import './PickTaskPage.css';
-import OrderDetailTable from '../common/OrderDetailTable/OrderDetailTable';
+
 
 const workstationMenuCss = {
   paddingTop: '100px'
@@ -80,22 +81,18 @@ class PickTaskPage extends Component {
   }
 
   componentWillMount() {
-    this.startStationOperationCall(this.retrievePickOrderReocrds);
+    this.startStationOperationCall();
   }
 
-  startStationOperationCall(callback) {
+  startStationOperationCall() {
     this.setState({loading: true});
-    api.station.startStationOperation(1, this.props.username, 'P').then(res => {
+    api.station.startStationOperation(this.props.stationId, this.props.username, 'P').then(res => {
       // return 1 if success, 0 if failed
+      let newState = { loading: false };
       if (!res.data) {
-        this.setState({ errors: { station: 'Cannot start station. Please contact your system admin'}, loading: false })
-      } else {
-        this.setState({ loading: false});
+        newState = Object.assign(newState, { errors: { station: 'Cannot start station. Please contact your system admin'}});
       }
-
-      if (callback) {
-        callback();
-      }
+      this.setState(newState, this.retrievePickOrderReocrds);
     }).catch((e) => {
       this.setState({ errors: { station: 'Server Error. Please contact your system admin'}, loading: false })
       console.error(e);
@@ -105,32 +102,39 @@ class PickTaskPage extends Component {
 
   retrievePickOrderReocrds = () => {
     this.setState({loading: true});
+    console.log('task:', this.state.activeTask, 'process:', this.state.activeProcess);
     api.pick.retrievePickOrderReocrdsByTypeAndState(1, this.state.activeTask, this.state.activeProcess).then( res => {
-      console.log('order', res.data);
       this.setState({ ordersList: res.data, loading: false });
     })
   }
 
   handleTaskChange = (e, { value }) => {
-    this.setState({ activeTask: value, activeProcess: 0 });
-    this.retrievePickOrderReocrds();
+    this.setState({ activeTask: value, activeProcess: 0 }, this.retrievePickOrderReocrds);
   }
 
-  handleProcessChange = (e, { index }) => {
-    this.setState({ activeProcess: index })
-    this.retrievePickOrderReocrds();
+  handleProcessChange = (e, { value }) => {
+    this.setState({ activeProcess: value }, this.retrievePickOrderReocrds);
   };
+
+  handleStartBtn = (e) => {
+    api.pick.callServerGeneratePickTask(this.props.stationId).then( res => {
+      this.props.history.push('/operation');
+    }).catch(error => {
+      this.setState({ errors: { station: 'Error while server generate pick task. Please contact system admin.'}});
+    })
+    
+  }
 
   render() {
     const { activeTask, activeProcess, loading, errors, ordersList } = this.state;
     
-    console.log(activeTask);
     const processList = activeTask === 4 ? processOptions[1] : processOptions[0];
     const processMenuItems = processList.map((option, i) => 
       <Menu.Item key={i}
         index={i}
-        active={ activeProcess === i }
+        active={ activeProcess === option.value }
         content={ option.text }
+        value={ option.value }
         onClick={ this.handleProcessChange }></Menu.Item>
     );
 
@@ -188,7 +192,7 @@ class PickTaskPage extends Component {
                 </Grid.Row>
                 <Grid.Row>
                   <div className="order-list-btn-group">
-                    <Button primary>Start Picking</Button>
+                    <Button primary onClick={() => this.handleStartBtn() }>Start</Button>
                     <Button secondary>Pause</Button>
                     <Button secondary>Print</Button>
                   </div>
@@ -207,11 +211,13 @@ PickTaskPage.propTypes = {
     push: PropTypes.func.isRequired
   }).isRequired,
   username: PropTypes.string.isRequired,
+  stationId: PropTypes.number.isRequired,
 };
 
 function mapStateToProps(state) {
   return {
-    username: state.user.username
+    username: state.user.username,
+    stationId: state.station.id
   };
 }
 
