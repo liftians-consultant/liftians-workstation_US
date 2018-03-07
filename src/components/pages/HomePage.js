@@ -52,7 +52,7 @@ class HomePage extends Component {
                 <MenuButton title="Pick" name="pick-task" goTo={this.goToPage} isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'P' ? true : false }/>
               </Grid.Column>
               <Grid.Column>
-                <MenuButton title="Count" name="count" isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'C' ? true : false }/>
+                <MenuButton title="Inventory Check" name="inventory-check" isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'C' ? true : false }/>
               </Grid.Column>
             </Grid.Row>
 
@@ -61,10 +61,10 @@ class HomePage extends Component {
                 <MenuButton title="System Setting" />
               </Grid.Column>
               <Grid.Column>
-                <MenuButton title="庫存查詢" />
+                <MenuButton title="Inventory Search" />
               </Grid.Column>
               <Grid.Column>
-                <MenuButton title="生成貨單" />
+                <MenuButton title="Generate Inventory" />
               </Grid.Column>
             </Grid.Row>
           </Grid>

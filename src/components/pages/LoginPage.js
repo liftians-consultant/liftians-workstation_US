@@ -4,7 +4,8 @@ import { connect } from "react-redux";
 import { Grid, Image } from 'semantic-ui-react'
 import LoginForm from '../forms/LoginForm';
 import { login } from "../../actions/auth";
-import logo from '../../assets/images/loginPage.png';
+// import logo from '../../assets/images/loginPage.png';
+import logo from '../../assets/images/assembly_logo.png';
 
 class LoginPage extends Component {
 
