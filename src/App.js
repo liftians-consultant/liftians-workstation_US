@@ -10,15 +10,25 @@ import PickTaskPage from "./components/pages/PickTaskPage/PickTaskPage";
 import OperationPage from './components/pages/OperationPage/OperationPage';
 import GuestRoute from "./components/routes/GuestRoute";
 import UserRoute from "./components/routes/UserRoute";
-// import TopNavigation from './components/navigation/TopNavigation';
+import SideNavigation from './components/navigation/SideNavigation';
+import { Grid } from "semantic-ui-react";
+import "./App.css";
 
 const App = ({ location, isAuthenticated }) => (
-  <div className="ui">
-    {/* {isAuthenticated && <TopNavigation />} */}
-    <UserRoute location={location} path="/" exact component={HomePage} />
-    <GuestRoute location={location} path="/login" exact component={LoginPage} />
-    <UserRoute location={location} path="/pick-task" exact component={PickTaskPage} />
-    <UserRoute location={location} path="/operation" exact component={OperationPage} />
+  <div className="app-comp-container">
+    <Grid padded={false} relaxed={false} stretched={true}>
+      <Grid.Row stretched>
+        <Grid.Column width={13}>
+          <UserRoute location={location} path="/" exact component={HomePage} />
+          <GuestRoute location={location} path="/login" exact component={LoginPage} />
+          <UserRoute location={location} path="/pick-task" exact component={PickTaskPage} />
+          <UserRoute location={location} path="/operation" exact component={OperationPage} />
+        </Grid.Column>
+        <Grid.Column width={3} className="navGridColumn">
+          {isAuthenticated && <SideNavigation />}
+        </Grid.Column>
+      </Grid.Row>
+    </Grid>
   </div>
 );
 

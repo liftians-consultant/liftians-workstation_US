@@ -4,12 +4,12 @@ import { connect } from "react-redux";
 import { Grid } from 'semantic-ui-react';
 import * as actions from "../../actions/auth";
 import MenuButton from '../common/MenuButton/MenuButton';
-import TopNavigation from '../navigation/TopNavigation';
+import SideNavigation from '../navigation/SideNavigation';
 import { getUserInfoById } from '../../actions/users';
 import { activateStation, checkCurrentUnFinishTask } from "../../actions/station";
 
 const workstationMenuCss = {
-  paddingTop: '100px'
+  paddingTop: '20%'
 }
 
 class HomePage extends Component {
@@ -41,7 +41,7 @@ class HomePage extends Component {
     // TODO: add loading
     return (
       <div>
-        <TopNavigation></TopNavigation>
+        {/* <SideNavigation></SideNavigation> */}
         <div className="workstation-menu ui container" style={ workstationMenuCss }>
           <Grid columns={3} centered>
             <Grid.Row>

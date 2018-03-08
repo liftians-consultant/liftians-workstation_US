@@ -1,7 +1,15 @@
-.orderlist-table {
+.workstation-menu {
+  padding-left: 2rem;
+}
+
+.orderlist-table-container {
   background: rgba(255, 255, 255, 0.95);
   padding: 5px;
   border-radius: 5px;
+
+  .orderlist-table {
+    height: 500px;
+  }
 }
 
 .order-list-btn-group {

@@ -1,7 +1,9 @@
+html, #root, .app-comp-container {
+  height: 100%; }
+
 body {
   margin: 0;
   padding: 0;
-  font-family: sans-serif; }
-
-body {
-  background: #545463; }
+  font-family: sans-serif;
+  background: #545463;
+  min-height: 100%; }

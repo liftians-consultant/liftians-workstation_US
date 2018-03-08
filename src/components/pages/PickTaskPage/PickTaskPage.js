@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import { Grid, Menu, Dropdown, Loader, Button } from 'semantic-ui-react';
-import TopNavigation from '../../navigation/TopNavigation';
+import SideNavigation from '../../navigation/SideNavigation';
 import api from '../../../api';
 import InlineError from '../../messages/InlineError';
 import { PickOrderTableColumns } from '../../../models/PickOrderTableModel';
@@ -13,7 +13,7 @@ import './PickTaskPage.css';
 
 
 const workstationMenuCss = {
-  paddingTop: '100px'
+  paddingTop: '10%'
 }
 
 const taskOptions = [
@@ -39,30 +39,6 @@ const processOptions = [
     { key: 2, text: 'Canceled', index: 2, value: 100 },
   ],
 ];
-
-// const taskOptions = [
-//   { key: 1, text: '配送出貨', index: 1, value: '11' },
-//   { key: 2, text: '短缺退貨', index: 2, value: '99' },
-//   { key: 3, text: '拆包出庫', index: 3, value: '12' },
-//   { key: 4, text: '調整出庫', index: 4, value: '4' },
-// ];
-
-// const processOptions = [
-//   [
-//     { key: 0, text: '尚未處理', index: 0, value: 0 },
-//     { key: 1, text: '等待執行', index: 1, value: 101 },
-//     { key: 2, text: '正在執行', index: 2, value: 100 },
-//     { key: 3, text: '已完成', index: 3, value: 1 },
-//     { key: 4, text: '取消訂單', index: 4, value: -1 },
-//   ],
-//   // value is wrong
-//   [
-//     { key: 0, text: '尚未處理', index: 0, value: 0 },
-//     { key: 1, text: '已完成', index: 1, value: 101 },
-//     { key: 2, text: '已取消', index: 2, value: 100 },
-//   ],
-// ];
-
 
 class PickTaskPage extends Component {
 
@@ -138,23 +114,15 @@ class PickTaskPage extends Component {
         onClick={ this.handleProcessChange }></Menu.Item>
     );
 
-    // const panels = ordersList.forEach(element => {
-    //   return {
-    //     title: {
-    //       content: <
-    //     }
-    //   }
-    // });
-
     return (
       <div>
-        <TopNavigation></TopNavigation>
+        {/* <SideNavigation></SideNavigation> */}
         {errors.station && <InlineError></InlineError> }
-        <div className="ui container workstation-menu" style={ workstationMenuCss }>
-          <Grid columns={2} divided>
+        <div className="ui workstation-menu" style={ workstationMenuCss }>
+          <Grid>
             <Grid.Row>
-              <Grid.Column width={4}>
-                <Menu vertical>
+              <Grid.Column width={16}>
+                <Menu>
                   <Menu.Item name="taskType">
                   <Dropdown placeholder='Select Task' 
                     value={ activeTask } 
@@ -164,17 +132,14 @@ class PickTaskPage extends Component {
                     onChange={ this.handleTaskChange }  
                   />
                   </Menu.Item>
-                </Menu>
-                <Menu vertical>
                   { processMenuItems }
                 </Menu>
               </Grid.Column>
-              <Grid.Column width={12}>
-                <Grid.Row>
-                  {/* <Dimmer > */}
-                    <Loader inverted active={loading} size="large">Loading</Loader>
-                  {/* </Dimmer> */}
-                  <div className="orderlist-table">
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column>
+                <Loader inverted active={loading} size="large">Loading</Loader>
+                <div className="orderlist-table-container">
                   <ReactTable
                     columns={PickOrderTableColumns}
                     data={ordersList}
@@ -186,17 +151,18 @@ class PickTaskPage extends Component {
                     filterable={false}
                     showPageJump={false}
                     showPagination={false}
-                    className="-striped -highlight"
+                    className="-striped -highlight orderlist-table"
                   />
-                  </div>
-                </Grid.Row>
-                <Grid.Row>
-                  <div className="order-list-btn-group">
-                    <Button primary onClick={() => this.handleStartBtn() }>Start</Button>
-                    <Button secondary>Pause</Button>
-                    <Button secondary>Print</Button>
-                  </div>
-                </Grid.Row>
+                </div>
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column>
+                <div className="order-list-btn-group">
+                  <Button primary onClick={() => this.handleStartBtn() }>Start</Button>
+                  <Button secondary>Pause</Button>
+                  <Button secondary>Print</Button>
+                </div>
               </Grid.Column>
             </Grid.Row>
           </Grid>
