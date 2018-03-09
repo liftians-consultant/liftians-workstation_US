@@ -31,8 +31,12 @@ const station = {
       parameter: [stationId] 
     }).then(res => res.data),
 
-  atStationPodLayoutInfo: () =>
-    axios.post('Login'),
+  atStationPodLayoutInfo: stationId =>
+    axios.post('Temp', {
+      type: 'procedures',
+      name: 'P_AtStationPodLayoutInfo',
+      parameter: [stationId]
+    }),
 
   showComingPods: (stationId, mode) => 
     axios.post('Login', {}),
@@ -43,6 +47,7 @@ const station = {
       name: 'P_StartStationOperation',
       parameter: [stationId, empId, operationType]
     }),
+
   stopStationOperation: (stationId, empId, taskType) => 
     axios.post('Temp', {
       type: 'procedures',
@@ -71,7 +76,31 @@ const pick = {
       parameter: [stationId]
     }),
   stopPickOperation: (stationId, empId) => 
-    station.stopStationOperation(stationId, empId, 'P')
+    station.stopStationOperation(stationId, empId, 'P'),
+  atStationBoxLocation: (stationId) => 
+    axios.post('Temp', {
+      type: 'procedures',
+      name: 'P_AtStationBoxLocation_Pick',
+      parameter: [stationId]
+    }),
+  atStationAfterPickProduct: (data) =>
+    axios.post('Temp', {
+      type: 'procedures',
+      name: 'P_AtStationAfterPickProduct',
+      parameters: [
+        data.stationId,
+        data.shelfId,
+        data.boxId,
+        data.orderNo,
+        data.sourceLinesId,
+        data.productId,
+        data.lotNo,
+        data.packageBarcode,
+        data.pickQuantity,
+        data.taskSubtype,
+        data.shortQty
+      ]
+    })
 };
 
 export default {

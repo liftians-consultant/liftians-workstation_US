@@ -1,0 +1,26 @@
+.product-info-block {
+  padding: 0 0 0 2em;
+
+  * {
+    color: #fff;
+  }
+}
+
+.product-name-container {
+  line-height: 3em;
+  margin: 0 0 1em 0;
+
+  .product-name {
+    font-size: 3em;
+  }
+}
+
+.product-remain-container {
+  line-height: 3em;
+  margin: 1em 0;
+
+  .remain-amount {
+    font-size: 3em;
+    font-weight: 400;
+  }
+}
