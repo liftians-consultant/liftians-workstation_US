@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import { Grid, Menu, Dropdown, Loader, Button } from 'semantic-ui-react';
-import SideNavigation from '../../navigation/SideNavigation';
 import api from '../../../api';
 import InlineError from '../../messages/InlineError';
 import { PickOrderTableColumns } from '../../../models/PickOrderTableModel';
@@ -13,7 +12,7 @@ import './PickTaskPage.css';
 
 
 const workstationMenuCss = {
-  paddingTop: '10%'
+  paddingTop: '5%'
 }
 
 const taskOptions = [
@@ -49,11 +48,6 @@ class PickTaskPage extends Component {
     ordersList: [],
     loading: false,
     errors: {}
-  }
-
-  constructor(props) {
-    super(props);
-    
   }
 
   componentWillMount() {
@@ -116,8 +110,7 @@ class PickTaskPage extends Component {
 
     return (
       <div>
-        {/* <SideNavigation></SideNavigation> */}
-        {errors.station && <InlineError></InlineError> }
+        { errors.station && <InlineError></InlineError> }
         <div className="ui workstation-menu" style={ workstationMenuCss }>
           <Grid>
             <Grid.Row>
@@ -159,9 +152,9 @@ class PickTaskPage extends Component {
             <Grid.Row>
               <Grid.Column>
                 <div className="order-list-btn-group">
-                  <Button primary onClick={() => this.handleStartBtn() }>Start</Button>
-                  <Button secondary>Pause</Button>
-                  <Button secondary>Print</Button>
+                  <Button size="huge" primary onClick={() => this.handleStartBtn() }>Start</Button>
+                  <Button size="huge" secondary>Pause</Button>
+                  <Button size="huge" secondary>Print</Button>
                 </div>
               </Grid.Column>
             </Grid.Row>

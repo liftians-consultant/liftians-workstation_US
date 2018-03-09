@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { Button, Menu, Container, Image } from 'semantic-ui-react';
+import { Button } from 'semantic-ui-react';
 import * as actions from '../../actions/auth';
-import leftLogo from '../../assets/images/logo@2x.png';
+// import leftLogo from '../../assets/images/logo@2x.png';
 import './SideNavigation.css';
 
 
