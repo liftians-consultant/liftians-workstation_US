@@ -2,11 +2,14 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
-import { Segment, Grid } from 'semantic-ui-react';
+import { Segment, Grid, Button } from 'semantic-ui-react';
 import api from '../../../api';
 import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
 // import RemainPickAmount from "./components/RemainPickAmount/RemainPickAmount";
 import './OperationPage.css';
+import PodShelf from '../../common/PodShelf/PodShelf';
+import NumPad from '../../common/NumPad/NumPad';
+import PickBoxes from './components/PickBoxes/PickBoxes';
 
 class OperationPage extends Component {
 
@@ -16,8 +19,10 @@ class OperationPage extends Component {
       shelfBoxes: []
     },
     currentPickProduct: {},
-    remainPickAmount: 0,
-    loading: false
+    pickedAmount: 0,
+    loading: false,
+    barcode: '',
+    showBox: false
   }
 
   componentWillMount() {
@@ -35,7 +40,7 @@ class OperationPage extends Component {
         taskType: res.data[0].taskType,
         shelfBoxes: _.chain(res.data).sortBy('shelfId').map((elmt) => { return parseInt(elmt.maxBox, 10) }).reverse().value()
       }
-      this.setState({ podInfo, remainPickAmount: 0, loading: false })
+      this.setState({ podInfo, pickedAmount: 0, loading: false })
     }).catch( err => {
       console.error('error getting pod info', err);
     });
@@ -44,24 +49,22 @@ class OperationPage extends Component {
   getProductList() {
     api.pick.atStationBoxLocation(this.props.stationId).then(res => {
       console.log(res.data);
-      this.setState({ currentPickProduct: res.data[0], remainPickAmount: parseInt(res.data[0].quantity, 10) });
+      this.setState({ currentPickProduct: res.data[0] });
     }).catch((err) => {
       console.error('Error getting products list', err);
     });
   }
 
+  handleScanBtnClick() {
+    this.setState( { showBox: !this.state.showBox });
+  }
+
   render() {
-    const { podInfo, currentPickProduct, remainPickAmount } = this.state;
-    
-    // create shelf html
-    const shelfElement = podInfo.shelfBoxes.map( (boxAmount, index) => {
-        let shelfObject = [];
-        _.times(boxAmount, (i) => {
-          shelfObject.push( <div key={'shelf'+ index + 'box'+ i} className={'shelf-object shelf-row-' + (index + 1) } style={{ width: 1 / boxAmount * 100 + '%' }}></div> )
-        })
-      
-      return (<div className="shelf-row" key={ index }>{ shelfObject }</div>)
-    })
+    const { podInfo, currentPickProduct, pickedAmount, showBox } = this.state;
+    const highlightBox = {
+      row: parseInt(currentPickProduct.shelfID, 10),
+      column: parseInt(currentPickProduct.holderPosition, 10)
+    };
 
     return (
       <div className="operationPage">
@@ -70,14 +73,26 @@ class OperationPage extends Component {
             <Grid.Column width={5}>
               <Segment.Group>
                 <Segment>
-                  {shelfElement}
+                  <PodShelf podInfo={ podInfo } highlightBox={ highlightBox }></PodShelf>
                 </Segment>
               </Segment.Group>
             </Grid.Column>
 
             <Grid.Column width={11}>
-              <ProductInfoDisplay product={ currentPickProduct } remainPickAmount={ remainPickAmount }></ProductInfoDisplay>
-              {/* <RemainPickAmount ></RemainPickAmount> */}
+              { !showBox ? (
+                <div>
+                  <ProductInfoDisplay product={ currentPickProduct } pickedAmount={ pickedAmount }></ProductInfoDisplay>
+                  <br></br>
+                </div>
+              ) : (
+                <div>
+                  <PickBoxes openedBoxNum={ parseInt(currentPickProduct.boxID, 10) }></PickBoxes>
+                  <NumPad></NumPad>
+                </div>
+              ) }
+              <Button primary size="huge" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
+
+              
             </Grid.Column>
           </Grid.Row>
         </Grid>

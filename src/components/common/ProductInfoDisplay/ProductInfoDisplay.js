@@ -6,14 +6,14 @@ import './ProductInfoDisplay.css';
 class ProductInfoDisplay extends Component {
 
   render() {
-    const { product, remainPickAmount } = this.props;
+    const { product, pickedAmount } = this.props;
     return (
       <div className="product-info-block">
         <div className="product-name-container">
           <span className="product-name">{ product.productName }</span>
         </div>
         <div className="product-remain-container">
-          <span className="remain-amount">Amount:  { product.quantity - remainPickAmount }</span>
+          <span className="remain-amount">Quantity:  { product.quantity - pickedAmount }</span>
         </div>
         <div className="product-image-container">
           <Image src="http://via.placeholder.com/500x400"></Image>
@@ -25,7 +25,7 @@ class ProductInfoDisplay extends Component {
 
 ProductInfoDisplay.propTypes = {
   product: PropTypes.object.isRequired,
-  remainPickAmount: PropTypes.number.isRequired,
+  pickedAmount: PropTypes.number.isRequired,
 };
 
 export default ProductInfoDisplay;
