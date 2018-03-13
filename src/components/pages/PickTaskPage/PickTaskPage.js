@@ -170,7 +170,7 @@ PickTaskPage.propTypes = {
     push: PropTypes.func.isRequired
   }).isRequired,
   username: PropTypes.string.isRequired,
-  stationId: PropTypes.number.isRequired,
+  stationId: PropTypes.string.isRequired,
 };
 
 function mapStateToProps(state) {

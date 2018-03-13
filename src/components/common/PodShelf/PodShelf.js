@@ -22,7 +22,9 @@ class PodShelf extends Component {
         // }
 
         shelfObject.push( 
-          <div key={ 'shelf'+ index + 'box'+ i } className={ 'shelf-object shelf-row-' + (index + 1) } style={ { width: 1 / boxAmount * 100 + '%' } }>
+          <div key={ 'shelf'+ index + 'box'+ i }
+            className={ 'shelf-object shelf-row-' + (highlightBox.row === shelfRowAmount - index ? index + 1 : 'disabled') }
+            style={ { width: 1 / boxAmount * 100 + '%' } }>
             { isHighlight && <div className="selected-box"></div> }
           </div> 
         )

@@ -36,7 +36,8 @@ const SideNavigation = ({ logout }) => ({
 });
 
 SideNavigation.propTypes = {
-  logout: PropTypes.func.isRequired
+  logout: PropTypes.func.isRequired,
+  stationId: PropTypes.string.isRequired,
 };
 
 function mapStateToProps(state) {

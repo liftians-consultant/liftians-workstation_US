@@ -63,26 +63,31 @@ const pick = {
       name: 'P_DisplayPickMenu',
       parameter: [stationId, taskId, processId]
     }),
+
   retrievePickOrderItems: (orderId) => 
     axios.post('Temp', {
       type: 'procedures',
       name: 'P_DisplayPickOrderDetail',
       parameter: [orderId]
     }),
+
   callServerGeneratePickTask: (stationId) => 
     axios.post('Temp', {
       type: 'procedures',
       name: 'P_GenPickTask',
       parameter: [stationId]
     }),
+
   stopPickOperation: (stationId, empId) => 
     station.stopStationOperation(stationId, empId, 'P'),
+
   atStationBoxLocation: (stationId) => 
     axios.post('Temp', {
       type: 'procedures',
-      name: 'P_AtStationBoxLocation_Pick',
+      name: 'AtStationPickInfo',
       parameter: [stationId]
     }),
+    
   atStationAfterPickProduct: (data) =>
     axios.post('Temp', {
       type: 'procedures',
