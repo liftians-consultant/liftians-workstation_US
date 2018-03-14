@@ -1,24 +1,24 @@
-$box-height: 130px;
+$bin-height: 130px;
 
-.pick-boxes-container {
+.pick-bins-container {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  height: $box-height;
+  height: $bin-height;
   position: relative;
 }
 
-.box-item-container {
+.bin-item-container {
   padding: 10px;
-  height: $box-height;
-  width: $box-height;
+  height: $bin-height;
+  width: $bin-height;
 }
 
-.box-item {
+.bin-item {
   height: 100%;
   width: 100%;
   background: #fff;
-  line-height: $box-height - 20;
+  line-height: $bin-height - 20;
   text-align: center;
   font-size: 3rem;
 }

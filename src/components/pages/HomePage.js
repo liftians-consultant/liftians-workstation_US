@@ -17,7 +17,7 @@ class HomePage extends Component {
     super(props);
     this.props.getUserInfoById(this.props.username).then(() => {
       // TODO: stationId
-      this.props.activateStation(1, this.props.username);
+      this.props.activateStation(this.props.stationId, this.props.username);
       this.checkCurrentUnFinishTaskCall();
     });
 
@@ -28,7 +28,7 @@ class HomePage extends Component {
 
   checkCurrentUnFinishTaskCall() {
     // TODO: station id
-    this.props.checkCurrentUnFinishTask(1).then(res => {
+    this.props.checkCurrentUnFinishTask(this.props.stationId).then(res => {
       console.log("test", res);
     })
   }
@@ -77,14 +77,17 @@ HomePage.propTypes = {
     push: PropTypes.func.isRequired
   }).isRequired,
   isAuthenticated: PropTypes.bool.isRequired,
-  logout: PropTypes.func.isRequired
+  logout: PropTypes.func.isRequired,
+  stationInfo: PropTypes.object.isRequired,
+  stationId: PropTypes.string.isRequired,
 };
 
 function mapStateToProps(state) {
   return {
     isAuthenticated: !!state.user.token,
     username: state.user.username,
-    stationInfo: state.station.info
+    stationInfo: state.station.info,
+    stationId: state.station.id
   };
 }
 

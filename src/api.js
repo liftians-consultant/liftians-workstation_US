@@ -20,7 +20,7 @@ const station = {
     axios.post('Login', {
       type: 'procedures',
       name: 'P_ActivateStationOperation',
-      parameter: [stationId, empId, '4']
+      parameter: [String(stationId), empId, '4']
     }
   ).then(res => res.data),
 
@@ -92,7 +92,7 @@ const pick = {
     axios.post('Temp', {
       type: 'procedures',
       name: 'P_AtStationAfterPickProduct',
-      parameters: [
+      parameter: [
         data.stationId,
         data.shelfId,
         data.boxId,
@@ -101,10 +101,46 @@ const pick = {
         data.productId,
         data.lotNo,
         data.packageBarcode,
-        data.pickQuantity,
+        String(data.pickQuantity),
         data.taskSubtype,
-        data.shortQty
+        String(data.shortQty)
       ]
+    }),
+  getProductSerialNum: (data) => 
+    axios.post('Pick', {
+      type: 'procedures',
+      name: 'GetProductByInvLocation', 
+      parameter: [
+        String(data.podId),
+        String(data.podSide),
+        String(data.shelfId),
+        String(data.boxId)
+      ]
+    }),
+  
+  atHolderAfterPickProduct: (data) => 
+    axios.post('Temp', {
+      type: 'procedures',
+      name: 'P_AtHolderAfterPickProduct',
+      parameter: [
+        data.stationId,
+        data.shelfId,
+        data.boxId,
+        data.orderNo,
+        data.sourceLinesId,
+        data.productId,
+        data.lotNo,
+        data.packageBarcode,
+        String(data.pickQuantity),
+        data.taskSubtype,
+        String(data.shortQty)
+      ]
+    }),
+  checkIfOrderFinished: (orderNum) => 
+    axios.post('Temp', {
+      type: 'function',
+      name: 'F_IsOrderFinished',
+      parameter: [ orderNum ]
     })
 };
 

@@ -2,14 +2,15 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
-import { Segment, Grid, Button } from 'semantic-ui-react';
+import { Segment, Grid, Button, Portal, Header } from 'semantic-ui-react';
 import api from '../../../api';
 import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
 // import RemainPickAmount from "./components/RemainPickAmount/RemainPickAmount";
 import './OperationPage.css';
 import PodShelf from '../../common/PodShelf/PodShelf';
 import NumPad from '../../common/NumPad/NumPad';
-import PickBoxes from './components/PickBoxes/PickBoxes';
+import BinGroup from './components/BinGroup/BinGroup';
+import OrderDetailListModal from './components/OrderDetailListModal/OrderDetailListModal';
 
 const testData = [
   {
@@ -44,6 +45,7 @@ class OperationPage extends Component {
       shelfBoxes: []
     },
     currentPickProduct: {},
+    orderList: [],
     pickedAmount: 0,
     loading: false,
     barcode: '',
@@ -54,21 +56,18 @@ class OperationPage extends Component {
     super(props)
 
     // Bind the this context to the handler function
-    this.placedInBox = this.placedInBox.bind(this);
+    this.selectPickedAmount = this.selectPickedAmount.bind(this);
   }
 
   componentWillMount() {
-    this.getAtStationPodInfo();
-    this.getProductList();
+    this.retrieveNextOrder();
   }
 
-  placedInBox(num) {
-    console.log('called', num);
+  selectPickedAmount(num) {
     this.setState({ pickedAmount: this.state.pickedAmount + num }, () => {
       if (this.state.pickedAmount === parseInt(this.state.currentPickProduct.quantity, 10)) {
         this.finishOrder();
       }
-      this.setState({ showBox: false });
     });
   }
 
@@ -84,17 +83,32 @@ class OperationPage extends Component {
       lotNo: product.lot_No,
       packageBarcode: this.state.barcode,
       pickQuantity: this.state.pickedAmount,
-      taskSubtype: product.taskType,
+      taskSubtype: product.locate_ACT_TYPE,
       shortQty: parseInt(product.quantity, 10) - this.state.pickedAmount,
     }
 
     api.pick.atStationAfterPickProduct(data).then(res => {
       console.log(res.data);
-      this.setState({ showBox: false }, () => this.getProductList());
-    })
+      if (res.data) { // return 1 if success
+        // this.setState({ showBox: false }, () => this.retrieveNextOrder());
+        // after placed in bin, inform db
+        api.pick.atHolderAfterPickProduct(data).then( res => {
+          this.retrieveNextOrder();
+        })
+      } else {
+        // TODO: ERROR MESSAGE
+      }
+    }).catch((err) => {
+      console.error('Error for atStationAfterPickPorduct', err);
+    });
   }
 
-  getAtStationPodInfo() {
+  retrieveNextOrder() {
+    this.getPodInfo();
+    this.getProductList();
+  }
+
+  getPodInfo() {
     this.setState({ loading: true });
     api.station.atStationPodLayoutInfo(this.props.stationId).then(res => {
       // console.log(res.data);
@@ -105,9 +119,8 @@ class OperationPage extends Component {
           taskType: res.data[0].taskType,
           shelfBoxes: _.chain(res.data).sortBy('shelfId').map((elmt) => { return parseInt(elmt.maxBox, 10) }).reverse().value()
         }
-        this.setState({ podInfo, pickedAmount: 0, loading: false })
-      }
-      
+        this.setState({ podInfo, loading: false })
+      }     
     }).catch( err => {
       console.error('error getting pod info', err);
     });
@@ -118,7 +131,11 @@ class OperationPage extends Component {
       console.log(res.data);
       if (res.data.length) {
         // res.data = testData;
-        this.setState({ currentPickProduct: res.data[0] });
+        this.setState({ 
+          currentPickProduct: res.data[0],
+          orderList: res.data,
+          pickedAmount: 0,
+          showBox: false });
       } else { // when there's nothing return from the sever to pick
         console.log("No order return from the server");
       }
@@ -130,15 +147,24 @@ class OperationPage extends Component {
   handleScanBtnClick() {
     if (!this.state.showBox) {
       // TODO: SIMULATION ONLY! NO PRODUCTION
-      this.state.barcode = this.state.currentPickProduct.productID;
+      const data = {
+        podId: this.state.currentPickProduct.podID,
+        podSide: this.state.currentPickProduct.podSide,
+        shelfId: this.state.currentPickProduct.shelfID,
+        boxId: this.state.currentPickProduct.boxID,
+      };
+      api.pick.getProductSerialNum(data).then( res => {
+        this.state.barcode = res.data[0].barcode;
+        this.setState({ showBox: !this.state.showBox });
+      })
     } else {
       this.state.barcode = '';
     }
-    this.setState( { showBox: !this.state.showBox });
+    
   }
 
   render() {
-    const { podInfo, currentPickProduct, pickedAmount, showBox } = this.state;
+    const { podInfo, currentPickProduct, pickedAmount, showBox, orderList } = this.state;
     const highlightBox = {
       row: currentPickProduct ? parseInt(currentPickProduct.shelfID, 10) : 0,
       column: currentPickProduct ? parseInt(currentPickProduct.boxID, 10) : 0
@@ -154,6 +180,7 @@ class OperationPage extends Component {
                   <PodShelf podInfo={ podInfo } highlightBox={ highlightBox }></PodShelf>
                 </Segment>
               </Segment.Group>
+              { orderList.length > 0 && <OrderDetailListModal orderList={orderList} /> }
             </Grid.Column>
 
             <Grid.Column width={11}>
@@ -167,15 +194,15 @@ class OperationPage extends Component {
                 </div>
               ) : (
                 <div>
-                  <PickBoxes openedBoxNum={ parseInt(currentPickProduct.binPosition, 10) }></PickBoxes>
+                  <BinGroup openedBinNum={ parseInt(currentPickProduct.binPosition, 10) }></BinGroup>
                   <NumPad highlightAmount={ currentPickProduct.quantity - pickedAmount }
-                    callback={this.placedInBox}
+                    callback={this.selectPickedAmount}
                     ></NumPad>
                 </div>
               ) }
               
+            
 
-              
             </Grid.Column>
           </Grid.Row>
         </Grid>
