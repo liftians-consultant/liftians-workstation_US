@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
-import { Segment, Grid, Button, Portal, Header } from 'semantic-ui-react';
+import { Segment, Grid, Button, Portal, Header, Dimmer, Loader } from 'semantic-ui-react';
 import api from '../../../api';
 import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
 // import RemainPickAmount from "./components/RemainPickAmount/RemainPickAmount";
@@ -47,20 +47,28 @@ class OperationPage extends Component {
     currentPickProduct: {},
     orderList: [],
     pickedAmount: 0,
-    loading: false,
+    loading: true,
     barcode: '',
     showBox: false
   }
+
+  checkPodInterval = {};
 
   constructor(props) {
     super(props)
 
     // Bind the this context to the handler function
     this.selectPickedAmount = this.selectPickedAmount.bind(this);
+    this.retrieveNextOrder = this.retrieveNextOrder.bind(this);
   }
 
   componentWillMount() {
-    this.retrieveNextOrder();
+    this.getUpcomingPod();
+    // this.retrieveNextOrder();
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.checkPodInterval);
   }
 
   selectPickedAmount(num) {
@@ -71,19 +79,39 @@ class OperationPage extends Component {
     });
   }
 
+  getUpcomingPod() {
+    // TODO: add simulation mode to .env
+    let isRecieve = false;
+
+    this.checkPodInterval = setInterval( () => {
+      if (!isRecieve) {
+        api.station.atStationPodLayoutInfo(this.props.stationId).then( res => {
+          if (res.data.length > 0) {
+            console.log('Pod arrive station');
+            this.setState({ orderProductList: res.data }, () => isRecieve = true);
+          }
+        });
+      } else {
+        console.log('stop interval');
+        clearInterval(this.checkPodInterval);
+        this.retrieveNextOrder();
+      }
+    }, 2000);
+  }
+
   finishOrder() {
     const product = this.state.currentPickProduct;
     const data = {
       stationId: this.props.stationId,
       shelfId: product.shelfID,
       boxId: product.boxID,
-      orderNo: product.order_No,
-      sourceLinesId: product.source_Lines_Id,
+      orderNo: product.order_no,
+      sourceLinesId: product.source_lines_id,
       productId: product.productID,
-      lotNo: product.lot_No,
+      lotNo: product.lot_no,
       packageBarcode: this.state.barcode,
       pickQuantity: this.state.pickedAmount,
-      taskSubtype: product.locate_ACT_TYPE,
+      taskSubtype: product.locate_act_type,
       shortQty: parseInt(product.quantity, 10) - this.state.pickedAmount,
     }
 
@@ -91,6 +119,8 @@ class OperationPage extends Component {
       console.log(res.data);
       if (res.data) { // return 1 if success
         // this.setState({ showBox: false }, () => this.retrieveNextOrder());
+        data.holderId = this.state.currentPickProduct.holderID;
+        
         // after placed in bin, inform db
         api.pick.atHolderAfterPickProduct(data).then( res => {
           this.retrieveNextOrder();
@@ -130,14 +160,16 @@ class OperationPage extends Component {
     api.pick.atStationBoxLocation(this.props.stationId).then(res => {
       console.log(res.data);
       if (res.data.length) {
-        // res.data = testData;
         this.setState({ 
           currentPickProduct: res.data[0],
           orderList: res.data,
           pickedAmount: 0,
           showBox: false });
-      } else { // when there's nothing return from the sever to pick
+      } else {
+        // when nothing return, that means the pod is finished
+        // and need to wait for the next pod come in to station
         console.log("No order return from the server");
+        this.getUpcomingPod(); 
       }
     }).catch((err) => {
       console.error('Error getting products list', err);
@@ -158,7 +190,7 @@ class OperationPage extends Component {
         this.setState({ showBox: !this.state.showBox });
       })
     } else {
-      this.state.barcode = '';
+      this.setState({ barcode: ''});
     }
     
   }
@@ -172,6 +204,9 @@ class OperationPage extends Component {
 
     return (
       <div className="operationPage">
+        <Dimmer active={this.state.loading}>
+          <Loader content='Waiting for pod...' indeterminate size="massive"/>
+        </Dimmer>
         <Grid>
           <Grid.Row >
             <Grid.Column width={5}>
@@ -181,6 +216,7 @@ class OperationPage extends Component {
                 </Segment>
               </Segment.Group>
               { orderList.length > 0 && <OrderDetailListModal orderList={orderList} /> }
+              <Button color="red" onClick={ () => this.finishOrder() }>Shortage</Button>
             </Grid.Column>
 
             <Grid.Column width={11}>
@@ -188,9 +224,7 @@ class OperationPage extends Component {
                 <div>
                   <ProductInfoDisplay product={ currentPickProduct } pickedAmount={ pickedAmount }></ProductInfoDisplay>
                   <br></br>
-                  <Button primary size="huge" onClick={ () => this.handleScanBtnClick() }>
-                    { !showBox ? 'Scan' : 'Placed in box' }
-                  </Button>
+                  <Button primary size="huge" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
                 </div>
               ) : (
                 <div>
@@ -200,9 +234,6 @@ class OperationPage extends Component {
                     ></NumPad>
                 </div>
               ) }
-              
-            
-
             </Grid.Column>
           </Grid.Row>
         </Grid>

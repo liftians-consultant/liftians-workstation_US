@@ -10,7 +10,7 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
 import rootReducer from "./rootReducer";
-import { userLoggedIn } from "./actions/auth";
+import { userLoggedIn, userLoggedOut } from "./actions/auth";
 import setAuthorizationHeader from "./utils/setAuthorizationHeader";
 import './index.css';
 
@@ -21,12 +21,21 @@ const store = createStore(
 
 if (localStorage.liftiansJWT) {
   const payload = decode(localStorage.liftiansJWT); // {sub: "10001", exp: 1519504053}
-  const user = {
-    token: localStorage.liftiansJWT,
-    username: payload.sub,
-  };
-  setAuthorizationHeader(localStorage.liftiansJWT);
-  store.dispatch(userLoggedIn(user));
+
+  // check if expired
+  const nowDate = new Date(), tokenDate = new Date(payload.exp);
+  if ( nowDate.getTime() < tokenDate.getTime() ) {
+    localStorage.removeItem("liftiansJWT");
+    setAuthorizationHeader();
+    store.dispatch(userLoggedOut());
+  } else {
+    const user = {
+      token: localStorage.liftiansJWT,
+      username: payload.sub,
+    };
+    setAuthorizationHeader(localStorage.liftiansJWT);
+    store.dispatch(userLoggedIn(user));
+  }
 }
 
 ReactDOM.render(

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { Link } from 'react-router-dom';
 import './MenuButton.css';
 
 class MenuButton extends Component {
@@ -10,14 +11,14 @@ class MenuButton extends Component {
   }
 
   render() {
-    const { title, isDisabled } = this.props;
+    const { title, name, isDisabled } = this.props;
     const menuClass = classNames({
       'menuBtn': true,
       'btn-disabled': isDisabled
     });
+
     return (
-      <div className={menuClass}
-           onClick={ (event) => { this.clickHandler(event) } }>
+      <div className={ menuClass } onClick={ () => this.clickHandler() }>
         <span className="menuBtn-span">{ title }</span>
       </div>
     );
@@ -26,7 +27,7 @@ class MenuButton extends Component {
 
 MenuButton.propTypes = {
   title: PropTypes.string.isRequired,
-  name: PropTypes.string,
+  name: PropTypes.string.isRequired,
   isDisabled: PropTypes.bool,
   goTo: PropTypes.func
 };

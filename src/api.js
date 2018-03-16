@@ -14,7 +14,6 @@ const user = {
   
 };
 
-// TODO
 const station = {
   activateStationWithUser: (stationId, empId) => 
     axios.post('Login', {
@@ -38,8 +37,12 @@ const station = {
       parameter: [stationId]
     }),
 
-  showComingPods: (stationId, mode) => 
-    axios.post('Login', {}),
+  atStationTask: (stationId) => 
+    axios.post('Temp', {
+      type: 'procedures',
+      name: 'AtStationTask',
+      parameter: [String(stationId)]
+    }),
 
   startStationOperation: (stationId, empId, operationType) =>
     axios.post('Pick', {
@@ -123,17 +126,13 @@ const pick = {
       type: 'procedures',
       name: 'P_AtHolderAfterPickProduct',
       parameter: [
-        data.stationId,
-        data.shelfId,
-        data.boxId,
+        data.holderId,
         data.orderNo,
         data.sourceLinesId,
         data.productId,
         data.lotNo,
-        data.packageBarcode,
-        String(data.pickQuantity),
         data.taskSubtype,
-        String(data.shortQty)
+        String(data.pickQuantity),
       ]
     }),
   checkIfOrderFinished: (orderNum) => 

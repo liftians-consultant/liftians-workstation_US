@@ -3,17 +3,12 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-import { Grid, Menu, Dropdown, Loader, Button } from 'semantic-ui-react';
+import { Grid, Menu, Dropdown, Loader, Button, Dimmer } from 'semantic-ui-react';
 import api from '../../../api';
 import InlineError from '../../messages/InlineError';
 import { PickOrderTableColumns } from '../../../models/PickOrderTableModel';
 import OrderDetailTable from '../../common/OrderDetailTable/OrderDetailTable';
 import './PickTaskPage.css';
-
-
-const workstationMenuCss = {
-  paddingTop: '5%'
-}
 
 const taskOptions = [
   { key: 1, text: 'Regular Picking', index: 1, value: '11' },
@@ -109,57 +104,57 @@ class PickTaskPage extends Component {
     );
 
     return (
-      <div>
+      <div className="ui pick-task-page-container">
+        <Dimmer active={this.state.isLoading}>
+          <Loader content='Loading' />
+        </Dimmer>
         { errors.station && <InlineError></InlineError> }
-        <div className="ui workstation-menu" style={ workstationMenuCss }>
-          <Grid>
-            <Grid.Row>
-              <Grid.Column width={16}>
-                <Menu>
-                  <Menu.Item name="taskType">
-                  <Dropdown placeholder='Select Task' 
-                    value={ activeTask } 
-                    fluid
-                    selection
-                    options={ taskOptions }
-                    onChange={ this.handleTaskChange }  
-                  />
-                  </Menu.Item>
-                  { processMenuItems }
-                </Menu>
-              </Grid.Column>
-            </Grid.Row>
-            <Grid.Row>
-              <Grid.Column>
-                <Loader inverted active={loading} size="large">Loading</Loader>
-                <div className="orderlist-table-container">
-                  <ReactTable
-                    columns={PickOrderTableColumns}
-                    data={ordersList}
-                    defaultPageSize={15}
-                    SubComponent={(row) => <OrderDetailTable orderId={row.original.order_No} /> }
-                    loading={loading}
-                    manual
-                    resizable={false}
-                    filterable={false}
-                    showPageJump={false}
-                    showPagination={false}
-                    className="-striped -highlight orderlist-table"
-                  />
-                </div>
-              </Grid.Column>
-            </Grid.Row>
-            <Grid.Row>
-              <Grid.Column>
-                <div className="order-list-btn-group">
-                  <Button size="huge" primary onClick={() => this.handleStartBtn() }>Start</Button>
-                  <Button size="huge" secondary>Pause</Button>
-                  <Button size="huge" secondary>Print</Button>
-                </div>
-              </Grid.Column>
-            </Grid.Row>
-          </Grid>
-        </div>
+        <Grid>
+          <Grid.Row>
+            <Grid.Column width={16}>
+              <Menu>
+                <Menu.Item name="taskType">
+                <Dropdown placeholder='Select Task' 
+                  value={ activeTask } 
+                  fluid
+                  selection
+                  options={ taskOptions }
+                  onChange={ this.handleTaskChange }  
+                />
+                </Menu.Item>
+                { processMenuItems }
+              </Menu>
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column>
+              <div className="orderlist-table-container">
+                <ReactTable
+                  columns={PickOrderTableColumns}
+                  data={ordersList}
+                  defaultPageSize={15}
+                  SubComponent={(row) => <OrderDetailTable orderId={row.original.order_No} /> }
+                  loading={loading}
+                  manual
+                  resizable={false}
+                  filterable={false}
+                  showPageJump={false}
+                  showPagination={false}
+                  className="-striped -highlight orderlist-table"
+                />
+              </div>
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column>
+              <div className="order-list-btn-group">
+                <Button size="huge" primary onClick={() => this.handleStartBtn() }>Start</Button>
+                <Button size="huge" secondary>Pause</Button>
+                <Button size="huge" secondary>Print</Button>
+              </div>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
       </div>
     );
   }

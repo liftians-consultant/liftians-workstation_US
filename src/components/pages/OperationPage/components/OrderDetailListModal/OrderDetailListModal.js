@@ -6,14 +6,13 @@ import { Button, Header, Icon, Modal, Table } from 'semantic-ui-react';
 class OrderDetailListModal extends Component {
   render() {
     const { orderList } = this.props;
-    console.log(orderList);
     const orderElement = _.map(orderList, (order, index) => {
       return (
         <Table.Row key={index}>
-          <Table.Cell>{ order.order_No }</Table.Cell>
+          <Table.Cell>{ order.order_no }</Table.Cell>
           <Table.Cell>{ order.quantity }</Table.Cell>
           <Table.Cell>{ order.customer }</Table.Cell>
-          <Table.Cell>{ order.send_Prior }</Table.Cell>
+          <Table.Cell>{ order.send_prior }</Table.Cell>
         </Table.Row>
       )
     })
@@ -21,10 +20,10 @@ class OrderDetailListModal extends Component {
     return (
       <Modal trigger={<Button>Orders List</Button>} size="small"
         style={{ marginTop: '1rem', marginLeft: 'auto', marginRight: 'auto' }} >
-        <Modal.Header>Orders</Modal.Header>
+        <Modal.Header>Current Handling Orders</Modal.Header>
         <Modal.Content scrolling>
           <Modal.Description>
-            <p>This is all the orders the system are currently handling</p>
+            <p>These are all the orders the system are currently handling.</p>
             <Table celled>
               <Table.Header>
                 <Table.Row>
@@ -43,7 +42,7 @@ class OrderDetailListModal extends Component {
         </Modal.Content>
         <Modal.Actions>
           <Button primary>
-            Proceed <Icon name='right chevron' />
+            Ok <Icon name='right chevron' />
           </Button>
         </Modal.Actions>
       </Modal>
