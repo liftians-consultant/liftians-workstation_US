@@ -11,8 +11,22 @@ const user = {
     axios.post('logout').then(res => res),
   getInfoById: (empId) => 
     axios.post('Login', { type: 'select', name: 'V_Empolyees_FindByID', parameter: [empId] }).then(res => res.data),
-  
 };
+
+const menu = {
+  getBillTypeName: (operationType) => 
+    axios.post('Common', {
+      type: 'select',
+      name: 'BillType',
+      parameter: [operationType]
+    }),
+  getProcessStatusName: (operationType) => 
+    axios.post('Common', {
+      type: 'select',
+      name: 'ProcessStatus',
+      parameter: [operationType]
+    }),
+}
 
 const station = {
   activateStationWithUser: (stationId, empId) => 
@@ -145,6 +159,7 @@ const pick = {
 
 export default {
   user,
+  menu,
   station,
   pick
 };

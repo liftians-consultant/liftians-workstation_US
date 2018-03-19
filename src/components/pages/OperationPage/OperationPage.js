@@ -201,6 +201,7 @@ class OperationPage extends Component {
       row: currentPickProduct ? parseInt(currentPickProduct.shelfID, 10) : 0,
       column: currentPickProduct ? parseInt(currentPickProduct.boxID, 10) : 0
     };
+    console.log(podInfo);
 
     return (
       <div className="operationPage">
@@ -210,6 +211,9 @@ class OperationPage extends Component {
         <Grid>
           <Grid.Row >
             <Grid.Column width={5}>
+              <div className="pod-info-block">
+                <span>Pod #{ podInfo.podId }, </span><span>Side #{ podInfo.podSide }</span>
+              </div>
               <Segment.Group>
                 <Segment>
                   <PodShelf podInfo={ podInfo } highlightBox={ highlightBox }></PodShelf>

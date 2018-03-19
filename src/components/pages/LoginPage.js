@@ -21,6 +21,9 @@ class LoginPage extends Component {
         body > div > div > div.login-form {
           height: 100%;
         }
+        .login-form {
+          padding-top: 15%;
+        }
         `}</style>
         <Grid
           textAlign='center'

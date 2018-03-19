@@ -10,30 +10,6 @@ import { PickOrderTableColumns } from '../../../models/PickOrderTableModel';
 import OrderDetailTable from '../../common/OrderDetailTable/OrderDetailTable';
 import './PickTaskPage.css';
 
-const taskOptions = [
-  { key: 1, text: 'Regular Picking', index: 1, value: '11' },
-  { key: 2, text: 'Shortage Picking', index: 2, value: '99' },
-  { key: 3, text: 'Seperate Picking', index: 3, value: '12' },
-  { key: 4, text: 'Adjustment Picking', index: 4, value: '4' },
-];
-
-// save it in translate file, use fetch to get it.
-const processOptions = [
-  [
-    { key: 0, text: 'Unprocessed', index: 0, value: 0 },
-    { key: 1, text: 'Queuing', index: 1, value: 101 },
-    { key: 2, text: 'Processing', index: 2, value: 100 },
-    { key: 3, text: 'Finished', index: 3, value: 1 },
-    { key: 4, text: 'Canceled', index: 4, value: -1 },
-  ],
-  // value is wrong
-  [
-    { key: 0, text: 'Unprocessed', index: 0, value: 0 },
-    { key: 1, text: 'Finished', index: 1, value: 101 },
-    { key: 2, text: 'Canceled', index: 2, value: 100 },
-  ],
-];
-
 class PickTaskPage extends Component {
 
   state = {
@@ -45,8 +21,33 @@ class PickTaskPage extends Component {
     errors: {}
   }
 
+  billTypeOptions = [
+    { key: 1, text: 'Regular Picking', index: 1, value: '11' },
+    { key: 2, text: 'Shortage Picking', index: 2, value: '99' },
+    { key: 3, text: 'Seperate Picking', index: 3, value: '12' },
+    { key: 4, text: 'Adjustment Picking', index: 4, value: '4' },
+  ];
+
+  processOptions = [
+    [
+      { key: 0, text: 'Unprocessed', index: 0, value: 0 },
+      { key: 1, text: 'Queuing', index: 1, value: 101 },
+      { key: 2, text: 'Processing', index: 2, value: 100 },
+      { key: 3, text: 'Finished', index: 3, value: 1 },
+      { key: 4, text: 'Canceled', index: 4, value: -1 },
+    ],
+    // value is wrong
+    [
+      { key: 0, text: 'Unprocessed', index: 0, value: 0 },
+      { key: 1, text: 'Finished', index: 1, value: 101 },
+      { key: 2, text: 'Canceled', index: 2, value: 100 },
+    ],
+  ];
+
   componentWillMount() {
     this.startStationOperationCall();
+    this.getBillTypeName();
+    this.getProcessStatusName();
   }
 
   startStationOperationCall() {
@@ -62,7 +63,27 @@ class PickTaskPage extends Component {
       this.setState({ errors: { station: 'Server Error. Please contact your system admin'}, loading: false })
       console.error(e);
     })
-    
+  }
+
+  getBillTypeName() {
+    api.menu.getBillTypeName('P').then(res => {
+      if (res.data) {
+        this.billTypeOptions = res.data.map((billType, index) => {
+          return {
+            key: index + 1,
+            text: billType.billTypeName,
+            index: index + 1,
+            value: billType.billType
+          }
+        })
+      }
+    })
+  }
+
+  getProcessStatusName() {
+    api.menu.getProcessStatusName('P').then(res => {
+
+    })
   }
 
   retrievePickOrderReocrds = () => {
@@ -93,7 +114,7 @@ class PickTaskPage extends Component {
   render() {
     const { activeTask, activeProcess, loading, errors, ordersList } = this.state;
     
-    const processList = activeTask === 4 ? processOptions[1] : processOptions[0];
+    const processList = activeTask === 4 ? this.processOptions[1] : this.processOptions[0];
     const processMenuItems = processList.map((option, i) => 
       <Menu.Item key={i}
         index={i}
@@ -105,9 +126,9 @@ class PickTaskPage extends Component {
 
     return (
       <div className="ui pick-task-page-container">
-        <Dimmer active={this.state.isLoading}>
-          <Loader content='Loading' />
-        </Dimmer>
+        {/* <Dimmer active={this.state.loading}> */}
+          <Loader content='Loading' active={this.state.loading} />
+        {/* </Dimmer> */}
         { errors.station && <InlineError></InlineError> }
         <Grid>
           <Grid.Row>
@@ -118,7 +139,7 @@ class PickTaskPage extends Component {
                   value={ activeTask } 
                   fluid
                   selection
-                  options={ taskOptions }
+                  options={ this.billTypeOptions }
                   onChange={ this.handleTaskChange }  
                 />
                 </Menu.Item>
