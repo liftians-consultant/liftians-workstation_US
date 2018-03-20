@@ -13,14 +13,15 @@ import './PickTaskPage.css';
 class PickTaskPage extends Component {
 
   state = {
-    activeTask: '11',
-    activeProcess: 0,
+    activeBillType: '11',
+    activeProcessType: 0,
 
     ordersList: [],
     loading: false,
     errors: {}
   }
 
+  // Dummy data, will retrieve from server
   billTypeOptions = [
     { key: 1, text: 'Regular Picking', index: 1, value: '11' },
     { key: 2, text: 'Shortage Picking', index: 2, value: '99' },
@@ -28,6 +29,7 @@ class PickTaskPage extends Component {
     { key: 4, text: 'Adjustment Picking', index: 4, value: '4' },
   ];
 
+  // Dummy data, will retrieve from server
   processOptions = [
     [
       { key: 0, text: 'Unprocessed', index: 0, value: 0 },
@@ -36,7 +38,7 @@ class PickTaskPage extends Component {
       { key: 3, text: 'Finished', index: 3, value: 1 },
       { key: 4, text: 'Canceled', index: 4, value: -1 },
     ],
-    // value is wrong
+    // The following is the speciel case for Adjustment Process
     [
       { key: 0, text: 'Unprocessed', index: 0, value: 0 },
       { key: 1, text: 'Finished', index: 1, value: 101 },
@@ -67,7 +69,7 @@ class PickTaskPage extends Component {
 
   getBillTypeName() {
     api.menu.getBillTypeName('P').then(res => {
-      if (res.data) {
+      if (res.data && res.data.length) {
         this.billTypeOptions = res.data.map((billType, index) => {
           return {
             key: index + 1,
@@ -82,24 +84,33 @@ class PickTaskPage extends Component {
 
   getProcessStatusName() {
     api.menu.getProcessStatusName('P').then(res => {
-
+      if (res.data && res.data.length) {
+        this.processOptions[0] = res.data.map((processType, index) => {
+          return {
+            key: index,
+            text: processType.processStatus,
+            index: index,
+            value: processType.processStatusID
+          }
+        })
+      }
     })
   }
 
   retrievePickOrderReocrds = () => {
     this.setState({loading: true});
-    console.log('task:', this.state.activeTask, 'process:', this.state.activeProcess);
-    api.pick.retrievePickOrderReocrdsByTypeAndState(1, this.state.activeTask, this.state.activeProcess).then( res => {
+    console.log('task:', this.state.activeBillType, 'process:', this.state.activeProcessType);
+    api.pick.retrievePickOrderReocrdsByTypeAndState(1, this.state.activeBillType, this.state.activeProcessType).then( res => {
       this.setState({ ordersList: res.data, loading: false });
     })
   }
 
   handleTaskChange = (e, { value }) => {
-    this.setState({ activeTask: value, activeProcess: 0 }, this.retrievePickOrderReocrds);
+    this.setState({ activeBillType: value, activeProcessType: 0 }, this.retrievePickOrderReocrds);
   }
 
   handleProcessChange = (e, { value }) => {
-    this.setState({ activeProcess: value }, this.retrievePickOrderReocrds);
+    this.setState({ activeProcessType: value }, this.retrievePickOrderReocrds);
   };
 
   handleStartBtn = (e) => {
@@ -112,13 +123,13 @@ class PickTaskPage extends Component {
   }
 
   render() {
-    const { activeTask, activeProcess, loading, errors, ordersList } = this.state;
+    const { activeBillType, activeProcessType, loading, errors, ordersList } = this.state;
     
-    const processList = activeTask === 4 ? this.processOptions[1] : this.processOptions[0];
+    const processList = activeBillType === 4 ? this.processOptions[1] : this.processOptions[0]; // If billType is Adjustment then use special process list
     const processMenuItems = processList.map((option, i) => 
       <Menu.Item key={i}
         index={i}
-        active={ activeProcess === option.value }
+        active={ activeProcessType === option.value }
         content={ option.text }
         value={ option.value }
         onClick={ this.handleProcessChange }></Menu.Item>
@@ -136,7 +147,7 @@ class PickTaskPage extends Component {
               <Menu>
                 <Menu.Item name="taskType">
                 <Dropdown placeholder='Select Task' 
-                  value={ activeTask } 
+                  value={ activeBillType } 
                   fluid
                   selection
                   options={ this.billTypeOptions }
