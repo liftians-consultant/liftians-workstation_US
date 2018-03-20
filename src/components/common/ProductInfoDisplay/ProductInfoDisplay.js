@@ -13,7 +13,7 @@ class ProductInfoDisplay extends Component {
           <span className="product-name">{ product.productName }</span>
         </div>
         <div className="product-remain-container">
-          <span className="remain-amount">Quantity:  { product.quantity - pickedAmount }</span>
+          <span className="remain-amount">{ product.quantity - pickedAmount }</span>
         </div>
         <div className="product-image-container">
           <Image src="http://via.placeholder.com/500x400"></Image>

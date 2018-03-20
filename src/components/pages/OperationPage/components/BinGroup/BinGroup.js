@@ -10,8 +10,10 @@ class BinGroup extends Component {
 
   render() {
     const { binAmount } = this.state;
-    const { openedBinNum } = this.props;
+    const { openedBinNum, highlightColor } = this.props;
+    let color = highlightColor || 'red'
     let binElements = [];
+
     _.times(binAmount, (index) => {
       binElements.push(
         <div key={'bin-' + index} className="bin-item-container">
@@ -22,6 +24,11 @@ class BinGroup extends Component {
 
     return (
       <div className="pick-bins-container">
+        <style>{`
+          .highlight {
+            background: ` + color + `;
+          }
+        `}</style>
         { binElements }
       </div>
     );
@@ -30,6 +37,7 @@ class BinGroup extends Component {
 
 BinGroup.propTypes = {
   openedBinNum: PropTypes.number.isRequired,
+  highlightColor: PropTypes.string,
 };
 
 export default BinGroup;

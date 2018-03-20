@@ -7,20 +7,29 @@
 }
 
 .product-name-container {
-  line-height: 3em;
+  // line-height: 3em;
   margin: 0 0 1em 0;
+  float: right;
+  width: 70%;
+  text-align: right;
 
   .product-name {
     font-size: 3em;
+    line-height: 1.5em;
   }
 }
 
 .product-remain-container {
-  line-height: 3em;
+  // line-height: 6em;
   margin: 1em 0;
+  background: orange;
+  width: 25%;
+  border: 3px solid #fff;
+  text-align: center;
 
   .remain-amount {
-    font-size: 3em;
-    font-weight: 300;
+    font-size: 6em;
+    font-weight: 400;
+    line-height: 1.5em;
   }
 }

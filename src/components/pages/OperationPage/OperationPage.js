@@ -11,32 +11,8 @@ import PodShelf from '../../common/PodShelf/PodShelf';
 import NumPad from '../../common/NumPad/NumPad';
 import BinGroup from './components/BinGroup/BinGroup';
 import OrderDetailListModal from './components/OrderDetailListModal/OrderDetailListModal';
+import OrderFinishModal from './components/OrderFinishModal/OrderFinishModal';
 
-const testData = [
-  {
-    stationId: 1,
-    shelfID: "3",
-    productName: "Coke cola (6 pack)",
-    boxID: "1",
-    source_ID: "123424",
-    source_lines_id: "32949",
-    productID: "PA023421",
-    lot_No: "2393",
-    taskType: "P",
-    quantity: "2"
-  }, {
-    stationId: 1,
-    shelfID: "3",
-    productName: "Diet Coke (12 pack)",
-    boxID: "2",
-    source_ID: "1234234",
-    source_lines_id: "332949",
-    productID: "PA0234223",
-    lot_No: "2333",
-    taskType: "P",
-    quantity: "4"
-  },
-]
 class OperationPage extends Component {
 
   state = {
@@ -44,15 +20,24 @@ class OperationPage extends Component {
       podId: '',
       shelfBoxes: []
     },
-    currentPickProduct: {},
+    currentPickProduct: {
+      quantity: 0
+    },
     orderList: [],
     pickedAmount: 0,
     loading: true,
     barcode: '',
-    showBox: false
+    showBox: false,
+    openOrderFinishModal: false,
+    
   }
 
   checkPodInterval = {};
+  
+  finishedOrder = {
+    binNum: 3,
+    orderNo: '235345'
+  };
 
   constructor(props) {
     super(props)
@@ -60,6 +45,7 @@ class OperationPage extends Component {
     // Bind the this context to the handler function
     this.selectPickedAmount = this.selectPickedAmount.bind(this);
     this.retrieveNextOrder = this.retrieveNextOrder.bind(this);
+    this.closeOrderFinishModal = this.closeOrderFinishModal.bind(this);
   }
 
   componentWillMount() {
@@ -74,7 +60,7 @@ class OperationPage extends Component {
   selectPickedAmount(num) {
     this.setState({ pickedAmount: this.state.pickedAmount + num }, () => {
       if (this.state.pickedAmount === parseInt(this.state.currentPickProduct.quantity, 10)) {
-        this.finishOrder();
+        this.finishPick();
       }
     });
   }
@@ -96,10 +82,10 @@ class OperationPage extends Component {
         clearInterval(this.checkPodInterval);
         this.retrieveNextOrder();
       }
-    }, 2000);
+    }, 1500);
   }
 
-  finishOrder() {
+  finishPick() {
     const product = this.state.currentPickProduct;
     const data = {
       stationId: this.props.stationId,
@@ -116,26 +102,40 @@ class OperationPage extends Component {
     }
 
     api.pick.atStationAfterPickProduct(data).then(res => {
-      console.log(res.data);
       if (res.data) { // return 1 if success
         // this.setState({ showBox: false }, () => this.retrieveNextOrder());
         data.holderId = this.state.currentPickProduct.holderID;
         
         // after placed in bin, inform db
         api.pick.atHolderAfterPickProduct(data).then( res => {
+          // set here because avoid data changed after async call
+          this.finishedOrder = {
+            orderNo: this.state.currentPickProduct.order_no,
+            binNum: parseInt(this.state.currentPickProduct.binPosition, 10)
+          };
+          this.checkIsOrderFinished();
           this.retrieveNextOrder();
         })
       } else {
         // TODO: ERROR MESSAGE
       }
     }).catch((err) => {
-      console.error('Error for atStationAfterPickPorduct', err);
+      console.error('Error for atStationAfterPickProduct', err);
     });
   }
 
   retrieveNextOrder() {
     this.getPodInfo();
     this.getProductList();
+  }
+
+  checkIsOrderFinished() {
+    api.pick.checkIsOrderFinished(this.state.currentPickProduct.order_no).then( res => {
+      if (res.data) { // return 1 or 0
+        console.log("order finished");
+        this.setState({ openOrderFinishModal: true });
+      }
+    });
   }
 
   getPodInfo() {
@@ -192,16 +192,18 @@ class OperationPage extends Component {
     } else {
       this.setState({ barcode: ''});
     }
-    
+  }
+
+  closeOrderFinishModal() {
+    this.setState({ openOrderFinishModal: false })
   }
 
   render() {
-    const { podInfo, currentPickProduct, pickedAmount, showBox, orderList } = this.state;
+    const { podInfo, currentPickProduct, pickedAmount, showBox, orderList, openOrderFinishModal } = this.state;
     const highlightBox = {
       row: currentPickProduct ? parseInt(currentPickProduct.shelfID, 10) : 0,
       column: currentPickProduct ? parseInt(currentPickProduct.boxID, 10) : 0
     };
-    console.log(podInfo);
 
     return (
       <div className="operationPage">
@@ -220,7 +222,7 @@ class OperationPage extends Component {
                 </Segment>
               </Segment.Group>
               { orderList.length > 0 && <OrderDetailListModal orderList={orderList} /> }
-              <Button color="red" onClick={ () => this.finishOrder() }>Shortage</Button>
+              <Button color="red" onClick={ () => this.finishPick() }>Shortage</Button>
             </Grid.Column>
 
             <Grid.Column width={11}>
@@ -241,6 +243,11 @@ class OperationPage extends Component {
             </Grid.Column>
           </Grid.Row>
         </Grid>
+
+        { openOrderFinishModal && <OrderFinishModal data={ this.finishedOrder }
+        modalOpen={ openOrderFinishModal }
+        modalClose={ this.closeOrderFinishModal }
+        ></OrderFinishModal> }
       </div>
     );
   }

@@ -149,7 +149,7 @@ const pick = {
         String(data.pickQuantity),
       ]
     }),
-  checkIfOrderFinished: (orderNum) => 
+  checkIsOrderFinished: (orderNum) => 
     axios.post('Temp', {
       type: 'function',
       name: 'F_IsOrderFinished',
