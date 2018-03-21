@@ -74,6 +74,12 @@ const station = {
 };
 
 const pick = {
+  resetTestData: (stationId) => 
+    axios.post('Pick', {
+      type: 'procedures',
+      name: 'P_ResetTestData',
+      parameter: [stationId]
+    }),
   retrievePickOrderReocrdsByTypeAndState: (stationId, taskId, processId) => 
     axios.post('Pick', {
       type: 'procedures',
@@ -110,16 +116,16 @@ const pick = {
       type: 'procedures',
       name: 'P_AtStationAfterPickProduct',
       parameter: [
-        data.stationId,
-        data.shelfId,
-        data.boxId,
-        data.orderNo,
-        data.sourceLinesId,
-        data.productId,
-        data.lotNo,
-        data.packageBarcode,
+        String(data.stationId),
+        String(data.shelfId),
+        String(data.boxId),
+        String(data.orderNo),
+        String(data.sourceLinesId),
+        String(data.productId),
+        String(data.lotNo),
+        String(data.packageBarcode),
         String(data.pickQuantity),
-        data.taskSubtype,
+        String(data.taskSubtype),
         String(data.shortQty)
       ]
     }),
@@ -140,20 +146,32 @@ const pick = {
       type: 'procedures',
       name: 'P_AtHolderAfterPickProduct',
       parameter: [
-        data.holderId,
-        data.orderNo,
-        data.sourceLinesId,
-        data.productId,
-        data.lotNo,
-        data.taskSubtype,
+        String(data.holderId),
+        String(data.orderNo),
+        String(data.sourceLinesId),
+        String(data.productId),
+        String(data.lotNo),
+        String(data.taskSubtype),
         String(data.pickQuantity),
       ]
     }),
+    
   checkIsOrderFinished: (orderNum) => 
     axios.post('Temp', {
       type: 'function',
       name: 'F_IsOrderFinished',
       parameter: [ orderNum ]
+    }),
+
+  getInventoryByProductBarcode: (productId, podId, podSide) => 
+    axios.post('Pick', {
+      type: 'procedures',
+      name: 'GetInventoryByProductBarcode',
+      parameter: [
+        productId,
+        String(podId || 0),
+        String(podSide || 0)
+      ]
     })
 };
 

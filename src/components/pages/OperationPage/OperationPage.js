@@ -12,6 +12,7 @@ import NumPad from '../../common/NumPad/NumPad';
 import BinGroup from './components/BinGroup/BinGroup';
 import OrderDetailListModal from './components/OrderDetailListModal/OrderDetailListModal';
 import OrderFinishModal from './components/OrderFinishModal/OrderFinishModal';
+import WrongProductModal from './components/WrongProductModal/WrongProductModal';
 
 class OperationPage extends Component {
 
@@ -29,6 +30,7 @@ class OperationPage extends Component {
     barcode: '',
     showBox: false,
     openOrderFinishModal: false,
+    openWrongProductModal: false
     
   }
 
@@ -46,6 +48,8 @@ class OperationPage extends Component {
     this.selectPickedAmount = this.selectPickedAmount.bind(this);
     this.retrieveNextOrder = this.retrieveNextOrder.bind(this);
     this.closeOrderFinishModal = this.closeOrderFinishModal.bind(this);
+    this.closeWrongProductModal = this.closeWrongProductModal.bind(this);
+    // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
   componentWillMount() {
@@ -176,6 +180,14 @@ class OperationPage extends Component {
     });
   }
 
+  scanValidation(barcode) {
+    if (barcode === this.state.currentPickProduct.productID) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   handleScanBtnClick() {
     if (!this.state.showBox) {
       // TODO: SIMULATION ONLY! NO PRODUCTION
@@ -186,20 +198,53 @@ class OperationPage extends Component {
         boxId: this.state.currentPickProduct.boxID,
       };
       api.pick.getProductSerialNum(data).then( res => {
-        this.state.barcode = res.data[0].barcode;
-        this.setState({ showBox: !this.state.showBox });
-      })
+        this.setState({ showBox: !this.state.showBox, barcode: res.data[0].barcode });
+      });
+
+      /* PRODUCTION CODE */
+      // After get barcode from scanner
+      // if (this.scanValidation(something)) {
+      //   this.setState({ showBox: !this.state.showBox, barcode: res.data[0].barcode });
+      // }
+
     } else {
       this.setState({ barcode: ''});
     }
   }
 
+  handleWrongProductBtnClick() {
+    // const wrongBarcode = "191618";
+
+    const data = {
+      podId: this.state.currentPickProduct.podID,
+      podSide: this.state.currentPickProduct.podSide,
+      shelfId: 2,
+      boxId: 1,
+    };
+
+    //  TODO: THE FOLLWING CODE IS JUST TRYIGN TO MAKE THE SIMULATION WORK....
+    api.pick.getProductSerialNum(data).then( res => {
+      this.setState({ barcode: res.data[1].barcode }, () => {
+        if (!this.scanValidation(res.data[1].barcode)) {
+          this.setState({ openWrongProductModal: true });
+        }
+      });      
+    });
+
+    
+  }
+
   closeOrderFinishModal() {
-    this.setState({ openOrderFinishModal: false })
+    this.setState({ openOrderFinishModal: false });
+  }
+
+  closeWrongProductModal() {
+    this.setState({ openWrongProductModal: false });
   }
 
   render() {
-    const { podInfo, currentPickProduct, pickedAmount, showBox, orderList, openOrderFinishModal } = this.state;
+    const { podInfo, currentPickProduct, pickedAmount, showBox, 
+      orderList, openOrderFinishModal, openWrongProductModal, barcode } = this.state;
     const highlightBox = {
       row: currentPickProduct ? parseInt(currentPickProduct.shelfID, 10) : 0,
       column: currentPickProduct ? parseInt(currentPickProduct.boxID, 10) : 0
@@ -221,7 +266,7 @@ class OperationPage extends Component {
                   <PodShelf podInfo={ podInfo } highlightBox={ highlightBox }></PodShelf>
                 </Segment>
               </Segment.Group>
-              { orderList.length > 0 && <OrderDetailListModal orderList={orderList} /> }
+              { orderList.length > 0 && <OrderDetailListModal orderList={ orderList } /> }
               <Button color="red" onClick={ () => this.finishPick() }>Shortage</Button>
             </Grid.Column>
 
@@ -231,6 +276,7 @@ class OperationPage extends Component {
                   <ProductInfoDisplay product={ currentPickProduct } pickedAmount={ pickedAmount }></ProductInfoDisplay>
                   <br></br>
                   <Button primary size="huge" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
+                  <Button size="huge" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button>
                 </div>
               ) : (
                 <div>
@@ -245,9 +291,14 @@ class OperationPage extends Component {
         </Grid>
 
         { openOrderFinishModal && <OrderFinishModal data={ this.finishedOrder }
-        modalOpen={ openOrderFinishModal }
-        modalClose={ this.closeOrderFinishModal }
-        ></OrderFinishModal> }
+          modalOpen={ openOrderFinishModal }
+          modalClose={ this.closeOrderFinishModal }
+          ></OrderFinishModal> }
+
+        { openWrongProductModal && <WrongProductModal podInfo={ podInfo } 
+          productId={ barcode }
+          open={ openWrongProductModal }
+          close={ this.closeWrongProductModal } /> }
       </div>
     );
   }
