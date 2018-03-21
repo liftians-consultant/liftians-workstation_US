@@ -52,25 +52,25 @@ class HomePage extends Component {
         <Grid columns={3} centered>
           <Grid.Row>
             <Grid.Column>
-              <MenuButton title="Replenish" name="replenish" goTo={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'R' ? true : false }/>
+              <MenuButton title="Replenish" name="replenish" clickHandler={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'R' ? true : false }/>
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Pick" name="pick-task" goTo={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'P' ? true : false }/>
+              <MenuButton title="Pick" name="pick-task" clickHandler={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'P' ? true : false }/>
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Inventory Check" name="inventory-check" goTo={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'C' ? true : false }/>
+              <MenuButton title="Inventory Check" name="inventory-check" clickHandler={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'C' ? true : false }/>
             </Grid.Column>
           </Grid.Row>
 
           <Grid.Row>
             <Grid.Column>
-              <MenuButton title="System Setting" name="system-setting" goTo={ this.goToPage } />
+              <MenuButton title="System Setting" name="system-setting" clickHandler={ this.goToPage } />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Inventory Search" name="inventory-search" goTo={ this.goToPage } />
+              <MenuButton title="Inventory Search" name="inventory-search" clickHandler={ this.goToPage } />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Generate Inventory" name="generate-inventory" goTo={ this.goToPage } />
+              <MenuButton title="Generate Inventory" name="generate-inventory" clickHandler={ this.goToPage } />
             </Grid.Column>
           </Grid.Row>
         </Grid>

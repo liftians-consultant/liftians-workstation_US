@@ -15,7 +15,6 @@ class PickTaskPage extends Component {
   state = {
     activeBillType: '11',
     activeProcessType: 0,
-
     ordersList: [],
     loading: false,
     errors: {}
