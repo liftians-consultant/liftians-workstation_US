@@ -275,8 +275,8 @@ class OperationPage extends Component {
                 <div>
                   <ProductInfoDisplay product={ currentPickProduct } pickedAmount={ pickedAmount }></ProductInfoDisplay>
                   <br></br>
-                  <Button primary size="huge" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
-                  <Button size="huge" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button>
+                  <Button primary size="massive" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
+                  <Button size="medium" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button>
                 </div>
               ) : (
                 <div>

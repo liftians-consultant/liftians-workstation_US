@@ -34,7 +34,7 @@ class WrongProductModal extends Component {
 
     return (
       <Modal open={ open }
-        size="large" basic
+        size="small" basic
         style={{ marginTop: '1rem', marginLeft: 'auto', marginRight: 'auto' }} >
         <Modal.Header><h1>WRONG PRODUCT</h1></Modal.Header>
         <Modal.Content scrolling>
@@ -50,7 +50,7 @@ class WrongProductModal extends Component {
           </Grid>
         </Modal.Content>
         <Modal.Actions>
-          <Button primary size="huge"
+          <Button primary size="massive"
             onClick={ close }>
             Ok
           </Button>

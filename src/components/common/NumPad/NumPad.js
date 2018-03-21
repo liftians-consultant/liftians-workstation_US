@@ -15,19 +15,19 @@ class NumPad extends Component {
     return (
       <div className="numpad-container">
         <div className="num-group">
-          <Button size="huge" disabled={ highlightAmount < 1 } primary={ highlightAmount >= 1 } onClick={ () => this.clickHandler(1) }>1</Button>
-          <Button size="huge" disabled={ highlightAmount < 2 } primary={ highlightAmount >= 2 } onClick={ () => this.clickHandler(2) }>2</Button>
-          <Button size="huge" disabled={ highlightAmount < 3 } primary={ highlightAmount >= 3 } onClick={ () => this.clickHandler(3) }>3</Button>
+          <Button size="massive" disabled={ highlightAmount < 1 } primary={ highlightAmount >= 1 } onClick={ () => this.clickHandler(1) }>1</Button>
+          <Button size="massive" disabled={ highlightAmount < 2 } primary={ highlightAmount >= 2 } onClick={ () => this.clickHandler(2) }>2</Button>
+          <Button size="massive" disabled={ highlightAmount < 3 } primary={ highlightAmount >= 3 } onClick={ () => this.clickHandler(3) }>3</Button>
         </div>
         <div className="num-group">
-          <Button size="huge" disabled={ highlightAmount < 4 } primary={ highlightAmount >= 4 } onClick={ () => this.clickHandler(4) }>4</Button>
-          <Button size="huge" disabled={ highlightAmount < 5 } primary={ highlightAmount >= 5 } onClick={ () => this.clickHandler(5) }>5</Button>
-          <Button size="huge" disabled={ highlightAmount < 6 } primary={ highlightAmount >= 6 } onClick={ () => this.clickHandler(6) }>6</Button>
+          <Button size="massive" disabled={ highlightAmount < 4 } primary={ highlightAmount >= 4 } onClick={ () => this.clickHandler(4) }>4</Button>
+          <Button size="massive" disabled={ highlightAmount < 5 } primary={ highlightAmount >= 5 } onClick={ () => this.clickHandler(5) }>5</Button>
+          <Button size="massive" disabled={ highlightAmount < 6 } primary={ highlightAmount >= 6 } onClick={ () => this.clickHandler(6) }>6</Button>
         </div>
         <div className="num-group">
-          <Button size="huge" disabled={ highlightAmount < 7 } primary={ highlightAmount >= 7 } onClick={ () => this.clickHandler(7) }>7</Button>
-          <Button size="huge" disabled={ highlightAmount < 8 } primary={ highlightAmount >= 8 } onClick={ () => this.clickHandler(8) }>8</Button>
-          <Button size="huge" disabled={ highlightAmount < 9 } primary={ highlightAmount >= 9 } onClick={ () => this.clickHandler(9) }>9</Button>
+          <Button size="massive" disabled={ highlightAmount < 7 } primary={ highlightAmount >= 7 } onClick={ () => this.clickHandler(7) }>7</Button>
+          <Button size="massive" disabled={ highlightAmount < 8 } primary={ highlightAmount >= 8 } onClick={ () => this.clickHandler(8) }>8</Button>
+          <Button size="massive" disabled={ highlightAmount < 9 } primary={ highlightAmount >= 9 } onClick={ () => this.clickHandler(9) }>9</Button>
         </div>
       </div>
     );
