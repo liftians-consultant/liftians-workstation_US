@@ -18,12 +18,14 @@ class OperationPage extends Component {
 
   state = {
     podInfo: {
-      podId: '',
+      podId: 0,
+      podSide: 0,
       shelfBoxes: []
     },
     currentPickProduct: {
       quantity: 0
     },
+    taskId: 0,
     orderList: [],
     pickedAmount: 0,
     loading: true,
@@ -75,10 +77,10 @@ class OperationPage extends Component {
 
     this.checkPodInterval = setInterval( () => {
       if (!isRecieve) {
-        api.station.atStationPodLayoutInfo(this.props.stationId).then( res => {
-          if (res.data.length > 0) {
+        api.station.atStationTask(this.props.stationId).then( res => {
+          if (res.data > 0) {
             console.log('Pod arrive station');
-            this.setState({ orderProductList: res.data }, () => isRecieve = true);
+            this.setState({ orderProductList: res.data, taskId: res.data }, () => isRecieve = true);
           }
         });
       } else {
@@ -129,8 +131,9 @@ class OperationPage extends Component {
   }
 
   retrieveNextOrder() {
-    this.getPodInfo();
+    this.setState({ loading: true });
     this.getProductList();
+    // this.getPodInfo();
   }
 
   checkIsOrderFinished() {
@@ -143,15 +146,12 @@ class OperationPage extends Component {
   }
 
   getPodInfo() {
-    this.setState({ loading: true });
-    api.station.atStationPodLayoutInfo(this.props.stationId).then(res => {
+    api.station.atStationPodLayoutInfo(this.state.podInfo.podId, this.state.podInfo.podSide).then(res => {
       // console.log(res.data);
       if (res.data.length) {
         const podInfo = {
-          podId: res.data[0].podid,
-          podSide: res.data[0].podSide,
-          taskType: res.data[0].taskType,
-          shelfBoxes: _.chain(res.data).sortBy('shelfId').map((elmt) => { return parseInt(elmt.maxBox, 10) }).reverse().value()
+          ...this.state.podInfo,
+          shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxNumberOfBox, 10) }).reverse().value()
         }
         this.setState({ podInfo, loading: false })
       }     
@@ -161,14 +161,19 @@ class OperationPage extends Component {
   }
 
   getProductList() {
-    api.pick.atStationBoxLocation(this.props.stationId).then(res => {
+    api.pick.getPickInfoByTaskId(this.state.taskId).then(res => {
       console.log(res.data);
       if (res.data.length) {
         this.setState({ 
           currentPickProduct: res.data[0],
           orderList: res.data,
+          podInfo: {
+            podId: res.data[0].podID,
+            podSide: res.data[0].podSide,
+            shelfBoxes: []
+          },
           pickedAmount: 0,
-          showBox: false });
+          showBox: false }, this.getPodInfo);
       } else {
         // when nothing return, that means the pod is finished
         // and need to wait for the next pod come in to station
