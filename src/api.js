@@ -10,19 +10,17 @@ const user = {
   logout: () => 
     axios.post('logout').then(res => res),
   getInfoById: (empId) => 
-    axios.post('Login', { type: 'select', name: 'V_Empolyees_FindByID', parameter: [empId] }).then(res => res.data),
+    axios.post('Login', { name: 'EmpolyeesFindByID', parameter: [empId] }).then(res => res.data),
 };
 
 const menu = {
   getBillTypeName: (operationType) => 
     axios.post('Common', {
-      type: 'select',
       name: 'BillType',
       parameter: [operationType]
     }),
   getProcessStatusName: (operationType) => 
     axios.post('Common', {
-      type: 'select',
       name: 'ProcessStatus',
       parameter: [operationType]
     }),
@@ -31,44 +29,38 @@ const menu = {
 const station = {
   activateStationWithUser: (stationId, empId) => 
     axios.post('Login', {
-      type: 'procedures',
-      name: 'P_ActivateStationOperation',
+      name: 'ActivateStationOperation',
       parameter: [String(stationId), empId, '4']
     }
   ).then(res => res.data),
 
   checkCurrentUnFinishTask: stationId => 
     axios.post('Login', {
-      type: 'procedures',
-      name: 'P_CheckCurrentUnFinishTask',
+      name: 'CheckCurrentUnFinishTask',
       parameter: [stationId] 
     }).then(res => res.data),
 
-  atStationPodLayoutInfo: stationId =>
-    axios.post('Temp', {
-      type: 'procedures',
-      name: 'P_AtStationPodLayoutInfo',
-      parameter: [stationId]
+  atStationPodLayoutInfo: (podId, podSide) =>
+    axios.post('Common', {
+      name: 'GetPodLayout',
+      parameter: [
+        String(podId),
+        String(podSide)
+      ]
     }),
 
   atStationTask: (stationId) => 
-    axios.post('Temp', {
-      type: 'procedures',
-      name: 'AtStationTask',
-      parameter: [String(stationId)]
-    }),
+    axios.get('atStation/CurrentTask?stationID=' + stationId),
 
   startStationOperation: (stationId, empId, operationType) =>
     axios.post('Pick', {
-      type: 'procedures',
-      name: 'P_StartStationOperation',
+      name: 'StartStationOperation',
       parameter: [stationId, empId, operationType]
     }),
 
   stopStationOperation: (stationId, empId, taskType) => 
     axios.post('Temp', {
-      type: 'procedures',
-      name: 'P_StopStationOperation',
+      name: 'StopStationOperation',
       parameter: [stationId, empId, taskType]
     })
 };
@@ -76,45 +68,39 @@ const station = {
 const pick = {
   resetTestData: (stationId) => 
     axios.post('Pick', {
-      type: 'procedures',
-      name: 'P_ResetTestData',
+      name: 'ResetTestData',
       parameter: [stationId]
     }),
   retrievePickOrderReocrdsByTypeAndState: (stationId, taskId, processId) => 
     axios.post('Pick', {
-      type: 'procedures',
-      name: 'P_DisplayPickMenu',
+      name: 'DisplayPickMenu',
       parameter: [stationId, taskId, processId]
     }),
 
   retrievePickOrderItems: (orderId) => 
     axios.post('Temp', {
-      type: 'procedures',
-      name: 'P_DisplayPickOrderDetail',
+      name: 'DisplayPickOrderDetail',
       parameter: [orderId]
     }),
 
   callServerGeneratePickTask: (stationId) => 
     axios.post('Temp', {
-      type: 'procedures',
-      name: 'P_GenPickTask',
+      name: 'GenPickTask',
       parameter: [stationId]
     }),
 
   stopPickOperation: (stationId, empId) => 
     station.stopStationOperation(stationId, empId, 'P'),
 
-  atStationBoxLocation: (stationId) => 
-    axios.post('Temp', {
-      type: 'procedures',
-      name: 'AtStationPickInfo',
-      parameter: [stationId]
+  getPickInfoByTaskId: (taskId) => 
+    axios.post('Pick', {
+      name: 'GetPickInfoByTaskID',
+      parameter: [String(taskId)]
     }),
     
   atStationAfterPickProduct: (data) =>
     axios.post('Temp', {
-      type: 'procedures',
-      name: 'P_AtStationAfterPickProduct',
+      name: 'AtStationAfterPickProduct',
       parameter: [
         String(data.stationId),
         String(data.shelfId),
@@ -131,7 +117,6 @@ const pick = {
     }),
   getProductSerialNum: (data) => 
     axios.post('Pick', {
-      type: 'procedures',
       name: 'GetProductByInvLocation', 
       parameter: [
         String(data.podId),
@@ -143,8 +128,7 @@ const pick = {
   
   atHolderAfterPickProduct: (data) => 
     axios.post('Temp', {
-      type: 'procedures',
-      name: 'P_AtHolderAfterPickProduct',
+      name: 'AtHolderAfterPickProduct',
       parameter: [
         String(data.holderId),
         String(data.orderNo),
@@ -158,14 +142,12 @@ const pick = {
     
   checkIsOrderFinished: (orderNum) => 
     axios.post('Temp', {
-      type: 'function',
-      name: 'F_IsOrderFinished',
+      name: 'IsOrderFinished',
       parameter: [ orderNum ]
     }),
 
   getInventoryByProductBarcode: (productId, podId, podSide) => 
     axios.post('Pick', {
-      type: 'procedures',
       name: 'GetInventoryByProductBarcode',
       parameter: [
         productId,
