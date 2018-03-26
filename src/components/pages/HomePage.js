@@ -52,7 +52,7 @@ class HomePage extends Component {
         <Grid columns={3} centered>
           <Grid.Row>
             <Grid.Column>
-              <MenuButton title="Replenish" name="replenish" clickHandler={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'R' ? true : false }/>
+              <MenuButton title="Replenish" name="replenish-task" clickHandler={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'R' ? true : false }/>
             </Grid.Column>
             <Grid.Column>
               <MenuButton title="Pick" name="pick-task" clickHandler={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'P' ? true : false }/>

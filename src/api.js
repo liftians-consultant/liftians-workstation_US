@@ -71,10 +71,14 @@ const pick = {
       name: 'ResetTestData',
       parameter: [stationId]
     }),
-  retrievePickOrderReocrdsByTypeAndState: (stationId, taskId, processId) => 
+  retrievePickOrderReocrdsByTypeAndState: (stationId, billTypeId, processId) => 
     axios.post('Pick', {
       name: 'DisplayPickMenu',
-      parameter: [stationId, taskId, processId]
+      parameter: [
+        stationId,
+        String(billTypeId),
+        String(processId)
+      ]
     }),
 
   retrievePickOrderItems: (orderId) => 
@@ -157,9 +161,40 @@ const pick = {
     })
 };
 
+const replenish = {
+  genReplenishTask: (stationId) => 
+    axios.post('Temp', {
+      name: 'GenReplenishTask',
+      parameter: [ stationId ]
+    }),
+  
+  retrieveReplenishRecords: (stationId, billTypeId, processId) =>
+    axios.post('Replenish', {
+      name: 'DisplayReplenish',
+      parameter: [ stationId, billTypeId, processId]
+    }),
+
+  getReplenishDetailBySourceId: (sourceId) => 
+    axios.post('Replenish', {
+      name: 'GetReplenishDetailBySourceID',
+      parameter: [ sourceId ]
+    }),
+  replenishBySourceId: (sourceId, userId, sourceIdList, jobPriority) => 
+    axios.post('Replenish', {
+      name: 'ReplenishBySourceID',
+      parameter: [
+        String(sourceId),
+        String(userId),
+        String(sourceIdList),
+        String(jobPriority)
+      ]
+    }),
+};
+
 export default {
   user,
   menu,
   station,
-  pick
+  pick,
+  replenish
 };

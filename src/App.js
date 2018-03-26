@@ -12,6 +12,7 @@ import SystemSettingPage from './components/pages/SystemSettingPage/SystemSettin
 import GuestRoute from "./components/routes/GuestRoute";
 import UserRoute from "./components/routes/UserRoute";
 import SideNavigation from './components/navigation/SideNavigation';
+import ReplenishTaskPage from './components/pages/ReplenishTaskPage/ReplenishTaskPage';
 import { Grid } from "semantic-ui-react";
 import "./App.css";
 
@@ -25,6 +26,7 @@ const App = ({ location, isAuthenticated }) => (
           <UserRoute location={location} path="/pick-task" exact component={PickTaskPage} />
           <UserRoute location={location} path="/operation" exact component={OperationPage} />
           <UserRoute location={location} path="/system-setting" exact component={SystemSettingPage} />
+          <UserRoute location={location} path="/replenish-task" exact component={ReplenishTaskPage} />
         </Grid.Column>
         <Grid.Column width={2} className="navGridColumn">
           {isAuthenticated && <SideNavigation />}

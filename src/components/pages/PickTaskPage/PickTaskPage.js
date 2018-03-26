@@ -6,8 +6,8 @@ import 'react-table/react-table.css';
 import { Grid, Menu, Dropdown, Loader, Button, Dimmer } from 'semantic-ui-react';
 import api from '../../../api';
 import InlineError from '../../messages/InlineError';
+import OrderListTable from '../../common/OrderListTable/OrderListTable';
 import { PickOrderTableColumns } from '../../../models/PickOrderTableModel';
-import OrderDetailTable from '../../common/OrderDetailTable/OrderDetailTable';
 import './PickTaskPage.css';
 
 class PickTaskPage extends Component {
@@ -160,19 +160,7 @@ class PickTaskPage extends Component {
           <Grid.Row>
             <Grid.Column>
               <div className="orderlist-table-container">
-                <ReactTable
-                  columns={PickOrderTableColumns}
-                  data={ordersList}
-                  defaultPageSize={15}
-                  SubComponent={(row) => <OrderDetailTable orderId={row.original.order_No} /> }
-                  loading={loading}
-                  manual
-                  resizable={false}
-                  filterable={false}
-                  showPageJump={false}
-                  showPagination={false}
-                  className="-striped -highlight orderlist-table"
-                />
+                <OrderListTable listData={ ordersList } loading={ loading } columns={ PickOrderTableColumns } />
               </div>
             </Grid.Column>
           </Grid.Row>
