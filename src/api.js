@@ -179,11 +179,11 @@ const replenish = {
       name: 'GetReplenishDetailBySourceID',
       parameter: [ sourceId ]
     }),
-  replenishBySourceId: (sourceId, userId, sourceIdList, jobPriority) => 
+  replenishBySourceId: (stationId, userId, sourceIdList, jobPriority) => 
     axios.post('Replenish', {
       name: 'ReplenishBySourceID',
       parameter: [
-        String(sourceId),
+        String(stationId),
         String(userId),
         String(sourceIdList),
         String(jobPriority)

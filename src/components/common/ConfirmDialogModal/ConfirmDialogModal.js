@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Confirm } from 'semantic-ui-react';
+import { Confirm } from 'semantic-ui-react';
 
 class ConfirmDialogModal extends Component {
   
@@ -9,7 +9,7 @@ class ConfirmDialogModal extends Component {
   }
 
   render() {
-    const { open, size, close, header, content } = this.props;
+    const { open, size, header, content } = this.props;
 
     return (
       <Confirm

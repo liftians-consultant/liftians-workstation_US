@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { Grid, Menu, Dropdown, Loader, Button, Dimmer, Input } from 'semantic-ui-react';
+import { Grid, Menu, Dropdown, Loader, Button, Input } from 'semantic-ui-react';
 import ReactTable from "react-table";
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
 import api from '../../../api';
-import InlineError from '../../messages/InlineError';
-import OrderListTable from '../../common/OrderListTable/OrderListTable';
+// import InlineError from '../../messages/InlineError';
+// import OrderListTable from '../../common/OrderListTable/OrderListTable';
 import { ReplenishOrderTableColumns } from '../../../models/ReplenishOrderTableColumns';
 import OrderDetailTable from '../../common/OrderDetailTable/OrderDetailTable';
 
@@ -14,16 +14,6 @@ import './ReplenishTaskPage.css';
 
 const CheckboxTable = checkboxHOC(ReactTable);
 
-const testListData = [
-  {
-    billNo: '139492',
-    receiver: 'Kevin Hong',
-    receiveDate: '12345324',
-    numberOfProducts: 1,
-    totalReceiveQuantity: 20,
-    statusNameInChn: 'In process'
-  }
-]
 class ReplenishTaskPage extends Component {
   state = {
     activeBillType: '01',
@@ -112,6 +102,13 @@ class ReplenishTaskPage extends Component {
     this.setState({ activeProcessType: value }, this.retrieveReplenishRecords);
   };
 
+  handleRequestPodBtn() {
+    const sourceIdList = this.state.selection.join(',');
+    api.replenish.replenishBySourceId(this.props.stationId, this.props.username, sourceIdList, 1).then(res => {
+      console.log('Going into replenish operation page~~~~');
+    })
+  }
+
   handleSearchChange = (e, { value }) => {
     this.filterOrderListBySourceId(value)
   };
@@ -186,7 +183,7 @@ class ReplenishTaskPage extends Component {
 
 
   render() {
-    const { toggleSelection, toggleAll, isSelected, logSelection } = this;
+    const { toggleSelection, toggleAll, isSelected } = this;
     const { activeBillType, activeProcessType, loading, errors, ordersList, selectAll, searchedList } = this.state;
     
     const processList = activeBillType === 4 ? this.processOptions[1] : this.processOptions[0]; // If billType is Adjustment then use special process list
@@ -258,7 +255,7 @@ class ReplenishTaskPage extends Component {
                 placeholder='Enter Source ID...' />
               </div>
               <div className="order-list-btn-group">
-                <Button size="huge" primary onClick={() => this.handleStartBtn() }>Request POD</Button>
+                <Button size="huge" primary onClick={() => this.handleRequestPodBtn() }>Request POD</Button>
                 {/* <Button size="huge" secondary>Pause</Button> */}
               </div>
             </Grid.Column>

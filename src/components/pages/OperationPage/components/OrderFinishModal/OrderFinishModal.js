@@ -1,15 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
-import { Button, Header, Icon, Modal } from 'semantic-ui-react';
+import { Button, Modal } from 'semantic-ui-react';
 import BinGroup from '../BinGroup/BinGroup';
 
 class OrderFinishModal extends Component {
   render() {
-    const { orderList, data } = this.props;
+    const { data, modalOpen, modalClose } = this.props;
 
     return (
-      <Modal open={ this.props.modalOpen }
+      <Modal open={ modalOpen }
         size="small" basic
         style={{ marginTop: '1rem', marginLeft: 'auto', marginRight: 'auto' }} >
         <Modal.Header><h1>Order #{ data.orderNo } completed</h1></Modal.Header>
@@ -21,7 +20,7 @@ class OrderFinishModal extends Component {
         </Modal.Content>
         <Modal.Actions>
           <Button primary size="huge"
-            onClick={ this.props.modalClose }>
+            onClick={ modalClose }>
             Ok
           </Button>
         </Modal.Actions>

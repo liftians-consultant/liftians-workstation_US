@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { Grid, Dimmer, Loader } from 'semantic-ui-react';
 import * as actions from "../../actions/auth";
 import MenuButton from '../common/MenuButton/MenuButton';

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
-import { Segment, Grid, Button, Portal, Header, Dimmer, Loader } from 'semantic-ui-react';
+import { Segment, Grid, Button, Dimmer, Loader } from 'semantic-ui-react';
 import api from '../../../api';
 import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
 // import RemainPickAmount from "./components/RemainPickAmount/RemainPickAmount";

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import ReactTable from 'react-table';
-import 'react-table/react-table.css';
-import { Grid, Menu, Dropdown, Loader, Button, Dimmer } from 'semantic-ui-react';
+// import ReactTable from 'react-table';
+// import 'react-table/react-table.css';
+import { Grid, Menu, Dropdown, Loader, Button } from 'semantic-ui-react';
 import api from '../../../api';
 import InlineError from '../../messages/InlineError';
 import OrderListTable from '../../common/OrderListTable/OrderListTable';

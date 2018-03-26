@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import './MenuButton.css';
 
 class MenuButton extends Component {
@@ -11,7 +11,7 @@ class MenuButton extends Component {
   }
 
   render() {
-    const { title, name, isDisabled } = this.props;
+    const { title, isDisabled } = this.props;
     const menuClass = classNames({
       'menuBtn': true,
       'btn-disabled': isDisabled

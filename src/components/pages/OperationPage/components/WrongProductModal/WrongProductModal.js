@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Header, Icon, Modal, Grid } from 'semantic-ui-react';
+import { Button, Modal, Grid } from 'semantic-ui-react';
 import PodShelf from '../../../../common/PodShelf/PodShelf';
 import api from "../../../../../api";
 

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import { Button, Header, Icon, Modal, Table } from 'semantic-ui-react';
+import { Button, Icon, Modal, Table } from 'semantic-ui-react';
 
 class OrderDetailListModal extends Component {
   render() {

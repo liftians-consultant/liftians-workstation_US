@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { Grid, Button, Message } from 'semantic-ui-react';
+import { Grid, Message } from 'semantic-ui-react';
 // import {BrowserHistory} from 'react-router';
 import MenuButton from '../../common/MenuButton/MenuButton';
 import api from '../../../api';
