@@ -11,7 +11,8 @@ import './SideNavigation.css';
 const SideNavigation = ({ logout }) => ({
 
   render() {
-    const { stationId } = this.props;
+    const { stationId, operationType } = this.props;
+    const operationUrl = operationType === 'P' ? "/operation" : '/replenish-operation';
 
     return (
       <div className="side-navigation">
@@ -23,7 +24,7 @@ const SideNavigation = ({ logout }) => ({
           <Link to="/"><Button className="nav-btn">Menu</Button></Link>
           </div>
           <div className="nav-item-container">
-          <Link to="/operation"><Button className="nav-btn">Operation</Button></Link>
+          <Link to={ operationUrl }><Button className="nav-btn">Operation</Button></Link>
           </div>
         </div>
         <div className="nav-buffer"></div>
@@ -38,11 +39,13 @@ const SideNavigation = ({ logout }) => ({
 SideNavigation.propTypes = {
   logout: PropTypes.func.isRequired,
   stationId: PropTypes.string.isRequired,
+  operationType: PropTypes.oneOf(['R', 'P', 'U'])
 };
 
 function mapStateToProps(state) {
   return {
-    stationId: state.station.id
+    stationId: state.station.id,
+    operationType: state.station.info.taskType
   };
 }
 

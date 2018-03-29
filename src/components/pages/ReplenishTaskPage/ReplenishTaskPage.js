@@ -106,7 +106,12 @@ class ReplenishTaskPage extends Component {
     const sourceIdList = this.state.selection.join(',');
     api.replenish.replenishBySourceId(this.props.stationId, this.props.username, sourceIdList, 1).then(res => {
       console.log('Going into replenish operation page~~~~');
+      this.props.history.push('/replenish-operation');
     })
+  }
+
+  handleContinueBtn() {
+    this.props.history.push('/replenish-operation');
   }
 
   handleSearchChange = (e, { value }) => {
@@ -170,7 +175,7 @@ class ReplenishTaskPage extends Component {
       const currentRecords = wrappedInstance.getResolvedState().sortedData;
       // we just push all the IDs onto the selection array
       currentRecords.forEach((item) => {
-        selection.push(item._original._id);
+        selection.push(item._original.sourceID);
       })
     }
     this.setState({ selectAll, selection })
@@ -184,7 +189,8 @@ class ReplenishTaskPage extends Component {
 
   render() {
     const { toggleSelection, toggleAll, isSelected } = this;
-    const { activeBillType, activeProcessType, loading, errors, ordersList, selectAll, searchedList } = this.state;
+    const { taskCount } = this.props;
+    const { activeBillType, activeProcessType, loading, errors, ordersList, selectAll, searchedList, selection } = this.state;
     
     const processList = activeBillType === 4 ? this.processOptions[1] : this.processOptions[0]; // If billType is Adjustment then use special process list
     const processMenuItems = processList.map((option, i) => 
@@ -229,18 +235,33 @@ class ReplenishTaskPage extends Component {
           <Grid.Row>
             <Grid.Column>
               <div className="orderlist-table-container">
-              <CheckboxTable
-                ref={ (r) => this.checkboxTable = r }
-                data={ searchedList }
-                columns={ ReplenishOrderTableColumns }
-                className="-striped -highlight replenish-task-table"
-                SubComponent={ (row) => <OrderDetailTable taskType="R" recordId={ row.original.sourceID } /> }
-                defaultPageSize={ 15 }
-                manual
-                resizable={false}
-                filterable={false}
-                {...checkboxProps}
-              />
+              { String(activeProcessType) === '0' &&
+                <CheckboxTable
+                  ref={ (r) => this.checkboxTable = r }
+                  data={ searchedList }
+                  columns={ ReplenishOrderTableColumns }
+                  className="-striped -highlight replenish-task-table"
+                  SubComponent={ (row) => <OrderDetailTable taskType="R" recordId={ row.original.sourceID } /> }
+                  defaultPageSize={ 15 }
+                  manual
+                  resizable={false}
+                  filterable={false}
+                  {...checkboxProps}
+                />
+              }
+
+              { String(activeProcessType) !== '0' && 
+                <ReactTable
+                  columns={ ReplenishOrderTableColumns }
+                  data={ searchedList }
+                  defaultPageSize={15}
+                  SubComponent={(row) => <OrderDetailTable taskType="R" recordId={ row.original.sourceID } /> }
+                  loading={ loading }
+                  manual
+                  resizable={false}
+                  filterable={false}
+                  className="-striped -highlight replenish-task-table"
+                /> }
                 {/* <OrderListTable listData={ ordersList } loading={ loading } columns={ ReplenishOrderTableColumns } /> */}
               </div>
             </Grid.Column>
@@ -255,7 +276,16 @@ class ReplenishTaskPage extends Component {
                 placeholder='Enter Source ID...' />
               </div>
               <div className="order-list-btn-group">
-                <Button size="huge" primary onClick={() => this.handleRequestPodBtn() }>Request POD</Button>
+                { String(activeProcessType) !== '100' && 
+                  <Button size="huge" primary
+                    disabled={ selection.length === 0 }
+                    onClick={() => this.handleRequestPodBtn() }>Request POD</Button> }
+                { String(activeProcessType) === '100' &&
+                  <Button size="huge"
+                    disabled={ ordersList.length === 0 }
+                    onClick={() => this.handleContinueBtn() }>Continue Replenish</Button>
+                }
+                
                 {/* <Button size="huge" secondary>Pause</Button> */}
               </div>
             </Grid.Column>
@@ -273,12 +303,14 @@ ReplenishTaskPage.propTypes = {
   }).isRequired,
   username: PropTypes.string.isRequired,
   stationId: PropTypes.string.isRequired,
+  taskCount: PropTypes.number.isRequired,
 };
 
 function mapStateToProps(state) {
   return {
     username: state.user.username,
-    stationId: state.station.id
+    stationId: state.station.id,
+    taskCount: state.station.info.taskCount
   }
 }
 

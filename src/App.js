@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 // import { Route } from "react-router-dom";
 // import logo from './logo.svg';
+import { Grid } from "semantic-ui-react";
 import './App.css';
 import HomePage from "./components/pages/HomePage";
 import LoginPage from "./components/pages/LoginPage";
@@ -13,7 +14,7 @@ import GuestRoute from "./components/routes/GuestRoute";
 import UserRoute from "./components/routes/UserRoute";
 import SideNavigation from './components/navigation/SideNavigation';
 import ReplenishTaskPage from './components/pages/ReplenishTaskPage/ReplenishTaskPage';
-import { Grid } from "semantic-ui-react";
+import ReplenishOperationPage from './components/pages/ReplenishOperationPage/ReplenishOperationPage';
 import "./App.css";
 
 const App = ({ location, isAuthenticated }) => (
@@ -27,6 +28,7 @@ const App = ({ location, isAuthenticated }) => (
           <UserRoute location={location} path="/operation" exact component={OperationPage} />
           <UserRoute location={location} path="/system-setting" exact component={SystemSettingPage} />
           <UserRoute location={location} path="/replenish-task" exact component={ReplenishTaskPage} />
+          <UserRoute location={location} path="/replenish-operation" exact component={ReplenishOperationPage} />
         </Grid.Column>
         <Grid.Column width={2} className="navGridColumn">
           {isAuthenticated && <SideNavigation />}

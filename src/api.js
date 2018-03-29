@@ -171,13 +171,17 @@ const replenish = {
   retrieveReplenishRecords: (stationId, billTypeId, processId) =>
     axios.post('Replenish', {
       name: 'DisplayReplenish',
-      parameter: [ stationId, billTypeId, processId]
+      parameter: [ 
+        String(stationId),
+        String(billTypeId),
+        String(processId)
+      ]
     }),
 
   getReplenishDetailBySourceId: (sourceId) => 
     axios.post('Replenish', {
       name: 'GetReplenishDetailBySourceID',
-      parameter: [ sourceId ]
+      parameter: [ String(sourceId) ]
     }),
   replenishBySourceId: (stationId, userId, sourceIdList, jobPriority) => 
     axios.post('Replenish', {
@@ -189,6 +193,34 @@ const replenish = {
         String(jobPriority)
       ]
     }),
+  getReplenishInfoByTaskId: (taskId) => 
+    axios.post('Replenish', {
+      name: 'GetReplenishInfoByTaskID',
+      parameter: [ String(taskId) ]
+    }),
+
+  atStationAfterReplenishProduct: (data) => 
+    axios.post('Temp', {
+      name: 'AtStationAfterReplenishProduct',
+      parameter: [
+        String(data.stationId),
+        String(data.boxBarcode),
+        String(data.productId),
+        String(data.lotNo),
+        String(data.packageCodes),
+        String(data.quantity),
+        String(data.taskSubType),
+        String(data.isFullInd)
+      ]
+    }),
+  atStationForcePodToLeave: (stationId, podId) => 
+    axios.post('Replenish', {
+      name: 'AtStationForcePod2Leave',
+      parameter: [
+        String(stationId),
+        String(podId)
+      ]
+    })
 };
 
 export default {

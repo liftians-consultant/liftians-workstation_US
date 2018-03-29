@@ -235,7 +235,6 @@ class OperationPage extends Component {
         }
       });      
     });
-
     
   }
 
@@ -278,7 +277,7 @@ class OperationPage extends Component {
             <Grid.Column width={11}>
               { !showBox ? (
                 <div>
-                  <ProductInfoDisplay product={ currentPickProduct } pickedAmount={ pickedAmount }></ProductInfoDisplay>
+                  <ProductInfoDisplay product={ currentPickProduct } quantity={ currentPickProduct.quantity } pickedAmount={ pickedAmount }></ProductInfoDisplay>
                   <br></br>
                   <Button primary size="massive" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
                   <Button size="medium" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button>

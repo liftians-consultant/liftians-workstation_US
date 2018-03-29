@@ -5,7 +5,7 @@ import { STATION_ACTIVATE_SUCCESS,
          COMING_PODS_FETCHED
 } from "../types";
 
-export default function station(state = { id: "1"}, action = {}) {
+export default function station(state = { id: "1", info: { taskType: 'U'}}, action = {}) {
   switch (action.type) {
     case STATION_ACTIVATE_SUCCESS:
       return { ...state, stationActivated: true}
