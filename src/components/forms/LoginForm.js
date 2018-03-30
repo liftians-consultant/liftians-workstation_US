@@ -81,7 +81,7 @@ class LoginForm extends React.Component {
             type="text"
             id="username"
             name="username"
-            placeholder="your username"
+            placeholder="Your username"
             value={data.username}
             onChange={this.onChange}
           />
@@ -93,7 +93,7 @@ class LoginForm extends React.Component {
             type="password"
             id="password"
             name="password"
-            placeholder="Make it secure"
+            placeholder="Your password"
             value={data.password}
             onChange={this.onChange}
           />
