@@ -19,11 +19,18 @@ import "./App.css";
 
 const App = ({ location, isAuthenticated }) => (
   <div className="app-comp-container">
+    { !isAuthenticated && 
+      <div>
+
+        <UserRoute location={location} path="/" exact component={HomePage} />
+        <GuestRoute location={location} path="/login" exact component={LoginPage} />
+      </div>
+    }
+    { isAuthenticated && 
     <Grid padded={false} relaxed={false} stretched={true}>
       <Grid.Row stretched>
         <Grid.Column width={14}>
           <UserRoute location={location} path="/" exact component={HomePage} />
-          <GuestRoute location={location} path="/login" exact component={LoginPage} />
           <UserRoute location={location} path="/pick-task" exact component={PickTaskPage} />
           <UserRoute location={location} path="/operation" exact component={OperationPage} />
           <UserRoute location={location} path="/system-setting" exact component={SystemSettingPage} />
@@ -31,10 +38,11 @@ const App = ({ location, isAuthenticated }) => (
           <UserRoute location={location} path="/replenish-operation" exact component={ReplenishOperationPage} />
         </Grid.Column>
         <Grid.Column width={2} className="navGridColumn">
-          {isAuthenticated && <SideNavigation />}
+          <SideNavigation />
         </Grid.Column>
       </Grid.Row>
     </Grid>
+    }
   </div>
 );
 

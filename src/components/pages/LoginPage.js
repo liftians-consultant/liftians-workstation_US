@@ -5,7 +5,7 @@ import { Grid, Image } from 'semantic-ui-react'
 import LoginForm from '../forms/LoginForm';
 import { login } from "../../actions/auth";
 // import logo from '../../assets/images/loginPage.png';
-import logo from '../../assets/images/assembly_logo.png';
+import logo from '../../assets/images/assembly_logo_trans.png';
 
 class LoginPage extends Component {
 
@@ -30,7 +30,7 @@ class LoginPage extends Component {
           style={{ height: '100%' }}
           verticalAlign='middle'>
           <Grid.Column style={{ maxWidth: 450 }}>
-            <Image src={logo} size='small' centered />
+            <Image src={logo} size='huge' centered />
             <LoginForm submit={this.submit}></LoginForm>
           </Grid.Column>
         </Grid>
