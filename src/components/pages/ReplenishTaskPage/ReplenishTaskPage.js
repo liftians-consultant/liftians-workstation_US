@@ -303,7 +303,7 @@ ReplenishTaskPage.propTypes = {
   }).isRequired,
   username: PropTypes.string.isRequired,
   stationId: PropTypes.string.isRequired,
-  taskCount: PropTypes.number.isRequired,
+  taskCount: PropTypes.number,
 };
 
 function mapStateToProps(state) {

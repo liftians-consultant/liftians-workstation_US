@@ -62,7 +62,16 @@ const station = {
     axios.post('Temp', {
       name: 'StopStationOperation',
       parameter: [stationId, empId, taskType]
-    })
+    }),
+
+  forcePodToLeaveStationByTaskId: (stationId, taskId) => 
+    axios.post('Common', {
+      name: 'ForcePod2LeaveStationByTaskID',
+      parameter: [
+        String(stationId),
+        String(taskId)
+      ]
+    }),
 };
 
 const pick = {
@@ -199,28 +208,29 @@ const replenish = {
       parameter: [ String(taskId) ]
     }),
 
-  atStationAfterReplenishProduct: (data) => 
-    axios.post('Temp', {
-      name: 'AtStationAfterReplenishProduct',
+  atStationSubmitReplenishProduct: (data) => 
+    axios.post('Replenish', {
+      name: 'AtStationSubmitReplenishProduct',
       parameter: [
-        String(data.stationId),
+        String(data.taskId),
         String(data.boxBarcode),
+        String(data.sourceLinesId),
         String(data.productId),
-        String(data.lotNo),
-        String(data.packageCodes),
-        String(data.quantity),
-        String(data.taskSubType),
-        String(data.isFullInd)
+        String(data.productBarcodeList),
+        String(data.replenishQty),
+        String(data.locateActType),
       ]
     }),
-  atStationForcePodToLeave: (stationId, podId) => 
+
+  getProductInfoByReplenishBillProduct: (billNo, productId) => 
     axios.post('Replenish', {
-      name: 'AtStationForcePod2Leave',
+      name: 'GetProductInfoByReplenishBillProduct',
       parameter: [
-        String(stationId),
-        String(podId)
+        String(billNo),
+        String(productId)
       ]
     })
+
 };
 
 export default {

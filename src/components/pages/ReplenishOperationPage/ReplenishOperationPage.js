@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
-import { Segment, Grid, Button, Dimmer, Loader, Modal } from 'semantic-ui-react';
+import { Segment, Grid, Button, Dimmer, Loader, Modal, Image } from 'semantic-ui-react';
 import api from '../../../api';
 import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
 import PodShelf from '../../common/PodShelf/PodShelf';
 import NumPad from '../../common/NumPad/NumPad';
+import './ReplenishOperationPage.css';
+import WarningModal from '../../common/WarningModal/WarningModal';
 
 const testProduct = [
   {
@@ -31,6 +33,7 @@ const testProduct = [
 class ReplenishOperationPage extends Component {
 
   state = {
+    businessMode: process.env.REACT_APP_BUSINESS_MODE,
     podInfo: {
       podId: 0,
       podSide: 0,
@@ -43,11 +46,15 @@ class ReplenishOperationPage extends Component {
     orderList: [],
     replenishedAmount: 0,
     loading: true,
+    barcodeList: [],
     barcode: '',
     boxBarcode: 0,
     // showBox: false,
     // openOrderFinishModal: false,
-    openWrongProductModal: false
+    openWrongProductModal: false,
+    nextPod: {
+      
+    }
     
   }
 
@@ -64,7 +71,8 @@ class ReplenishOperationPage extends Component {
     // Bind the this context to the handler function
     this.selectReplenishedAmount = this.selectReplenishedAmount.bind(this);
     this.retrieveNextOrder = this.retrieveNextOrder.bind(this);
-    this.handleScanBtnClick = this.handleScanBtnClick.bind(this);
+    this.handleProductScanBtnClick = this.handleProductScanBtnClick.bind(this);
+    this.finishReplenish = this.finishReplenish.bind(this);
     // this.closeOrderFinishModal = this.closeOrderFinishModal.bind(this);
     // this.closeWrongProductModal = this.closeWrongProductModal.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
@@ -87,7 +95,7 @@ class ReplenishOperationPage extends Component {
   getUpcomingPod() {
     // TODO: add simulation mode to .env
     let isRecieve = false;
-
+    this.setState({ loading: true });
     this.checkPodInterval = setInterval( () => {
       if (!isRecieve) {
         api.station.atStationTask(this.props.stationId).then( res => {
@@ -106,33 +114,29 @@ class ReplenishOperationPage extends Component {
 
   finishReplenish(replenishAmount) {
     const product = this.state.currentReplenishProduct;
-    const data = {
-      stationId: this.props.stationId,
-      boxBarcode: this.state.boxBarcode,
-      productId: product.productID,
-      lotNo: product.lot_no,
-      packageCodes: this.state.barcode,
-      quantity: replenishAmount,
-      taskSubtype: product.locate_act_type,
-      // isBoxFull: parseInt(product.quantity, 10) - this.state.replenishedAmount,
+    let barcodeList = this.state.barcode;
+    if (this.state.businessMode === 'pharmacy' ) {
+      barcodeList = this.state.barcodeList.slice(0, replenishAmount).join(',');
     }
+    const data = {
+      taskId: this.state.taskId,
+      boxBarcode: this.state.boxBarcode,
+      sourceLinesId: product.source_lines_id,
+      productId: product.productID,
+      productBarcodeList: barcodeList,
+      replenishQty: replenishAmount,
+      locateActType: product.locate_act_type,
+    };
 
-    api.replenish.atStationAfterReplenishProduct(data).then(res => {
+    console.log("replenish data", data);
+    api.replenish.atStationSubmitReplenishProduct(data).then(res => {
       if (res.data) { // return 1 if success
-        // this.setState({ showBox: false }, () => this.retrieveNextOrder());
-        data.holderId = this.state.currentReplenishProduct.holderID;
-        
-          this.finishedOrder = {
-            orderNo: this.state.currentReplenishProduct.order_no,
-            binNum: parseInt(this.state.currentReplenishProduct.binPosition, 10)
-          };
-
-          if (this.state.replenishedAmount === parseInt(this.state.currentReplenishProduct.quantity, 10)) {
-            this.retrieveNextOrder();
-          }
-
+        if (this.state.replenishedAmount === parseInt(this.state.currentReplenishProduct.totalReplenishQuantity, 10)) {
+          this.retrieveNextOrder();
+        }
       } else {
         // TODO: ERROR MESSAGE
+        console.log('WARNING: replenish task submittion failed');
       }
     }).catch((err) => {
       console.error('Error for atStationAfterReplenishProduct', err);
@@ -146,6 +150,10 @@ class ReplenishOperationPage extends Component {
   }
 
   getPodInfo() {
+    console.log('product', this.state.currentReplenishProduct);
+
+    this.getProductBarcodeList(); // SIMULATION: GET BARCODE
+
     api.station.atStationPodLayoutInfo(this.state.podInfo.podId, this.state.podInfo.podSide).then(res => {
       // console.log(res.data);
       if (res.data.length) {
@@ -195,31 +203,50 @@ class ReplenishOperationPage extends Component {
     }
   }
 
+  getProductBarcodeList(callback) {
+    const { replenishBillNo, productID } = this.state.currentReplenishProduct;
+    api.replenish.getProductInfoByReplenishBillProduct(replenishBillNo, productID).then( res => {
+      if (res.data) {
+        const barcodeList = res.data.map(item => item.productBarcode)
+        console.log('barcode list: ', barcodeList);
+
+        this.setState({ barcodeList: barcodeList});
+      }
+      
+      if (callback) {
+        callback();
+      }
+    }).catch( err => {
+      console.log("ERROR WHILE GETTING BARCODE LIST", err);
+    });
+  }
+
   /* Simulate when the user scan the product */
-  handleScanBtnClick() {
-    if (!this.state.showBox) {
-      // TODO: SIMULATION ONLY! NO PRODUCTION
-      const data = {
-        podId: this.state.currentReplenishProduct.podID,
-        podSide: this.state.currentReplenishProduct.podSide,
-        shelfId: this.state.currentReplenishProduct.shelfID,
-        boxId: this.state.currentReplenishProduct.boxID,
-      };
-      api.pick.getProductSerialNum(data).then( res => {
-        this.setState({ barcode: res.data[0].barcode });
+  handleProductScanBtnClick() {
+    // TODO: SIMULATION ONLY! NO PRODUCTION
+    if (this.state.businessMode === 'pharmacy') {
+      // all product have unique barcode. scann all product then send out the finish request
+      
+      this.setState({ replenishedAmount: this.state.replenishedAmount + 1 }, () => {
+        console.log(`pharmacy: replenish amount: ${this.state.replenishedAmount}`);
+        if (this.state.replenishedAmount === this.state.currentReplenishProduct.totalReplenishQuantity) {
+          this.finishReplenish(this.state.replenishedAmount);
+        }
       });
-
-      /* PRODUCTION CODE */
-      // After get barcode from scanner
-      // if (this.scanValidation(something)) {
-      //   this.setState({ showBox: !this.state.showBox, barcode: res.data[0].barcode });
-      // } else {
-      //   this.setState({ openWrongProductModal: true });
-      // }
-
-    } else {
-      this.setState({ barcode: ''});
+    } else if (this.state.businessMode === 'ecommerce' ) {
+      // only one barcode will be return and all product use same barcode
+      // scanned once, send request everything number pad is clicked. 
+      console.log('ecommerce scanned~');
+      this.setState({ barcode: this.state.barcodeList[0]});
     }
+
+    /* PRODUCTION CODE */
+    // After get barcode from scanner
+    // if (this.scanValidation(something)) {
+    //   this.setState({ showBox: !this.state.showBox, barcode: res.data[0].barcode });
+    // } else {
+    //   this.setState({ openWrongProductModal: true });
+    // }
   }
 
   /* Simulate when user scan the box barcode */
@@ -235,7 +262,8 @@ class ReplenishOperationPage extends Component {
   }
 
   handleNextPodBtnClick() {
-    api.replenish.atStationForcePodToLeave(this.props.stationId, this.currentReplenishProduct.podID).then(res => {
+    this.finishReplenish(this.state.replenishedAmount);
+    api.station.forcePodToLeaveStationByTaskId(this.props.stationId, this.state.taskId).then(res => {
       this.getUpcomingPod();
     });
   }
@@ -278,7 +306,7 @@ class ReplenishOperationPage extends Component {
     };
 
     return (
-      <div className="operationPage">
+      <div className="replenish-operation-page">
         <Dimmer active={this.state.loading}>
           <Loader content='Waiting for pod...' indeterminate size="massive"/>
         </Dimmer>
@@ -293,6 +321,20 @@ class ReplenishOperationPage extends Component {
                   <PodShelf podInfo={ podInfo } highlightBox={ highlightBox }></PodShelf>
                 </Segment>
               </Segment.Group>
+
+              <div>
+                <Button>Shortage</Button>
+                <WarningModal triggerText='Scan Wrong Box'
+                  headerText='Wrong Box'
+                  contentText='You scanned a wrong box! Please make sure you locate the right box and try again.'
+                />
+
+                <WarningModal triggerText='Scan Wrong Product'
+                  headerText='Wrong Product'
+                  contentText='You scanned a wrong product! Please make sure you have the right product and try again.'
+                />
+              </div>
+
               {/* { orderList.length > 0 && <OrderDetailListModal orderList={ orderList } /> } */}
               {/* <Button color="red" onClick={ () => this.finishReplenish() }>Shortage</Button> */}
             </Grid.Column>
@@ -300,35 +342,27 @@ class ReplenishOperationPage extends Component {
             <Grid.Column width={11}>
               {/* { showBox === false ? ( */}
                 <div>
-                  <ProductInfoDisplay product={ currentReplenishProduct } quantity={ currentReplenishProduct.totalReplenishQuantity } pickedAmount={ replenishedAmount }></ProductInfoDisplay>
+                  {/* <ProductInfoDisplay product={ currentReplenishProduct } quantity={ currentReplenishProduct.totalReplenishQuantity } pickedAmount={ replenishedAmount }></ProductInfoDisplay> */}
+                  <div className="product-info-block">
+                    <div className="product-name-container">
+                      <span className="product-name">{ currentReplenishProduct.productName }</span>
+                    </div>
+                    <div className="product-remain-container">
+                      <span className="remain-amount">{ currentReplenishProduct.totalReplenishQuantity }</span>
+                    </div>
+                    <div className="product-image-container">
+                      <Image className="product-image" src="http://via.placeholder.com/400x300"></Image>
+                    </div>
+                  </div>
                   <br></br>
-                  <Button primary size="huge" onClick={ () => this.handleScanBoxClick() }>Scan Box</Button>
-                  <Button primary size="huge" onClick={ () => this.handleScanBtnClick() } disabled={ this.state.boxBarcode === 0 } >Scan Product</Button>
-                  <Button size="huge" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
+                  <Button primary size="medium" onClick={ () => this.handleScanBoxClick() }>Scan Box</Button>
+                  <Button primary size="medium" onClick={ () => this.handleProductScanBtnClick() } disabled={ this.state.boxBarcode === 0 } >Scan Product</Button>
+                  <br></br>
+                    <Button size="medium" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
 
-                  <div>
-                    <Modal trigger={<Button>Scan Wrong Box</Button>}
-                      style={{ marginTop: '20%', marginLeft: 'auto', marginRight: 'auto' }}>
-                      <Modal.Header>Wrong Box</Modal.Header>
-                      <Modal.Content>
-                        <p>You scanned a wrong box! Please make sure you locate the right box and try again.</p>
-                      </Modal.Content>
-                    </Modal>
-                    
-                    <Modal trigger={<Button>Scan Wrong Product</Button>}
-                      style={{ marginTop: '20%', marginLeft: 'auto', marginRight: 'auto' }}>
-                      <Modal.Header>Wrong Product</Modal.Header>
-                      <Modal.Content>
-                        <p>You scanned a wrong product! Please make sure you have the right product and try again.</p>
-                      </Modal.Content>
-                    </Modal>
-                  </div>
-
-                  <div>
-                    <NumPad highlightAmount={ currentReplenishProduct.totalReplenishQuantity - replenishedAmount }
-                      callback={this.selectReplenishedAmount}
-                      disabled={ barcode === '' || boxBarcode === '' }></NumPad>
-                  </div>
+                  { this.state.businessMode === 'ecommerce' && <NumPad highlightAmount={ currentReplenishProduct.totalReplenishQuantity - replenishedAmount }
+                    callback={this.selectReplenishedAmount}
+                    disabled={ barcode === '' || boxBarcode === '' }></NumPad> }
                 </div>
               {/* ) : (
                

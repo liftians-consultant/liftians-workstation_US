@@ -33,3 +33,18 @@
     line-height: 1.5em;
   }
 }
+
+
+@media (max-width: 1400px) {
+  .product-name-container .product-name {
+    font-size: 2em;
+  }
+
+  .product-remain-container .remain-amount {
+    font-size: 5em;
+  }
+
+  .product-image-container .product-image {
+    width: 280px;
+  }
+}
