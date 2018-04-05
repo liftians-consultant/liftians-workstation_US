@@ -229,7 +229,18 @@ const replenish = {
         String(billNo),
         String(productId)
       ]
-    })
+    }),
+  
+  getProductInfoByTaskId: (taskId, sourceLinesId, productId, processStatusId) => 
+    axios.post('Replenish', {
+      name: 'GetProductInfoByTaskID',
+      parameter: [
+        String(taskId),
+        String(sourceLinesId),
+        String(productId),
+        String(processStatusId),
+      ]
+    }),
 
 };
 

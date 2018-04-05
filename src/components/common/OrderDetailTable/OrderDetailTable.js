@@ -55,7 +55,7 @@ class OrderDetailTable extends Component {
 }
 
 OrderDetailTable.propTypes = {
-  recordId: PropTypes.oneOf(['P', 'R']).isRequired,
+  recordId: PropTypes.number.isRequired,
   taskType: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,

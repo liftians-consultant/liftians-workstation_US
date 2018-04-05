@@ -100,19 +100,20 @@ class ReplenishOperationPage extends Component {
       if (!isRecieve) {
         api.station.atStationTask(this.props.stationId).then( res => {
           if (res.data > 0) {
-            console.log('Pod arrive station');
+            console.log(`Pod arrive station with TaskId ${res.data}`);
             this.setState({ orderProductList: res.data, taskId: res.data }, () => isRecieve = true);
           }
         });
       } else {
-        console.log('stop interval');
+        // console.log('stop interval');
         clearInterval(this.checkPodInterval);
         this.retrieveNextOrder();
       }
     }, 1500);
   }
 
-  finishReplenish(replenishAmount) {
+  finishReplenish(replenishAmount, isNextPod=false) {
+    this.setState({ loading: true });
     const product = this.state.currentReplenishProduct;
     let barcodeList = this.state.barcode;
     if (this.state.businessMode === 'pharmacy' ) {
@@ -128,15 +129,26 @@ class ReplenishOperationPage extends Component {
       locateActType: product.locate_act_type,
     };
 
-    console.log("replenish data", data);
+    console.log("Replenish data", data);
     api.replenish.atStationSubmitReplenishProduct(data).then(res => {
       if (res.data) { // return 1 if success
+        console.log('REPLENISH success');
+
+        if (isNextPod) {
+          api.station.forcePodToLeaveStationByTaskId(this.props.stationId, this.state.taskId).then(res => {
+            console.log(`Force Pod with TaskId ${this.state.taskId} to leave`);
+            this.getUpcomingPod();
+          });
+          return;
+        }
+
         if (this.state.replenishedAmount === parseInt(this.state.currentReplenishProduct.totalReplenishQuantity, 10)) {
           this.retrieveNextOrder();
         }
       } else {
         // TODO: ERROR MESSAGE
-        console.log('WARNING: replenish task submittion failed');
+        console.log('REPLENISH falied');
+        this.setState({ loading: false });
       }
     }).catch((err) => {
       console.error('Error for atStationAfterReplenishProduct', err);
@@ -150,7 +162,7 @@ class ReplenishOperationPage extends Component {
   }
 
   getPodInfo() {
-    console.log('product', this.state.currentReplenishProduct);
+    console.log('current replenishing product', this.state.currentReplenishProduct);
 
     this.getProductBarcodeList(); // SIMULATION: GET BARCODE
 
@@ -170,7 +182,7 @@ class ReplenishOperationPage extends Component {
 
   getProductList() {
     api.replenish.getReplenishInfoByTaskId(this.state.taskId).then(res => {
-      console.log(res.data);
+      // console.log(res.data);
       // res.data = testProduct;
       if (res.data.length) {
         this.setState({ 
@@ -204,10 +216,10 @@ class ReplenishOperationPage extends Component {
   }
 
   getProductBarcodeList(callback) {
-    const { replenishBillNo, productID } = this.state.currentReplenishProduct;
-    api.replenish.getProductInfoByReplenishBillProduct(replenishBillNo, productID).then( res => {
+    const { productID, source_lines_id, processStatus } = this.state.currentReplenishProduct;
+    api.replenish.getProductInfoByTaskId(this.state.taskId, source_lines_id, productID, 100).then( res => {
       if (res.data) {
-        const barcodeList = res.data.map(item => item.productBarcode)
+        const barcodeList = res.data.map(item => item.productBarCode)
         console.log('barcode list: ', barcodeList);
 
         this.setState({ barcodeList: barcodeList});
@@ -228,7 +240,7 @@ class ReplenishOperationPage extends Component {
       // all product have unique barcode. scann all product then send out the finish request
       
       this.setState({ replenishedAmount: this.state.replenishedAmount + 1 }, () => {
-        console.log(`pharmacy: replenish amount: ${this.state.replenishedAmount}`);
+        console.log(`SCAN PRODUCT: Replenished amount: ${this.state.replenishedAmount}`);
         if (this.state.replenishedAmount === this.state.currentReplenishProduct.totalReplenishQuantity) {
           this.finishReplenish(this.state.replenishedAmount);
         }
@@ -254,7 +266,7 @@ class ReplenishOperationPage extends Component {
     const productInfo = this.state.currentReplenishProduct;
     // generate box barcode
     const boxBarcode = 1000000000 + (1000 * productInfo.podID) + productInfo.podSide * 100 + productInfo.shelfID * 10 + productInfo.boxID;
-    console.log(`set boxBarcode ${boxBarcode}`);
+    console.log(`SCAN BOX: ${boxBarcode}`);
     this.setState({ boxBarcode });
 
     /* PRODUCTION */
@@ -262,10 +274,7 @@ class ReplenishOperationPage extends Component {
   }
 
   handleNextPodBtnClick() {
-    this.finishReplenish(this.state.replenishedAmount);
-    api.station.forcePodToLeaveStationByTaskId(this.props.stationId, this.state.taskId).then(res => {
-      this.getUpcomingPod();
-    });
+    this.finishReplenish(this.state.replenishedAmount, true);
   }
 
   handleWrongProductBtnClick() {
