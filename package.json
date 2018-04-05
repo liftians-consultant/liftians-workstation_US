@@ -1,12 +1,12 @@
 {
   "name": "liftians-workstation",
   "version": "0.1.0",
+  "author": "Kevin Hong",
   "private": true,
   "proxy": "http://localhost:8060",
   "dependencies": {
     "axios": "^0.18.0",
     "classnames": "^2.2.5",
-    "electron": "^1.8.3",
     "eslint": "^4.18.1",
     "foreman": "^2.0.0",
     "jwt-decode": "^2.2.0",
@@ -36,7 +36,7 @@
   "scripts": {
     "start": "nf start -p 3000",
     "react-start": "npm-run-all -p watch-css start-js",
-    "electron-start": "node src/electron-wait-react",
+    "electron-start": "node public/electron-wait-react",
     "electron": "electron .",
     "build-css": "node-sass-chokidar src/ -o src/",
     "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
@@ -45,8 +45,37 @@
     "build": "npm-run-all build-css build-js",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "waiton-react": "wait-on -l http://localhost:3000 && yarn electron-start"
+    "waiton-react": "wait-on -l http://localhost:3000 && yarn electron-start",
+    "electron-pack": "build -wml -c.extraMetadata.main=build/electron-starter.js",
+    "preelectron-pack": "yarn build"
   },
-  "main": "src/electron-starter.js",
-  "homepage": "./"
+  "main": "public/electron-starter.js",
+  "homepage": "./",
+  "devDependencies": {
+    "electron": "^1.8.3",
+    "electron-builder": "^20.8.1"
+  },
+  "build": {
+    "appId": "com.liftians.workstation",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories":{
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "target": "zip"
+    }
+  }
 }
