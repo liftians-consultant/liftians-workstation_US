@@ -1,4 +1,6 @@
 const electron = require('electron')
+const {webFrame} = require('electron')
+
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -6,6 +8,7 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
+const isDev = require('electron-is-dev');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -13,7 +16,7 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1200, height: 900})
+  mainWindow = new BrowserWindow({width: 1200, height: 900 })
 
   // and load the index.html of the app.
   // mainWindow.loadURL(url.format({
@@ -22,10 +25,19 @@ function createWindow () {
   //   slashes: true
   // }))
   const startUrl = process.env.ELECTRON_START_URL;
-  mainWindow.loadURL("http://localhost:3000");
+  // webFrame.registerURLSchemeAsPrivileged('file');
+  // const startUrl = isDev ? 'http://localhost:3000' : url.format({
+  //   pathname: path.join(__dirname, '/../build/index.html'),
+  //   protocol: 'file:',
+  //   slashes: true
+  // });
+  // mainWindow.webContents.session.setProxy({proxyRules: "http://localhost:8060"}, function() {
+    // mainWindow.loadURL(startUrl);
+  // });
+  mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
-  mainWindow.maximize()
+  // mainWindow.webContents.openDevTools();
+  mainWindow.maximize();
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows

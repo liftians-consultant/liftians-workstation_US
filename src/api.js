@@ -3,6 +3,7 @@ import axios from 'axios';
 /**
  * All API call.
  */
+axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
 
 const user = {
   login: credentials =>

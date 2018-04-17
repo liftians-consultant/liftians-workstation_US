@@ -15,13 +15,13 @@ import UserRoute from "./components/routes/UserRoute";
 import SideNavigation from './components/navigation/SideNavigation';
 import ReplenishTaskPage from './components/pages/ReplenishTaskPage/ReplenishTaskPage';
 import ReplenishOperationPage from './components/pages/ReplenishOperationPage/ReplenishOperationPage';
+import InventorySearchPage from "./components/pages/InventorySearchPage/InventorySearchPage";
 import "./App.css";
 
 const App = ({ location, isAuthenticated }) => (
   <div className="app-comp-container">
     { !isAuthenticated && 
       <div>
-
         <UserRoute location={location} path="/" exact component={HomePage} />
         <GuestRoute location={location} path="/login" exact component={LoginPage} />
       </div>
@@ -29,15 +29,16 @@ const App = ({ location, isAuthenticated }) => (
     { isAuthenticated && 
     <Grid padded={false} relaxed={false} stretched={true}>
       <Grid.Row stretched>
-        <Grid.Column width={14}>
+        <Grid.Column width={13}>
           <UserRoute location={location} path="/" exact component={HomePage} />
           <UserRoute location={location} path="/pick-task" exact component={PickTaskPage} />
           <UserRoute location={location} path="/operation" exact component={OperationPage} />
           <UserRoute location={location} path="/system-setting" exact component={SystemSettingPage} />
           <UserRoute location={location} path="/replenish-task" exact component={ReplenishTaskPage} />
           <UserRoute location={location} path="/replenish-operation" exact component={ReplenishOperationPage} />
+          <UserRoute location={location} path="/inventory-search" exact component={InventorySearchPage} />
         </Grid.Column>
-        <Grid.Column width={2} className="navGridColumn">
+        <Grid.Column width={3} className="navGridColumn">
           <SideNavigation />
         </Grid.Column>
       </Grid.Row>
