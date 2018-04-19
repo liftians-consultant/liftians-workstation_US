@@ -15,7 +15,6 @@ import OrderFinishModal from './components/OrderFinishModal/OrderFinishModal';
 import WrongProductModal from './components/WrongProductModal/WrongProductModal';
 
 class OperationPage extends Component {
-
   state = {
     podInfo: {
       podId: 0,
@@ -32,12 +31,14 @@ class OperationPage extends Component {
     barcode: '',
     showBox: false,
     openOrderFinishModal: false,
-    openWrongProductModal: false
-    
+    openWrongProductModal: false,
+    scanCount: 0
   }
 
   checkPodInterval = {};
-  
+
+  businessMode = process.env.REACT_APP_BUSINESS_MODE;
+
   finishedOrder = {
     binNum: 3,
     orderNo: '235345'
@@ -51,6 +52,7 @@ class OperationPage extends Component {
     this.retrieveNextOrder = this.retrieveNextOrder.bind(this);
     this.closeOrderFinishModal = this.closeOrderFinishModal.bind(this);
     this.closeWrongProductModal = this.closeWrongProductModal.bind(this);
+    this.handleScanBtnClick = this.handleScanBtnClick.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
@@ -107,14 +109,18 @@ class OperationPage extends Component {
       shortQty: parseInt(product.quantity, 10) - this.state.pickedAmount,
     }
 
+    console.log(`[Pick Operation] AtStationAfterPickProduct data:`, data);
+
     api.pick.atStationAfterPickProduct(data).then(res => {
       if (res.data) { // return 1 if success
+        console.log(`[Pick Operation] AtStationAfterPickProduct success:`, res.data);
         // this.setState({ showBox: false }, () => this.retrieveNextOrder());
         data.holderId = this.state.currentPickProduct.holderID;
-        
+
         // after placed in bin, inform db
         api.pick.atHolderAfterPickProduct(data).then( res => {
           // set here because avoid data changed after async call
+          console.log(`[Pick Operation] atHolderAfterPickProduct success:`, res.data);
           this.finishedOrder = {
             orderNo: this.state.currentPickProduct.order_no,
             binNum: parseInt(this.state.currentPickProduct.binPosition, 10)
@@ -139,7 +145,7 @@ class OperationPage extends Component {
   checkIsOrderFinished() {
     api.pick.checkIsOrderFinished(this.state.currentPickProduct.order_no).then( res => {
       if (res.data) { // return 1 or 0
-        console.log("order finished");
+        console.log("order finished", res.data);
         this.setState({ openOrderFinishModal: true });
       }
     });
@@ -154,7 +160,7 @@ class OperationPage extends Component {
           shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxNumberOfBox, 10) }).reverse().value()
         }
         this.setState({ podInfo, loading: false })
-      }     
+      }
     }).catch( err => {
       console.error('error getting pod info', err);
     });
@@ -164,7 +170,7 @@ class OperationPage extends Component {
     api.pick.getPickInfoByTaskId(this.state.taskId).then(res => {
       console.log(res.data);
       if (res.data.length) {
-        this.setState({ 
+        this.setState({
           currentPickProduct: res.data[0],
           orderList: res.data,
           podInfo: {
@@ -172,13 +178,14 @@ class OperationPage extends Component {
             podSide: res.data[0].podSide,
             shelfBoxes: []
           },
+          barcode: '',
           pickedAmount: 0,
           showBox: false }, this.getPodInfo);
       } else {
         // when nothing return, that means the pod is finished
         // and need to wait for the next pod come in to station
         console.log("No order return from the server");
-        this.getUpcomingPod(); 
+        this.getUpcomingPod();
       }
     }).catch((err) => {
       console.error('Error getting products list', err);
@@ -203,7 +210,18 @@ class OperationPage extends Component {
         boxId: this.state.currentPickProduct.boxID,
       };
       api.pick.getProductSerialNum(data).then( res => {
-        this.setState({ showBox: !this.state.showBox, barcode: res.data[0].barcode });
+        const barCodeIndex = res.data[0].barcode ? 0 : 1;
+        if (this.businessMode === 'pharmacy') {
+          const barcode = this.state.scanCount === 0 ? res.data[barCodeIndex].barcode : `${this.state.barcode},${res.data[barCodeIndex].barcode}`;
+          const scanCount = this.state.scanCount + 1;
+          if (scanCount == this.state.currentPickProduct.quantity) {
+            this.setState({showBox: true, barcode, scanCount: 0});
+          } else {
+            this.setState({ barcode, scanCount });
+          }
+        } else if (this.businessMode === 'ecommerce') {
+          this.setState({ showBox: !this.state.showBox, barcode: res.data[barCodeIndex].barcode });
+        }
       });
 
       /* PRODUCTION CODE */
@@ -233,9 +251,8 @@ class OperationPage extends Component {
         if (!this.scanValidation(res.data[1].barcode)) {
           this.setState({ openWrongProductModal: true });
         }
-      });      
+      });
     });
-    
   }
 
   closeOrderFinishModal() {
@@ -247,7 +264,7 @@ class OperationPage extends Component {
   }
 
   render() {
-    const { podInfo, currentPickProduct, pickedAmount, showBox, 
+    const { podInfo, currentPickProduct, pickedAmount, showBox,
       orderList, openOrderFinishModal, openWrongProductModal, barcode } = this.state;
     const highlightBox = {
       row: currentPickProduct ? parseInt(currentPickProduct.shelfID, 10) : 0,
@@ -263,7 +280,7 @@ class OperationPage extends Component {
           <Grid.Row >
             <Grid.Column width={5}>
               <div className="pod-info-block">
-                <span>Pod #{ podInfo.podId }, </span><span>Side #{ podInfo.podSide }</span>
+                <span>Pod #{ podInfo.podId } - { podInfo.podSide }</span>
               </div>
               <Segment.Group>
                 <Segment>
@@ -278,6 +295,7 @@ class OperationPage extends Component {
               { !showBox ? (
                 <div>
                   <ProductInfoDisplay product={ currentPickProduct } quantity={ currentPickProduct.quantity } pickedAmount={ pickedAmount }></ProductInfoDisplay>
+                    <h4>[{ this.state.barcode}]</h4>
                   <br></br>
                   <Button primary size="massive" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
                   <Button size="medium" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button>
@@ -285,9 +303,14 @@ class OperationPage extends Component {
               ) : (
                 <div>
                   <BinGroup openedBinNum={ parseInt(currentPickProduct.binPosition, 10) }></BinGroup>
-                  <NumPad highlightAmount={ currentPickProduct.quantity - pickedAmount }
-                    callback={this.selectPickedAmount}
+                  { this.businessMode === 'pharmacy' ? (
+                    <Button className="ok-btn" size="massive" primary onClick={() => this.finishPick(currentPickProduct.quantity)}>OK</Button>
+                  ) : (
+                    <NumPad highlightAmount={ currentPickProduct.quantity - pickedAmount }
+                      callback={this.finishPick}
                     ></NumPad>
+                  )}
+                  
                 </div>
               ) }
             </Grid.Column>
@@ -299,7 +322,7 @@ class OperationPage extends Component {
           modalClose={ this.closeOrderFinishModal }
           ></OrderFinishModal> }
 
-        { openWrongProductModal && <WrongProductModal podInfo={ podInfo } 
+        { openWrongProductModal && <WrongProductModal podInfo={ podInfo }
           productId={ barcode }
           open={ openWrongProductModal }
           close={ this.closeWrongProductModal } /> }

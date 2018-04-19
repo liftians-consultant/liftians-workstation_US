@@ -29,7 +29,7 @@ class OrderListTable extends Component {
 OrderListTable.propTypes = {
   listData: PropTypes.array.isRequired,
   loading: PropTypes.bool,
-  columns: PropTypes.object.isRequired,
+  columns: PropTypes.array.isRequired,
 };
 
 export default OrderListTable;

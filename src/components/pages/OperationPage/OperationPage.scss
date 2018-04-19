@@ -1,17 +1,21 @@
 .operationPage {
-  padding: 100px 5% 0;
-}
+  padding: 50px 5% 0;
 
-.numpad-container {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-}
-
-.pod-info-block {
-  span {
-    color: #FFF;
-    font-size: 2rem;
-    white-space: nowrap;
+  .numpad-container, .ok-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
   }
+  
+  .pod-info-block {
+    span {
+      color: #FFF;
+      font-size: 1.5rem;
+      white-space: nowrap;
+    }
+  }
+
+
 }
+
+

@@ -2,11 +2,16 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Image } from 'semantic-ui-react';
 import './ProductInfoDisplay.css';
+import ImageNotFound from '../../../assets/images/no_photo_available.jpg';
+
+const productImgBaseUrl = process.env.REACT_APP_IMAGE_BASE_URL;
 
 class ProductInfoDisplay extends Component {
-
   render() {
     const { product, pickedAmount, quantity } = this.props;
+    const imageUrl = productImgBaseUrl + product.productID + '.png';
+    //http://via.placeholder.com/400x300
+
     return (
       <div className="product-info-block">
         <div className="product-name-container">
@@ -16,7 +21,7 @@ class ProductInfoDisplay extends Component {
           <span className="remain-amount">{ quantity - pickedAmount }</span>
         </div>
         <div className="product-image-container">
-          <Image className="product-image" src="http://via.placeholder.com/400x300"></Image>
+          <Image className="product-image" src={ imageUrl } onError={(e) => { e.target.src = ImageNotFound }}></Image>
         </div>
       </div>
     );

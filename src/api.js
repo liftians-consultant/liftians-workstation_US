@@ -3,24 +3,26 @@ import axios from 'axios';
 /**
  * All API call.
  */
-axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
+if (process.env.REACT_APP_ENV === 'PRODUCTION') {
+  axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
+}
 
 const user = {
   login: credentials =>
     axios.post('login', { ...credentials }).then(res => res.headers.authorization),
-  logout: () => 
+  logout: () =>
     axios.post('logout').then(res => res),
-  getInfoById: (empId) => 
+  getInfoById: (empId) =>
     axios.post('Login', { name: 'EmpolyeesFindByID', parameter: [empId] }).then(res => res.data),
 };
 
 const menu = {
-  getBillTypeName: (operationType) => 
+  getBillTypeName: (operationType) =>
     axios.post('Common', {
       name: 'BillType',
       parameter: [operationType]
     }),
-  getProcessStatusName: (operationType) => 
+  getProcessStatusName: (operationType) =>
     axios.post('Common', {
       name: 'ProcessStatus',
       parameter: [operationType]
@@ -28,17 +30,17 @@ const menu = {
 }
 
 const station = {
-  activateStationWithUser: (stationId, empId) => 
+  activateStationWithUser: (stationId, empId) =>
     axios.post('Login', {
       name: 'ActivateStationOperation',
       parameter: [String(stationId), empId, '4']
     }
   ).then(res => res.data),
 
-  checkCurrentUnFinishTask: stationId => 
+  checkCurrentUnFinishTask: stationId =>
     axios.post('Login', {
       name: 'CheckCurrentUnFinishTask',
-      parameter: [stationId] 
+      parameter: [stationId]
     }).then(res => res.data),
 
   atStationPodLayoutInfo: (podId, podSide) =>
@@ -50,7 +52,7 @@ const station = {
       ]
     }),
 
-  atStationTask: (stationId) => 
+  atStationTask: (stationId) =>
     axios.get('atStation/CurrentTask?stationID=' + stationId),
 
   startStationOperation: (stationId, empId, operationType) =>
@@ -59,13 +61,13 @@ const station = {
       parameter: [stationId, empId, operationType]
     }),
 
-  stopStationOperation: (stationId, empId, taskType) => 
+  stopStationOperation: (stationId, empId, taskType) =>
     axios.post('Temp', {
       name: 'StopStationOperation',
       parameter: [stationId, empId, taskType]
     }),
 
-  forcePodToLeaveStationByTaskId: (stationId, taskId) => 
+  forcePodToLeaveStationByTaskId: (stationId, taskId) =>
     axios.post('Common', {
       name: 'ForcePod2LeaveStationByTaskID',
       parameter: [
@@ -76,12 +78,12 @@ const station = {
 };
 
 const pick = {
-  resetTestData: (stationId) => 
+  resetTestData: (stationId) =>
     axios.post('Pick', {
       name: 'ResetTestData',
       parameter: [stationId]
     }),
-  retrievePickOrderReocrdsByTypeAndState: (stationId, billTypeId, processId) => 
+  retrievePickOrderReocrdsByTypeAndState: (stationId, billTypeId, processId) =>
     axios.post('Pick', {
       name: 'DisplayPickMenu',
       parameter: [
@@ -91,27 +93,27 @@ const pick = {
       ]
     }),
 
-  retrievePickOrderItems: (orderId) => 
+  retrievePickOrderItems: (orderId) =>
     axios.post('Temp', {
       name: 'DisplayPickOrderDetail',
       parameter: [orderId]
     }),
 
-  callServerGeneratePickTask: (stationId) => 
+  callServerGeneratePickTask: (stationId) =>
     axios.post('Temp', {
       name: 'GenPickTask',
       parameter: [stationId]
     }),
 
-  stopPickOperation: (stationId, empId) => 
+  stopPickOperation: (stationId, empId) =>
     station.stopStationOperation(stationId, empId, 'P'),
 
-  getPickInfoByTaskId: (taskId) => 
+  getPickInfoByTaskId: (taskId) =>
     axios.post('Pick', {
       name: 'GetPickInfoByTaskID',
       parameter: [String(taskId)]
     }),
-    
+
   atStationAfterPickProduct: (data) =>
     axios.post('Temp', {
       name: 'AtStationAfterPickProduct',
@@ -129,9 +131,9 @@ const pick = {
         String(data.shortQty)
       ]
     }),
-  getProductSerialNum: (data) => 
+  getProductSerialNum: (data) =>
     axios.post('Pick', {
-      name: 'GetProductByInvLocation', 
+      name: 'GetProductByInvLocation',
       parameter: [
         String(data.podId),
         String(data.podSide),
@@ -139,8 +141,8 @@ const pick = {
         String(data.boxId)
       ]
     }),
-  
-  atHolderAfterPickProduct: (data) => 
+
+  atHolderAfterPickProduct: (data) =>
     axios.post('Temp', {
       name: 'AtHolderAfterPickProduct',
       parameter: [
@@ -153,14 +155,14 @@ const pick = {
         String(data.pickQuantity),
       ]
     }),
-    
-  checkIsOrderFinished: (orderNum) => 
+
+  checkIsOrderFinished: (orderNum) =>
     axios.post('Temp', {
       name: 'IsOrderFinished',
       parameter: [ orderNum ]
     }),
 
-  getInventoryByProductBarcode: (productId, podId, podSide) => 
+  getInventoryByProductBarcode: (productId, podId, podSide) =>
     axios.post('Pick', {
       name: 'GetInventoryByProductBarcode',
       parameter: [
@@ -172,28 +174,28 @@ const pick = {
 };
 
 const replenish = {
-  genReplenishTask: (stationId) => 
+  genReplenishTask: (stationId) =>
     axios.post('Temp', {
       name: 'GenReplenishTask',
       parameter: [ stationId ]
     }),
-  
+
   retrieveReplenishRecords: (stationId, billTypeId, processId) =>
     axios.post('Replenish', {
       name: 'DisplayReplenish',
-      parameter: [ 
+      parameter: [
         String(stationId),
         String(billTypeId),
         String(processId)
       ]
     }),
 
-  getReplenishDetailBySourceId: (sourceId) => 
+  getReplenishDetailBySourceId: (sourceId) =>
     axios.post('Replenish', {
       name: 'GetReplenishDetailBySourceID',
       parameter: [ String(sourceId) ]
     }),
-  replenishBySourceId: (stationId, userId, sourceIdList, jobPriority) => 
+  replenishBySourceId: (stationId, userId, sourceIdList, jobPriority) =>
     axios.post('Replenish', {
       name: 'ReplenishBySourceID',
       parameter: [
@@ -203,13 +205,13 @@ const replenish = {
         String(jobPriority)
       ]
     }),
-  getReplenishInfoByTaskId: (taskId) => 
+  getReplenishInfoByTaskId: (taskId) =>
     axios.post('Replenish', {
       name: 'GetReplenishInfoByTaskID',
       parameter: [ String(taskId) ]
     }),
 
-  atStationSubmitReplenishProduct: (data) => 
+  atStationSubmitReplenishProduct: (data) =>
     axios.post('Replenish', {
       name: 'AtStationSubmitReplenishProduct',
       parameter: [
@@ -223,7 +225,7 @@ const replenish = {
       ]
     }),
 
-  getProductInfoByReplenishBillProduct: (billNo, productId) => 
+  getProductInfoByReplenishBillProduct: (billNo, productId) =>
     axios.post('Replenish', {
       name: 'GetProductInfoByReplenishBillProduct',
       parameter: [
@@ -231,8 +233,8 @@ const replenish = {
         String(productId)
       ]
     }),
-  
-  getProductInfoByTaskId: (taskId, sourceLinesId, productId, processStatusId) => 
+
+  getProductInfoByTaskId: (taskId, sourceLinesId, productId, processStatusId) =>
     axios.post('Replenish', {
       name: 'GetProductInfoByTaskID',
       parameter: [
@@ -242,13 +244,40 @@ const replenish = {
         String(processStatusId),
       ]
     }),
-
 };
+
+const inventory = {
+  getProductCategory: () =>
+    axios.post('Inventory', {
+      name: 'GetProductCategory',
+      parameter: []
+    }),
+
+  getProductType: () =>
+    axios.post('Inventory', {
+      name: 'GetProductType',
+      parameter: []
+    }),
+
+  getExpirationMonthRange: () =>
+    axios.post('Inventory', {
+      name: 'GetExpirationMonthRange',
+      parameter: []
+    }),
+
+  getInventorySummaryByProduct: () =>
+    axios.post('Inventory', {
+      name: 'GetInventorySumByProduct',
+      parameter: []
+    }),
+
+}
 
 export default {
   user,
   menu,
   station,
   pick,
-  replenish
+  replenish,
+  inventory
 };
