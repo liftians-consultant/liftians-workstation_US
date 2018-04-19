@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "author": "Kevin Hong",
   "private": true,
+  "proxy": "http://localhost:8060",
   "dependencies": {
     "axios": "^0.18.0",
     "classnames": "^2.2.5",
@@ -50,7 +51,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "electron-dev": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron-pack": "electron-builder -l -c.extraMetadata.main=build/electron.js",
+    "electron-pack": "electron-builder -lmw -c.extraMetadata.main=build/electron.js",
     "electron-dist": "electron-builder",
     "preelectron-pack": "yarn build"
   },
