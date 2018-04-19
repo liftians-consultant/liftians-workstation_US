@@ -1,7 +1,8 @@
 export const ReplenishOrderTableColumns = [
   {
     Header: 'Billing ID.',
-    accessor: 'replenishBillNo'
+    accessor: 'replenishBillNo',
+    minWidth: 120
   }, {
     Header: 'Source ID',
     accessor: 'sourceID'
@@ -10,7 +11,8 @@ export const ReplenishOrderTableColumns = [
     accessor: 'receiver'
   }, {
     Header: 'Receive Date',
-    accessor: 'replenishDate'
+    accessor: 'replenishDate',
+    minWidth: 150
   }, {
     Header: '# of products',
     accessor: 'totalDistinctProduct'

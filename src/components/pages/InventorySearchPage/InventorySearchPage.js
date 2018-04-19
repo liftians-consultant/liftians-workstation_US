@@ -14,38 +14,40 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 const CheckboxTable = checkboxHOC(ReactTable);
 
-const typeOptions = [
-  { key: 'all', text: 'All', value: '' },
-  { key: 'low', text: 'Low', value: '1' },
-  { key: 'medium', text: 'Medium', value: '2' },
-  { key: 'high', text: 'High', value: '3' },
-]
+// const typeOptions = [
+//   { key: 'all', text: 'All', value: '' },
+//   { key: 'low', text: 'Low', value: '1' },
+//   { key: 'medium', text: 'Medium', value: '2' },
+//   { key: 'high', text: 'High', value: '3' },
+// ]
 
-const catalogOptions = [
-  { key: 'all', text: 'All', value: '' },
-  { key: '1', text: 'Type I', value: '1'},
-  { key: '2', text: 'Type II', value: '2' },
-  { key: '3', text: 'Type III', value: '3' },
-];
+// const catalogOptions = [
+//   { key: 'all', text: 'All', value: '' },
+//   { key: '1', text: 'Type I', value: '1'},
+//   { key: '2', text: 'Type II', value: '2' },
+//   { key: '3', text: 'Type III', value: '3' },
+// ];
 
-const expireDateOptions = [
-  { key: '0', text: 'All', value: '9999' },
-  { key: '1', text: '<= 3 months', value: '3'},
-  { key: '2', text: '<= 6 months', value: '6' },
-  { key: '3', text: '<= 9 months', value: '9' },
-  { key: '4', text: '<= a year', value: '12' }
-]
+// const expireDateOptions = [
+//   { key: '0', text: 'All', value: '9999' },
+//   { key: '1', text: '<= 3 months', value: '3'},
+//   { key: '2', text: '<= 6 months', value: '6' },
+//   { key: '3', text: '<= 9 months', value: '9' },
+//   { key: '4', text: '<= a year', value: '12' }
+// ]
 
 class InventorySearchPage extends Component {
   state = {
+    productTypeOptions: [],
+    productCategoryOptions: [],
+    expirationDateOptions: [],
     type: '',
-    catalog: '0',
-    code: '',
-    abbreviation: '',
-    name: '',
-    lot: '',
+    category: '',
+    productId: '',
+    productName: '',
     expireDate: '9999',
     searchedList: [],
+    selection: [],
     selectAll: false,
   }
 
@@ -53,9 +55,83 @@ class InventorySearchPage extends Component {
     super(props);
     
     this.handleDateChange = this.handleDateChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleFormChange = (e, { value }) => this.setState({ value })
+  componentWillMount() {
+    this.getProductType();
+    this.getProductCategory();
+    this.getExpirationMonthRange();
+  }
+
+  getProductCategory() {
+    api.inventory.getProductCategory().then(res => {
+      if (res.data) {
+        const productCategoryOptions = res.data.map((option, index) => {
+          return {
+            key: index,
+            text: option.categoryName,
+            value: option.categoryID
+          }
+        })
+        this.setState({productCategoryOptions});
+      }
+    });
+  }
+
+  getProductType() {
+    api.inventory.getProductType().then(res => {
+      if (res.data) {
+        const productTypeOptions = res.data.map((option, index) => {
+          return {
+            key: index,
+            text: option.productTypeName,
+            value: option.productTypeID
+          }
+        });
+        this.setState({productTypeOptions});
+      }
+    });
+  }
+
+  getExpirationMonthRange() {
+    api.inventory.getExpirationMonthRange().then(res => {
+      if (res.data) {
+        const expirationDateOptions = res.data.map((option, index) => {
+          return {
+            key: index,
+            text: option.displayValue,
+            value: option.monthID
+          }
+        });
+        this.setState({expirationDateOptions});
+      }
+    })
+  }
+
+  handleSubmit() {
+    const data = {
+      type: this.state.type || '',
+      category: this.state.category || '',
+      productId: this.state.productId || '',
+      productName: this.state.productName || '',
+      expireDate: this.state.expireDate || 9999
+    };
+
+    console.log('Search Submit Data:', data);
+    api.inventory.getInventorySummaryByProduct(data).then(res => {
+      if (res.data) {
+        this.setState({ searchedList: res.data });
+      }
+    });
+  }
+
+  handleFormChange = (e, { name, value }) => {
+    console.log('form change', value);
+    const newState = {};
+    newState[name] = value;
+    this.setState(newState);
+  }
 
   handleDateChange(e) {
     this.setState({ expireDate: e.format('MM-DD-YYYY')})
@@ -108,8 +184,8 @@ class InventorySearchPage extends Component {
 
   render() {
     const { toggleSelection, toggleAll, isSelected } = this;
-    const { value, type, catalog, code, abbreviation, name, lot, expireDate,
-      searchedList, selectAll } = this.state;
+    const { value, type, category, productId, productName, expireDate,
+      searchedList, selectAll, productTypeOptions, productCategoryOptions, expirationDateOptions } = this.state;
 
     const checkboxProps = {
       selectAll,
@@ -124,16 +200,16 @@ class InventorySearchPage extends Component {
       <div className="inventory-search-page">
         <Form inverted widths="equal" size="small" onSubmit={ this.handleSubmit }>
           <Form.Group>
-            <Form.Field control={ Select } label='Type' value={ type } options={ typeOptions } onChange={ this.handleFormChange } />
-            <Form.Field control={ Select } label='Catalog' value={ catalog } options={ catalogOptions } onChange={ this.handleFormChange } />
-            <Form.Field control={ Input } label='Code' value={ code } onChange={ this.handleFormChange } />
+            <Form.Field control={ Select } label='Type' name="type" value={ type } options={ productTypeOptions } onChange={ this.handleFormChange } />
+            <Form.Field control={ Select } label='Catalog' name="category" value={ category } options={ productCategoryOptions } onChange={ this.handleFormChange } />
+            {/* <Form.Field control={ Input } label='Code' name="code" value={ code } onChange={ this.handleFormChange } /> */}
           </Form.Group>
           <Form.Group>
-            <Form.Field control={ Input } label='Abbreviation' value={ abbreviation } onChange={ this.handleFormChange } />
-            <Form.Field control={ Input } label='Name' value={ name } onChange={ this.handleFormChange } />
-            <Form.Field control={ Input } label='Lot' value={ lot } onChange={ this.handleFormChange } />
+            <Form.Field control={ Input } label='Product ID' name="productId" value={ productId } onChange={ this.handleFormChange } />
+            <Form.Field control={ Input } label='Product Name' name="productName" value={ productName } onChange={ this.handleFormChange } />
+            {/* <Form.Field control={ Input } label='Lot' value={ lot } onChange={ this.handleFormChange } /> */}
             {/* <Form.Field control={ DatePicker } label='Expire Date' value={ String(expireDate) } onChange={this.handleDateChange} /> */}
-            <Form.Field control={ Select } label='Expire Date' value={ expireDate } options={ expireDateOptions } onChange={ this.handleFormChange } />
+            <Form.Field control={ Select } label='Expire Date' value={ expireDate } options={ expirationDateOptions } onChange={ this.handleFormChange } />
             <Form.Field control={ Button } primary className="submit-btn">Submit</Form.Field>
           </Form.Group>
         </Form>

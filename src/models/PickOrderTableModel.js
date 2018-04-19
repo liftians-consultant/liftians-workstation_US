@@ -7,13 +7,16 @@ export const PickOrderTableColumns = [
     accessor: 'rec_DEPT_NAME'
   }, {
     Header: '# of Product',
-    accessor: 'totalDistinctProduct'
+    accessor: 'totalDistinctProduct',
+    maxWidth: 100
   }, {
     Header: 'Qty',
-    accessor: 'totalOrder_Qty'
+    accessor: 'totalOrder_Qty',
+    maxWidth: 100
   }, {
     Header: 'Order Date',
-    accessor: 'pick_DATE'
+    accessor: 'pick_DATE',
+    minWidth: 130
   }, {
     Header: 'Status',
     accessor: 'processStatusCHN'

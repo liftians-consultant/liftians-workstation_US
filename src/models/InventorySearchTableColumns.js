@@ -1,27 +1,23 @@
 export const InventorySearchTableColumns = [
   {
-    Header: 'OP Code',
-    accessor: 'productID'
+    Header: 'Product ID',
+    accessor: 'productID',
+    minWidth: 80
   }, {
     Header: 'Name',
-    accessor: 'productName'
-  }, {
-    Header: 'Spec',
-    accessor: 'ProductDesc'
-  }, {
-    Header: 'Lot',
-    accessor: 'LotNo'
-  }, {
+    accessor: 'productName',
+    minWidth: 150
+  },{
     Header: 'Expire Date',
-    accessor: 'ExpirDate'
+    accessor: 'expirDate',
+    minWidth: 120
   }, {
-    Header: 'Unit Num',
-    accessor: 'UnitNum'
+    Header: 'Unit #',
+    accessor: 'unitNum',
+    maxWidth: 70
   }, {
     Header: 'Quantity',
-    accessor: 'Dcount'
-  }, {
-    Header: 'Total',
-    accessor: 'Acount'
+    accessor: 'quantity',
+    maxWidth: 70
   }
 ];

@@ -50,9 +50,7 @@
     "build": "npm-run-all build-css build-js",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "electron-dev": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron-pack": "electron-builder -lmw -c.extraMetadata.main=build/electron.js",
-    "electron-dist": "electron-builder",
     "preelectron-pack": "yarn build"
   },
   "main": "public/electron.js",

@@ -4,7 +4,7 @@ import axios from 'axios';
  * All API call.
  */
 if (process.env.REACT_APP_ENV === 'PRODUCTION') {
-  axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
+  axios.defaults.baseURL = `${process.env.REACT_APP_SERVER_HOST}:${process.env.REACT_APP_SERVER_PORT}`;
 }
 
 const user = {
@@ -265,10 +265,16 @@ const inventory = {
       parameter: []
     }),
 
-  getInventorySummaryByProduct: () =>
+  getInventorySummaryByProduct: (data) =>
     axios.post('Inventory', {
       name: 'GetInventorySumByProduct',
-      parameter: []
+      parameter: [
+        String(data.type),
+        String(data.category),
+        String(data.productId),
+        String(data.productName),
+        String(data.expireDate)
+      ]
     }),
 
 }

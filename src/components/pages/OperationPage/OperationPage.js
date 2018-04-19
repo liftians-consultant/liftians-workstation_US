@@ -53,6 +53,7 @@ class OperationPage extends Component {
     this.closeOrderFinishModal = this.closeOrderFinishModal.bind(this);
     this.closeWrongProductModal = this.closeWrongProductModal.bind(this);
     this.handleScanBtnClick = this.handleScanBtnClick.bind(this);
+    this.finishPick = this.finishPick.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
@@ -307,7 +308,7 @@ class OperationPage extends Component {
                     <Button className="ok-btn" size="massive" primary onClick={() => this.finishPick(currentPickProduct.quantity)}>OK</Button>
                   ) : (
                     <NumPad highlightAmount={ currentPickProduct.quantity - pickedAmount }
-                      callback={this.finishPick}
+                      callback={this.selectPickedAmount}
                     ></NumPad>
                   )}
                   
