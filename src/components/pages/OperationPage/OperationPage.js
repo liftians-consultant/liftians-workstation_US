@@ -215,7 +215,7 @@ class OperationPage extends Component {
         if (this.businessMode === 'pharmacy') {
           const barcode = this.state.scanCount === 0 ? res.data[barCodeIndex].barcode : `${this.state.barcode},${res.data[barCodeIndex].barcode}`;
           const scanCount = this.state.scanCount + 1;
-          if (scanCount == this.state.currentPickProduct.quantity) {
+          if (scanCount === this.state.currentPickProduct.quantity) {
             this.setState({showBox: true, barcode, scanCount: 0});
           } else {
             this.setState({ barcode, scanCount });

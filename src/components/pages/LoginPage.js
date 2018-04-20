@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { Grid, Image } from 'semantic-ui-react'
+import { Grid, Image, Button } from 'semantic-ui-react'
 import LoginForm from '../forms/LoginForm';
 import { login } from "../../actions/auth";
 // import logo from '../../assets/images/loginPage.png';
@@ -34,6 +34,7 @@ class LoginPage extends Component {
             <LoginForm submit={this.submit}></LoginForm>
           </Grid.Column>
         </Grid>
+        <Button icon='cog' size="massive" />
       </div>
     );
   }

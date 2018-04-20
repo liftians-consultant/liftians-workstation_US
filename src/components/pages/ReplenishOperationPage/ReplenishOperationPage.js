@@ -2,34 +2,34 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
-import { Segment, Grid, Button, Dimmer, Loader, Modal, Image } from 'semantic-ui-react';
+import { Segment, Grid, Button, Dimmer, Loader, Image } from 'semantic-ui-react';
 import api from '../../../api';
-import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
+// import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
 import PodShelf from '../../common/PodShelf/PodShelf';
 import NumPad from '../../common/NumPad/NumPad';
 import './ReplenishOperationPage.css';
 import WarningModal from '../../common/WarningModal/WarningModal';
 
-const testProduct = [
-  {
-    taskType: "R",
-    stationID: 1,
-    podID: 20,
-    podSide: 0,
-    shelfID: 1,
-    boxId: 1,
-    replenishBillNo: "T1712060003",
-    source_id: "818241",
-    source_lines_id: "829777",
-    productId: "096719",
-    productName: "Something that is awesome",
-    lot_no: "A20171202",
-    unit_num: "12",
-    expire_date: "2018-12-06 00:00:00.0",
-    totalReplenishQuantity: 3,
-    locate_act_type: "D"
-  }
-]
+// const testProduct = [
+//   {
+//     taskType: "R",
+//     stationID: 1,
+//     podID: 20,
+//     podSide: 0,
+//     shelfID: 1,
+//     boxId: 1,
+//     replenishBillNo: "T1712060003",
+//     source_id: "818241",
+//     source_lines_id: "829777",
+//     productId: "096719",
+//     productName: "Something that is awesome",
+//     lot_no: "A20171202",
+//     unit_num: "12",
+//     expire_date: "2018-12-06 00:00:00.0",
+//     totalReplenishQuantity: 3,
+//     locate_act_type: "D"
+//   }
+// ]
 class ReplenishOperationPage extends Component {
 
   state = {
@@ -216,7 +216,7 @@ class ReplenishOperationPage extends Component {
   }
 
   getProductBarcodeList(callback) {
-    const { productID, source_lines_id, processStatus } = this.state.currentReplenishProduct;
+    const { productID, source_lines_id } = this.state.currentReplenishProduct;
     api.replenish.getProductInfoByTaskId(this.state.taskId, source_lines_id, productID, 100).then( res => {
       if (res.data) {
         const barcodeList = res.data.map(item => item.productBarCode)
@@ -307,8 +307,7 @@ class ReplenishOperationPage extends Component {
   // }
 
   render() {
-    const { podInfo, currentReplenishProduct, replenishedAmount, 
-      orderList, openOrderFinishModal, openWrongProductModal, barcode, boxBarcode } = this.state;
+    const { podInfo, currentReplenishProduct, replenishedAmount, barcode, boxBarcode } = this.state;
     const highlightBox = {
       row: currentReplenishProduct ? parseInt(currentReplenishProduct.shelfID, 10) : 0,
       column: currentReplenishProduct ? parseInt(currentReplenishProduct.boxID, 10) : 0

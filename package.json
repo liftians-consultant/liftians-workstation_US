@@ -1,6 +1,6 @@
 {
   "name": "liftians-workstation",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Kevin Hong",
   "private": true,
   "proxy": "http://localhost:8060",
@@ -10,14 +10,10 @@
     "concurrently": "^3.5.1",
     "electron-is-dev": "^0.3.0",
     "electron-renderer-react-scripts-target": "^1.1.1",
-    "eslint": "^4.18.1",
-    "foreman": "^2.0.0",
     "history": "^4.7.2",
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.5",
     "moment": "^2.22.0",
-    "node-sass-chokidar": "^0.0.3",
-    "npm-run-all": "^4.1.2",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-datepicker": "^1.4.0",
@@ -29,14 +25,11 @@
     "react-scripts": "1.1.1",
     "react-table": "^6.8.0",
     "redux": "^3.7.2",
-    "redux-connect-decorator": "^0.2.0",
-    "redux-devtools-extension": "^2.13.2",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0",
     "semantic-ui-css": "^2.3.1",
     "semantic-ui-react": "^0.78.2",
-    "validator": "^9.4.1",
-    "wait-on": "^2.1.0"
+    "validator": "^9.4.1"
   },
   "scripts": {
     "start": "nf start -p 3000",
@@ -50,14 +43,20 @@
     "build": "npm-run-all build-css build-js",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "electron-pack": "electron-builder -lmw -c.extraMetadata.main=build/electron.js",
+    "electron-pack": "electron-builder -mlw -c.extraMetadata.main=build/electron.js",
     "preelectron-pack": "yarn build"
   },
   "main": "public/electron.js",
   "homepage": "./",
   "devDependencies": {
     "electron": "^1.8.3",
-    "electron-builder": "^20.8.1"
+    "electron-builder": "^20.8.1",
+    "wait-on": "^2.1.0",
+    "node-sass-chokidar": "^0.0.3",
+    "redux-devtools-extension": "^2.13.2",
+    "npm-run-all": "^4.1.2",
+    "eslint": "^4.18.1",
+    "foreman": "^2.0.0"
   },
   "build": {
     "appId": "com.liftians.workstation",

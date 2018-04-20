@@ -10,11 +10,6 @@ class NumPad extends Component {
     total: ''
   }
 
-  constructor() {
-    super();
-
-  }
-
   clickHandler(number) {
     this.props.callback(number)
   }

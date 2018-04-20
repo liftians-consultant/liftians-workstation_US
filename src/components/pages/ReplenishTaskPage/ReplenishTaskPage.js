@@ -189,8 +189,7 @@ class ReplenishTaskPage extends Component {
 
   render() {
     const { toggleSelection, toggleAll, isSelected } = this;
-    const { taskCount } = this.props;
-    const { activeBillType, activeProcessType, loading, errors, ordersList, selectAll, searchedList, selection } = this.state;
+    const { activeBillType, activeProcessType, loading, ordersList, selectAll, searchedList, selection } = this.state;
     
     const processList = activeBillType === 4 ? this.processOptions[1] : this.processOptions[0]; // If billType is Adjustment then use special process list
     const processMenuItems = processList.map((option, i) => 

@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import PropTypes from 'prop-types';
-import _ from "lodash";
+// import PropTypes from 'prop-types';
+// import _ from "lodash";
 // import DatePicker from "react-datepicker";
 // import moment from "moment";
 import ReactTable from "react-table";
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
-import { Checkbox, Form, Input, Radio, Select, TextArea, Button } from 'semantic-ui-react';
+import { Form, Input, Select, Button } from 'semantic-ui-react';
 import api from '../../../api';
 import { InventorySearchTableColumns } from '../../../models/InventorySearchTableColumns';
 import './InventorySearchPage.css';
@@ -184,7 +184,7 @@ class InventorySearchPage extends Component {
 
   render() {
     const { toggleSelection, toggleAll, isSelected } = this;
-    const { value, type, category, productId, productName, expireDate,
+    const { type, category, productId, productName, expireDate,
       searchedList, selectAll, productTypeOptions, productCategoryOptions, expirationDateOptions } = this.state;
 
     const checkboxProps = {
