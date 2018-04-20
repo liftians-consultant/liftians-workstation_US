@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Form, Button, Message, Segment } from "semantic-ui-react";
+import { Form, Button, Message } from "semantic-ui-react";
 // import Validator from "validator";
 import InlineError from "../messages/InlineError";
 
@@ -26,10 +26,13 @@ class LoginForm extends React.Component {
       this.setState({ loading: true });
       this.props
         .submit(this.state.data)
-        .catch(err =>
-          {
+        .catch(err => {
             console.log(err);
-            this.setState({ errors: { global: 'Login Error'}, loading: false })
+            let message = 'Login Error';
+            if (err.message.indexOf('timeout') !== -1) {
+              message = 'Connection Timeout: Please make sure you have the correct server configuration.'
+            }
+            this.setState({ errors: { global: message}, loading: false })
           }
         );
     }
@@ -68,7 +71,6 @@ class LoginForm extends React.Component {
 
 
       <Form onSubmit={this.onSubmit} loading={loading} size='large'>
-        <Segment>
         {errors.global && (
           <Message negative>
             <Message.Header>Something went wrong</Message.Header>
@@ -100,8 +102,7 @@ class LoginForm extends React.Component {
           {errors.password && <InlineError text={errors.password} />}
         </Form.Field>
         <Button primary>Login</Button>
-        </Segment>
-      </Form>
+       </Form>
     );
   }
 }

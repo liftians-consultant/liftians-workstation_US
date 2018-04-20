@@ -1,28 +1,42 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { Grid, Image, Button } from 'semantic-ui-react'
+import { Grid, Image, Segment } from 'semantic-ui-react'
 import LoginForm from '../forms/LoginForm';
 import { login } from "../../actions/auth";
 // import logo from '../../assets/images/loginPage.png';
+import ServerSettingModal from "../common/ServerSettingModal/ServerSettingModal";
 import logo from '../../assets/images/assembly_logo_trans.png';
 
 class LoginPage extends Component {
 
+  constructor() {
+    super();
+    this.handleSettingBtnClick = this.handleSettingBtnClick.bind(this);
+  }
+
   submit = data =>
     this.props.login(data).then(() => this.props.history.push("/"));
 
+  handleSettingBtnClick() {
+
+  }
+
   render() {
     return (
-      <div className="login-form">
+      <div className="login-page">
         <style>{`
-        body > div,
-        body > div > div,
-        body > div > div > div.login-form {
+        
+        body div.login-page {
           height: 100%;
         }
-        .login-form {
+        .login-page {
           padding-top: 15%;
+        }
+        .setting-btn {
+          position: absolute;
+          left: 30px;
+          bottom: 30px;
         }
         `}</style>
         <Grid
@@ -31,10 +45,12 @@ class LoginPage extends Component {
           verticalAlign='middle'>
           <Grid.Column style={{ maxWidth: 450 }}>
             <Image src={logo} size='huge' centered />
-            <LoginForm submit={this.submit}></LoginForm>
+            <Segment>
+              <LoginForm submit={this.submit}></LoginForm>
+            </Segment>
           </Grid.Column>
         </Grid>
-        <Button icon='cog' size="massive" />
+        <ServerSettingModal />
       </div>
     );
   }

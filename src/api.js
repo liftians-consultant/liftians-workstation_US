@@ -3,13 +3,14 @@ import axios from 'axios';
 /**
  * All API call.
  */
-if (process.env.REACT_APP_ENV === 'PRODUCTION') {
-  axios.defaults.baseURL = `${process.env.REACT_APP_SERVER_HOST}:${process.env.REACT_APP_SERVER_PORT}`;
+if (process.env.REACT_APP_ENV === 'PRODUCTION') { 
+  axios.defaults.baseURL = `${localStorage.serverHost}:${localStorage.serverPort}`;
+  console.log(axios.defaults.baseURL);
 }
 
 const user = {
   login: credentials =>
-    axios.post('login', { ...credentials }).then(res => res.headers.authorization),
+    axios.post('login', { ...credentials }, {timeout: 6000}).then(res => res.headers.authorization),
   logout: () =>
     axios.post('logout').then(res => res),
   getInfoById: (empId) =>
