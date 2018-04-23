@@ -47,6 +47,8 @@ class OperationPage extends Component {
   constructor(props) {
     super(props)
 
+    this.scanInputRef = React.createRef();
+
     // Bind the this context to the handler function
     this.selectPickedAmount = this.selectPickedAmount.bind(this);
     this.retrieveNextOrder = this.retrieveNextOrder.bind(this);
@@ -54,6 +56,8 @@ class OperationPage extends Component {
     this.closeWrongProductModal = this.closeWrongProductModal.bind(this);
     this.handleScanBtnClick = this.handleScanBtnClick.bind(this);
     this.finishPick = this.finishPick.bind(this);
+    this.handleScanKeyPress = this.handleScanKeyPress.bind(this);
+    this.setFocusToScanInput = this.setFocusToScanInput.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
@@ -65,6 +69,16 @@ class OperationPage extends Component {
   componentWillUnmount() {
     clearInterval(this.checkPodInterval);
   }
+
+  componentDidMount() {
+    this.setFocusToScanInput();
+  }
+
+  setFocusToScanInput() {
+    this.scanInputRef.current.focus();
+    this.scanInputRef.current.value = '';
+  }
+  
 
   selectPickedAmount(num) {
     this.setState({ pickedAmount: this.state.pickedAmount + num }, () => {
@@ -160,7 +174,7 @@ class OperationPage extends Component {
           ...this.state.podInfo,
           shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxNumberOfBox, 10) }).reverse().value()
         }
-        this.setState({ podInfo, loading: false })
+        this.setState({ podInfo, loading: false });
       }
     }).catch( err => {
       console.error('error getting pod info', err);
@@ -181,7 +195,10 @@ class OperationPage extends Component {
           },
           barcode: '',
           pickedAmount: 0,
-          showBox: false }, this.getPodInfo);
+          showBox: false }, () => {
+            this.getPodInfo();
+            this.setFocusToScanInput();
+          });
       } else {
         // when nothing return, that means the pod is finished
         // and need to wait for the next pod come in to station
@@ -198,6 +215,32 @@ class OperationPage extends Component {
       return true;
     } else {
       return false;
+    }
+  }
+
+  handleScanKeyPress(e) {
+    if (e.key === 'Enter' && e.target.value) {
+      console.log('[Scanned]', e.target.value);
+      const scannedValue = e.target.value;
+      if (this.businessMode === 'pharmacy') {
+        const barcode = this.state.scanCount === 0 ? scannedValue : `${this.state.barcode},${scannedValue}`;
+        const scanCount = this.state.scanCount + 1;
+        if (scanCount === this.state.currentPickProduct.quantity) {
+          this.setState({showBox: true, barcode, scanCount: 0});
+        } else {
+          this.setState({ barcode, scanCount });
+        }
+        console.log(`[Scanned] New Barcode: ${barcode}`);
+      } else if (this.businessMode === 'ecommerce') {
+        if (this.scanValidation(scannedValue)) {
+          this.setState({ showBox: !this.state.showBox, barcode: scannedValue });
+          console.log(`[Scanned] New Barcode: ${scannedValue}`);
+        } else {
+          this.setState({ barcode: scannedValue } , () => {
+            this.setState({ openWrongProductModal: true })
+          });
+        }
+      }
     }
   }
 
@@ -262,6 +305,7 @@ class OperationPage extends Component {
 
   closeWrongProductModal() {
     this.setState({ openWrongProductModal: false });
+    this.setFocusToScanInput();
   }
 
   render() {
@@ -296,8 +340,14 @@ class OperationPage extends Component {
               { !showBox ? (
                 <div>
                   <ProductInfoDisplay product={ currentPickProduct } quantity={ currentPickProduct.quantity } pickedAmount={ pickedAmount }></ProductInfoDisplay>
-                    <h4>[{ this.state.barcode}]</h4>
+                  <br />
+                  <h4>[{ this.state.barcode}]</h4>
                   <br></br>
+                  <div className="scan-input-holder">
+                    <input type="text"
+                      ref={this.scanInputRef}
+                      onKeyPress={this.handleScanKeyPress}/>
+                  </div>
                   <Button primary size="massive" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
                   <Button size="medium" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button>
                 </div>

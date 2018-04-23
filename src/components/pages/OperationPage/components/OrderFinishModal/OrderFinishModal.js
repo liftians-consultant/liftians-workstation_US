@@ -4,13 +4,15 @@ import { Button, Modal } from 'semantic-ui-react';
 import BinGroup from '../BinGroup/BinGroup';
 
 class OrderFinishModal extends Component {
+
   render() {
     const { data, modalOpen, modalClose } = this.props;
 
     return (
       <Modal open={ modalOpen }
         size="small" basic
-        style={{ marginTop: '1rem', marginLeft: 'auto', marginRight: 'auto' }} >
+        style={{ marginTop: '1rem', marginLeft: 'auto', marginRight: 'auto' }} 
+      >
         <Modal.Header><h1>Order #{ data.orderNo } completed</h1></Modal.Header>
         <Modal.Content scrolling>
           <Modal.Description>

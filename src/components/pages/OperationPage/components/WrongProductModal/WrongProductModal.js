@@ -28,8 +28,8 @@ class WrongProductModal extends Component {
     const { productLocation } = this.state;
     
     const highlightBox = {
-      row: productLocation.shelfID,
-      column: productLocation.boxID
+      row: productLocation ? productLocation.shelfID : 0,
+      column: productLocation ? productLocation.boxID : 0
     };
 
     return (
