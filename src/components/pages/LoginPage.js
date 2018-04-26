@@ -31,7 +31,7 @@ class LoginPage extends Component {
           height: 100%;
         }
         .login-page {
-          padding-top: 15%;
+          // padding-top: 10%;
         }
         .setting-btn {
           position: absolute;

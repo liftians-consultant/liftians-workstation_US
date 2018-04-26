@@ -2,12 +2,25 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Route, Redirect } from "react-router-dom";
+import { Grid } from 'semantic-ui-react';
+import SideNavigation from '../navigation/SideNavigation';
 
 const UserRoute = ({ isAuthenticated, component: Component, ...rest }) => (
   <Route
     {...rest}
     render={props =>
-      isAuthenticated ? <Component {...props} /> : <Redirect to="/login" />}
+      isAuthenticated ? (
+        <Grid padded={false} relaxed={false}>
+          <Grid.Row stretched>
+            <Grid.Column width={13}>
+              <Component {...props} />
+            </Grid.Column>
+            <Grid.Column width={3} className="navGridColumn">
+              <SideNavigation />
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      ) : <Redirect to="/login" />}
   />
 );
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { Switch } from 'react-router';
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 // import { Route } from "react-router-dom";
@@ -20,30 +21,16 @@ import "./App.css";
 
 const App = ({ location, isAuthenticated }) => (
   <div className="app-comp-container">
-    { !isAuthenticated && 
-      <div>
-        <UserRoute location={location} path="/" exact component={HomePage} />
-        <GuestRoute location={location} path="/login" exact component={LoginPage} />
-      </div>
-    }
-    { isAuthenticated && 
-    <Grid padded={false} relaxed={false} stretched={true}>
-      <Grid.Row stretched>
-        <Grid.Column width={13}>
-          <UserRoute location={location} path="/" exact component={HomePage} />
-          <UserRoute location={location} path="/pick-task" exact component={PickTaskPage} />
-          <UserRoute location={location} path="/operation" exact component={OperationPage} />
-          <UserRoute location={location} path="/system-setting" exact component={SystemSettingPage} />
-          <UserRoute location={location} path="/replenish-task" exact component={ReplenishTaskPage} />
-          <UserRoute location={location} path="/replenish-operation" exact component={ReplenishOperationPage} />
-          <UserRoute location={location} path="/inventory-search" exact component={InventorySearchPage} />
-        </Grid.Column>
-        <Grid.Column width={3} className="navGridColumn">
-          <SideNavigation />
-        </Grid.Column>
-      </Grid.Row>
-    </Grid>
-    }
+    <Switch>
+      <UserRoute path="/pick-task" exact component={PickTaskPage} />
+      <UserRoute path="/operation" exact component={OperationPage} />
+      <UserRoute path="/system-setting" exact component={SystemSettingPage} />
+      <UserRoute path="/replenish-task" exact component={ReplenishTaskPage} />
+      <UserRoute path="/replenish-operation" exact component={ReplenishOperationPage} />
+      <UserRoute path="/inventory-search" exact component={InventorySearchPage} />
+      <GuestRoute path="/login" component={LoginPage} />
+      <UserRoute path="/" exact component={HomePage} />
+    </Switch>
   </div>
 );
 
