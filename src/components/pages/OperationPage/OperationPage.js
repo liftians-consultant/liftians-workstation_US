@@ -108,6 +108,14 @@ class OperationPage extends Component {
     }, 1500);
   }
 
+  validateAfterPickData(data) {
+    if (data.packageBarcode && data.pickQuantity > 0 && data.shortQty >= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   finishPick() {
     const product = this.state.currentPickProduct;
     const data = {
@@ -124,31 +132,35 @@ class OperationPage extends Component {
       shortQty: parseInt(product.quantity, 10) - this.state.pickedAmount,
     }
 
-    console.log(`[Pick Operation] AtStationAfterPickProduct data:`, data);
+    console.log(`[PICK OPERATION] AtStationAfterPickProduct data:`, data);
 
-    api.pick.atStationAfterPickProduct(data).then(res => {
-      if (res.data) { // return 1 if success
-        console.log(`[Pick Operation] AtStationAfterPickProduct success:`, res.data);
-        // this.setState({ showBox: false }, () => this.retrieveNextOrder());
-        data.holderId = this.state.currentPickProduct.holderID;
+    if (this.validateAfterPickData(data)) {
+      api.pick.atStationAfterPickProduct(data).then(res => {
+        if (res.data) { // return 1 if success
+          console.log(`[PICK OPERATION] AtStationAfterPickProduct success:`, res.data);
+          // this.setState({ showBox: false }, () => this.retrieveNextOrder());
+          data.holderId = this.state.currentPickProduct.holderID;
 
-        // after placed in bin, inform db
-        api.pick.atHolderAfterPickProduct(data).then( res => {
-          // set here because avoid data changed after async call
-          console.log(`[Pick Operation] atHolderAfterPickProduct success:`, res.data);
-          this.finishedOrder = {
-            orderNo: this.state.currentPickProduct.order_no,
-            binNum: parseInt(this.state.currentPickProduct.binPosition, 10)
-          };
-          this.checkIsOrderFinished();
-          this.retrieveNextOrder();
-        })
-      } else {
-        // TODO: ERROR MESSAGE
-      }
-    }).catch((err) => {
-      console.error('Error for atStationAfterPickProduct', err);
-    });
+          // after placed in bin, inform db
+          api.pick.atHolderAfterPickProduct(data).then( res => {
+            // set here because avoid data changed after async call
+            console.log(`[PICK OPERATION] atHolderAfterPickProduct success:`, res.data);
+            this.finishedOrder = {
+              orderNo: this.state.currentPickProduct.order_no,
+              binNum: parseInt(this.state.currentPickProduct.binPosition, 10)
+            };
+            this.checkIsOrderFinished();
+            this.retrieveNextOrder();
+          })
+        } else {
+          // TODO: ERROR MESSAGE
+        }
+      }).catch((err) => {
+        console.error('[ERROR] for atStationAfterPickProduct', err);
+      });
+    } else {
+      console.log('[PICK OPERATION] Validation error')
+    }
   }
 
   retrieveNextOrder() {
@@ -348,8 +360,11 @@ class OperationPage extends Component {
                       ref={this.scanInputRef}
                       onKeyPress={this.handleScanKeyPress}/>
                   </div>
-                  <Button primary size="massive" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
-                  <Button size="medium" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button>
+                  {/* { process.env.REACT_APP_ENV === 'DEV' && ( */}
+                    <Button primary size="medium" onClick={ () => this.handleScanBtnClick() }>Scan</Button>)
+                  {/* } */}
+                  <Button size="medium" onClick={ () => this.setFocusToScanInput() }>Set Focus</Button>
+                  {/* <Button size="medium" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button> */}
                 </div>
               ) : (
                 <div>

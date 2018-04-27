@@ -4,9 +4,10 @@ import { Modal, Icon, Button } from 'semantic-ui-react';
 
 class WarningModal extends Component {
   render() {
-    const { triggerText, headerText, contentText } = this.props;
+    const { open, onClose, headerText, contentText } = this.props;
     return (
-      <Modal trigger={<Button size="tiny">{ triggerText}</Button>}
+      <Modal open={open}
+        onClose={onClose}
         size="tiny"
         style={{ marginTop: '20%', marginLeft: 'auto', marginRight: 'auto' }}>
         <Modal.Header><Icon name='warning circle' size="large" /> { headerText }</Modal.Header>
@@ -21,7 +22,6 @@ class WarningModal extends Component {
 WarningModal.propTypes = {
   open: PropTypes.bool,
   onClose: PropTypes.func,
-  triggerText: PropTypes.string.isRequired,
   headerText: PropTypes.string.isRequired,
   contentText: PropTypes.string.isRequired,
 };

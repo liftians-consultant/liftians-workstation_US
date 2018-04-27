@@ -9,27 +9,11 @@ import PodShelf from '../../common/PodShelf/PodShelf';
 import NumPad from '../../common/NumPad/NumPad';
 import './ReplenishOperationPage.css';
 import WarningModal from '../../common/WarningModal/WarningModal';
+import ImageNotFound from '../../../assets/images/no_photo_available.jpg';
 
-// const testProduct = [
-//   {
-//     taskType: "R",
-//     stationID: 1,
-//     podID: 20,
-//     podSide: 0,
-//     shelfID: 1,
-//     boxId: 1,
-//     replenishBillNo: "T1712060003",
-//     source_id: "818241",
-//     source_lines_id: "829777",
-//     productId: "096719",
-//     productName: "Something that is awesome",
-//     lot_no: "A20171202",
-//     unit_num: "12",
-//     expire_date: "2018-12-06 00:00:00.0",
-//     totalReplenishQuantity: 3,
-//     locate_act_type: "D"
-//   }
-// ]
+
+const productImgBaseUrl = process.env.REACT_APP_IMAGE_BASE_URL;
+
 class ReplenishOperationPage extends Component {
 
   state = {
@@ -49,17 +33,31 @@ class ReplenishOperationPage extends Component {
     barcodeList: [],
     barcode: '',
     boxBarcode: 0,
-    // showBox: false,
-    // openOrderFinishModal: false,
-    openWrongProductModal: false,
-    nextPod: {
-      
+    openＷarningModal: false,
+    nextPod: {},
+    warningMessage: {
+      headerText: '',
+      contentText: ''
     }
-    
   }
 
   checkPodInterval = {};
-  
+
+  scanBoxInputRef = null;
+  scanProductInputRef = null;
+
+  wrongBoxWarningMessage = {
+    onCloseFunc: this.closeWrongBoxModal,
+    headerText: 'Wrong Box',
+    contentText: 'You scanned a wrong box! Please make sure you locate the right box and try again.'
+  };
+
+  wrongProductWarningMessage = {
+    onCloseFunc: this.closeWrongProductModal,
+    headerText: 'Wrong Product',
+    contentText: 'You scanned a wrong product! Please make sure you have the right product and try again.'
+  };
+
   finishedOrder = {
     binNum: 3,
     orderNo: '235345'
@@ -68,14 +66,19 @@ class ReplenishOperationPage extends Component {
   constructor(props) {
     super(props)
 
+    // Setup Ref for input fields
+    this.scanBoxInputRef = React.createRef();
+    this.scanProductInputRef = React.createRef();
+
     // Bind the this context to the handler function
     this.selectReplenishedAmount = this.selectReplenishedAmount.bind(this);
     this.retrieveNextOrder = this.retrieveNextOrder.bind(this);
     this.handleProductScanBtnClick = this.handleProductScanBtnClick.bind(this);
     this.finishReplenish = this.finishReplenish.bind(this);
-    // this.closeOrderFinishModal = this.closeOrderFinishModal.bind(this);
-    // this.closeWrongProductModal = this.closeWrongProductModal.bind(this);
-    // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
+    this.closeWrongBoxModal = this.closeWrongBoxModal.bind(this);
+    this.closeWrongProductModal = this.closeWrongProductModal.bind(this);
+    this.handleBoxScanKeyPress = this.handleBoxScanKeyPress.bind(this);
+    this.handleProductScanKeyPress = this.handleProductScanKeyPress.bind(this);
   }
 
   componentWillMount() {
@@ -84,6 +87,21 @@ class ReplenishOperationPage extends Component {
 
   componentWillUnmount() {
     clearInterval(this.checkPodInterval);
+  }
+
+  componentDidMount() {
+    this.setFocusToBoxScanInput();
+  }
+
+  setFocusToBoxScanInput() {
+    this.scanBoxInputRef.current.focus();
+    this.scanBoxInputRef.current.value = '';
+    this.scanProductInputRef.current.value = '';
+  }
+
+  setFocusToProductScanInput() {
+    this.scanProductInputRef.current.focus();
+    this.scanProductInputRef.current.value = '';
   }
 
   selectReplenishedAmount(num) {
@@ -108,11 +126,20 @@ class ReplenishOperationPage extends Component {
         // console.log('stop interval');
         clearInterval(this.checkPodInterval);
         this.retrieveNextOrder();
+        this.setFocusToBoxScanInput();
       }
     }, 1500);
   }
 
-  finishReplenish(replenishAmount, isNextPod=false) {
+  validateReplenishData(data) {
+    if (data.taskId > 0 && data.boxBarcode > 0 && data.productBarcodeList !== '' && data.replenishQty > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  finishReplenish(replenishAmount, isNextPod=false, retry=false) {
     this.setState({ loading: true });
     const product = this.state.currentReplenishProduct;
     let barcodeList = this.state.barcode;
@@ -129,29 +156,48 @@ class ReplenishOperationPage extends Component {
       locateActType: product.locate_act_type,
     };
 
-    console.log("Replenish data", data);
+    if (!this.validateReplenishData(data)) {
+      const warningMessage = {
+        onCloseFunc: this.closeWarningModal,
+        headerText: 'Invalid Data',
+        contentText: 'The replenish data is not correct. Please contact your admin and make sure you have the right data'
+      };
+      this.setState({ openＷarningModal: true, warningMessage })
+      return;
+    }
+
+    console.log("[REPLENISH] Request data", data);
+    console.log("[REPLENISH] BoxBarcode", data.boxBarcode);
     api.replenish.atStationSubmitReplenishProduct(data).then(res => {
       if (res.data) { // return 1 if success
-        console.log('REPLENISH success');
+        console.log('[REPLENISH] Success');
 
         if (isNextPod) {
-          api.station.forcePodToLeaveStationByTaskId(this.props.stationId, this.state.taskId).then(res => {
-            console.log(`Force Pod with TaskId ${this.state.taskId} to leave`);
-            this.getUpcomingPod();
-          });
+          this.forcePodToLeaveStation();
           return;
         }
 
         if (this.state.replenishedAmount === parseInt(this.state.currentReplenishProduct.totalReplenishQuantity, 10)) {
+          console.log('[REPLENISH] Order Finish, Retrieving next bill');
           this.retrieveNextOrder();
+          this.setFocusToBoxScanInput();
+        } else {
+          // replenish not yet finished
+          this.setFocusToProductScanInput();
+          this.setState({ loading: false });
         }
       } else {
         // TODO: ERROR MESSAGE
-        console.log('REPLENISH falied');
-        this.setState({ loading: false });
+        console.log('[REPLENISH] Failed');
+        const replenishedAmount = this.state.replenishedAmount - replenishAmount;
+        this.setState({ loading: false, replenishedAmount });
       }
     }).catch((err) => {
-      console.error('Error for atStationAfterReplenishProduct', err);
+      console.log('[ERROR] atStationAfterReplenishProduct', err);
+      if (!retry) {
+        console.log('[REPLENISH] Retrying');
+        this.finishReplenish(replenishAmount, isNextPod, true);
+      }
     });
   }
 
@@ -161,8 +207,16 @@ class ReplenishOperationPage extends Component {
     // this.getPodInfo();
   }
 
+  forcePodToLeaveStation() {
+    api.station.forcePodToLeaveStationByTaskId(this.props.stationId, this.state.taskId).then(res => {
+      console.log(`[REPLENISH] Force Pod with TaskId ${this.state.taskId} to leave`);
+      this.getUpcomingPod();
+      this.setFocusToBoxScanInput();
+    });
+  }
+
   getPodInfo() {
-    console.log('current replenishing product', this.state.currentReplenishProduct);
+    console.log('[REPLENISH] GetPodInfo: current replenishing product', this.state.currentReplenishProduct);
 
     this.getProductBarcodeList(); // SIMULATION: GET BARCODE
 
@@ -174,9 +228,9 @@ class ReplenishOperationPage extends Component {
           shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxNumberOfBox, 10) }).reverse().value()
         }
         this.setState({ podInfo, loading: false })
-      }     
+      }
     }).catch( err => {
-      console.error('error getting pod info', err);
+      console.error('[ERROR] Getting pod info', err);
     });
   }
 
@@ -185,7 +239,7 @@ class ReplenishOperationPage extends Component {
       // console.log(res.data);
       // res.data = testProduct;
       if (res.data.length) {
-        this.setState({ 
+        this.setState({
           currentReplenishProduct: res.data[0],
           orderList: res.data,
           podInfo: {
@@ -194,16 +248,17 @@ class ReplenishOperationPage extends Component {
             shelfBoxes: []
           },
           replenishedAmount: 0,
-          boxBarcode: 0
+          boxBarcode: 0,
+          barcode: ''
         }, this.getPodInfo);
       } else {
         // when nothing return, that means the pod is finished
         // and need to wait for the next pod come in to station
-        console.log("No order return from the server");
-        this.getUpcomingPod(); 
+        console.log("[GET PRODUCT LIST] No order return from the server");
+        this.getUpcomingPod();
       }
     }).catch((err) => {
-      console.error('Error getting products list', err);
+      console.error('[ERROR] Getting products list', err);
     });
   }
 
@@ -220,16 +275,15 @@ class ReplenishOperationPage extends Component {
     api.replenish.getProductInfoByTaskId(this.state.taskId, source_lines_id, productID, 100).then( res => {
       if (res.data) {
         const barcodeList = res.data.map(item => item.productBarCode)
-        console.log('barcode list: ', barcodeList);
-
+        console.log('[GET PRODUCT BARCODE LIST] Barcode List', barcodeList);
         this.setState({ barcodeList: barcodeList});
       }
-      
+
       if (callback) {
         callback();
       }
     }).catch( err => {
-      console.log("ERROR WHILE GETTING BARCODE LIST", err);
+      console.log("[ERROR] WHILE GETTING BARCODE LIST", err);
     });
   }
 
@@ -238,80 +292,119 @@ class ReplenishOperationPage extends Component {
     // TODO: SIMULATION ONLY! NO PRODUCTION
     if (this.state.businessMode === 'pharmacy') {
       // all product have unique barcode. scann all product then send out the finish request
-      
+
       this.setState({ replenishedAmount: this.state.replenishedAmount + 1 }, () => {
-        console.log(`SCAN PRODUCT: Replenished amount: ${this.state.replenishedAmount}`);
+        console.log(`[SCAN PRODUCT] Replenished amount: ${this.state.replenishedAmount}`);
         if (this.state.replenishedAmount === this.state.currentReplenishProduct.totalReplenishQuantity) {
           this.finishReplenish(this.state.replenishedAmount);
         }
       });
     } else if (this.state.businessMode === 'ecommerce' ) {
       // only one barcode will be return and all product use same barcode
-      // scanned once, send request everything number pad is clicked. 
-      console.log('ecommerce scanned~');
+      // scanned once, send request everything number pad is clicked.
+      console.log('[SCAN PRODUCT] SIMULATION: product scanned');
       this.setState({ barcode: this.state.barcodeList[0]});
     }
+  }
 
-    /* PRODUCTION CODE */
-    // After get barcode from scanner
-    // if (this.scanValidation(something)) {
-    //   this.setState({ showBox: !this.state.showBox, barcode: res.data[0].barcode });
-    // } else {
-    //   this.setState({ openWrongProductModal: true });
-    // }
+
+  /* Production Scan box handler */
+  handleBoxScanKeyPress(e) {
+    if (e.key === 'Enter' && e.target.value) {
+      console.log(`[SCAN BOX] Box scanned: ${e.target.value}`);
+
+      // validate box barcode
+      const productInfo = this.state.currentReplenishProduct;
+      const correctBoxCode = 1000000000 + (1000 * productInfo.podID) + productInfo.podSide * 100 + productInfo.shelfID * 10 + productInfo.boxID;
+      if (e.target.value === String(correctBoxCode)) {
+        console.log('[SCAN BOX] Box correct');
+        this.setState({ boxBarcode: e.target.value }, () => {
+          this.setFocusToProductScanInput();
+        });
+      } else {
+        console.log('[SCAN BOX] Wrong box!');
+        this.setState({ openＷarningModal: true, warningMessage: this.wrongBoxWarningMessage });
+        setTimeout(() => {
+          this.closeWrongBoxModal();
+        }, 3000);
+      }
+    }
+  }
+
+  handleProductScanKeyPress(e) {
+    if (e.key === 'Enter' && e.target.value) {
+      console.log(`[SCAN PRODUCT] Product Scanned: ${e.target.value}`);
+
+      if (this.state.businessMode === 'pharmacy') {
+        // all product have unique barcode. scann all product then send out the finish request
+
+        this.setState({ replenishedAmount: this.state.replenishedAmount + 1 }, () => {
+          console.log(`[SCAN PRODUCT] Replenished amount: ${this.state.replenishedAmount}`);
+          if (this.state.replenishedAmount === this.state.currentReplenishProduct.totalReplenishQuantity) {
+            this.finishReplenish(this.state.replenishedAmount);
+          }
+        });
+      } else if (this.state.businessMode === 'ecommerce' ) {
+        // only one barcode will be return and all product use same barcode
+        // scanned once, send request everything number pad is clicked.
+        if (this.scanValidation(e.target.value)) {
+          console.log('[SCAN PRODUCT] Product correct');
+          this.setState({ barcode: e.target.value});
+        } else {
+          console.log('[SCAN PRODUCT] Wrong product!');
+          this.setState({ openＷarningModal: true, warningMessage: this.wrongProductWarningMessage });
+          setTimeout(() => {
+            this.closeWrongProductModal();
+          }, 3000);
+        }
+      }
+    }
   }
 
   /* Simulate when user scan the box barcode */
-  handleScanBoxClick() {
+  handleScanBoxBtnClick() {
     const productInfo = this.state.currentReplenishProduct;
     // generate box barcode
     const boxBarcode = 1000000000 + (1000 * productInfo.podID) + productInfo.podSide * 100 + productInfo.shelfID * 10 + productInfo.boxID;
-    console.log(`SCAN BOX: ${boxBarcode}`);
+    console.log(`[SCAN BOX] SIMULATION: ${boxBarcode}`);
     this.setState({ boxBarcode });
-
-    /* PRODUCTION */
-
+    this.setFocusToProductScanInput();
   }
 
   handleNextPodBtnClick() {
-    this.finishReplenish(this.state.replenishedAmount, true);
+    if (this.state.businessMode === 'pharmacy') {
+      this.finishReplenish(this.state.replenishedAmount, true);
+    } else if (this.state.businessMode === 'ecommerce') {
+      this.forcePodToLeaveStation();
+    }
   }
 
   handleWrongProductBtnClick() {
-    // const wrongBarcode = "191618";
-
-    // const data = {
-    //   podId: this.state.currentReplenishProduct.podID,
-    //   podSide: this.state.currentReplenishProduct.podSide,
-    //   shelfId: 2,
-    //   boxId: 1,
-    // };
-
-    //  TODO: THE FOLLWING CODE IS JUST TRYIGN TO MAKE THE SIMULATION WORK....
-    // api.pick.getProductSerialNum(data).then( res => {
-    //   this.setState({ barcode: res.data[1].barcode }, () => {
-    //     if (!this.scanValidation(res.data[1].barcode)) {
-          this.setState({ openWrongProductModal: true });
-    //     }
-    //   });      
-    // });
- 
+    this.setState({ openＷarningModal: true });
   }
 
-  // closeOrderFinishModal() {
-  //   this.setState({ openOrderFinishModal: false });
-  // }
+  closeWrongBoxModal() {
+    this.setState({ openＷarningModal: false });
+    this.setFocusToBoxScanInput();
+  }
 
-  // closeWrongProductModal() {
-  //   this.setState({ openWrongProductModal: false });
-  // }
+  closeWrongProductModal() {
+    this.setState({ openＷarningModal: false });
+    this.setFocusToProductScanInput();
+  }
+
+  closeWarningModal() {
+    this.setState({ openＷarningModal: false });
+  }
 
   render() {
-    const { podInfo, currentReplenishProduct, replenishedAmount, barcode, boxBarcode } = this.state;
+    const { podInfo, currentReplenishProduct, replenishedAmount, barcode, boxBarcode, warningMessage } = this.state;
     const highlightBox = {
       row: currentReplenishProduct ? parseInt(currentReplenishProduct.shelfID, 10) : 0,
       column: currentReplenishProduct ? parseInt(currentReplenishProduct.boxID, 10) : 0
     };
+
+    const imageUrl = productImgBaseUrl + currentReplenishProduct.productID + '.png';
 
     return (
       <div className="replenish-operation-page">
@@ -332,15 +425,6 @@ class ReplenishOperationPage extends Component {
 
               <div>
                 <Button>Shortage</Button>
-                <WarningModal triggerText='Scan Wrong Box'
-                  headerText='Wrong Box'
-                  contentText='You scanned a wrong box! Please make sure you locate the right box and try again.'
-                />
-
-                <WarningModal triggerText='Scan Wrong Product'
-                  headerText='Wrong Product'
-                  contentText='You scanned a wrong product! Please make sure you have the right product and try again.'
-                />
               </div>
 
               {/* { orderList.length > 0 && <OrderDetailListModal orderList={ orderList } /> } */}
@@ -359,26 +443,45 @@ class ReplenishOperationPage extends Component {
                       <span className="remain-amount">{ currentReplenishProduct.totalReplenishQuantity }</span>
                     </div>
                     <div className="product-image-container">
-                      <Image className="product-image" src="http://via.placeholder.com/400x300"></Image>
+                      <Image className="product-image" src={ imageUrl } onError={(e) => { e.target.src = ImageNotFound }}></Image>
                     </div>
                   </div>
                   <br></br>
-                  <Button primary size="medium" onClick={ () => this.handleScanBoxClick() }>Scan Box</Button>
-                  <Button primary size="medium" onClick={ () => this.handleProductScanBtnClick() } disabled={ this.state.boxBarcode === 0 } >Scan Product</Button>
+                  <div className="scan-input-holder">
+                    <input type="text"
+                      ref={this.scanBoxInputRef}
+                      onKeyPress={this.handleBoxScanKeyPress} />
+                  </div>
+                  <div className="scan-input-holder">
+                    <input type="text"
+                      ref={this.scanProductInputRef}
+                      onKeyPress={this.handleProductScanKeyPress} />
+                  </div>
+                  { process.env.REACT_APP_ENV === 'DEV' && (
+                    <div>
+                      <Button primary size="medium" onClick={ () => this.handleScanBoxBtnClick() }>Scan Box</Button>
+                      <Button primary size="medium" onClick={ () => this.handleProductScanBtnClick() } disabled={ this.state.boxBarcode === 0 } >Scan Product</Button>
+                    </div>
+                  )}
                   <br></br>
                     <Button size="medium" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
 
                   { this.state.businessMode === 'ecommerce' && <NumPad highlightAmount={ currentReplenishProduct.totalReplenishQuantity - replenishedAmount }
                     callback={this.selectReplenishedAmount}
-                    disabled={ barcode === '' || boxBarcode === '' }></NumPad> }
+                    disabled={ !barcode || !boxBarcode }></NumPad> }
                 </div>
               {/* ) : (
-               
+
               ) } */}
             </Grid.Column>
           </Grid.Row>
         </Grid>
 
+        <WarningModal open={ this.state.openＷarningModal}
+          onClose={warningMessage.onCloseFunc}
+          headerText={warningMessage.headerText}
+          contentText={warningMessage.contentText}
+        />
       </div>
     );
   }

@@ -1,17 +1,26 @@
 .replenish-operation-page {
   padding: 100px 5% 0;
-}
 
-// .numpad-container {
-//   position: absolute;
-//   bottom: 0;
-//   right: 0;
-// }
 
-.pod-info-block {
-  span {
-    color: #FFF;
-    font-size: 2rem;
-    white-space: nowrap;
+  .pod-info-block {
+    span {
+      color: #FFF;
+      font-size: 2rem;
+      white-space: nowrap;
+    }    
   }
+
+  .numpad-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+  }
+
+  // .scan-input-holder {
+  //   opacity: 0;
+  //   width: 0;
+  //   input {
+  //     width: 0;
+  //   }
+  // }
 }
