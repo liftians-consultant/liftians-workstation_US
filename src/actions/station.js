@@ -1,4 +1,5 @@
-import { STATION_ACTIVATE_SUCCESS,
+import { STATION_ID_SET,
+  STATION_ACTIVATE_SUCCESS,
   STATION_ACTIVATE_ERROR, 
   STATION_CURRENT_UNFINISH_TASK_FETCHED,
   // AT_STATION_POD_LAYOUT_INFO_FETCHED,
@@ -13,6 +14,12 @@ export const stationActivateSuccess = () => ({
 export const stationActivateError = () => ({
   type: STATION_ACTIVATE_ERROR
 });
+
+export const setStationId= (stationId) => (dispatch, getState) => {
+  const { station } = getState();
+  station.id = stationId;
+  dispatch({type: STATION_ID_SET, station});
+}
 
 export const activateStation = (stationId) => (dispatch, getState) => {
   const { user } = getState();

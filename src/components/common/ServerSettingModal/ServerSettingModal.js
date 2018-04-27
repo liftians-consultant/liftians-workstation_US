@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from "react-redux";
 import { Modal, Icon, Button, Form, Input } from 'semantic-ui-react';
 import axios from 'axios';
+import { setStationId } from "../../../actions/station";
+import appConfig from '../../../AppConfig';
 
 class ServerSettingModal extends Component {
   state = {
+    stationId: '1',
     host: '',
     port: '',
     open: false
@@ -13,14 +17,17 @@ class ServerSettingModal extends Component {
   constructor() {
     super();
     this.handleChange = this.handleChange.bind(this);
-    // this.open = this.open.bind(this);
-    // this.handleClose = this.handleClose.bind(this);
   }
 
   componentWillMount() {
-    const host = localStorage.serverHost || 'http://localhost';
-    const port = localStorage.serverPort || '8060';
-    this.setState({host, port});
+    // const stationId = localStorage.stationId || 1;
+    // const host = localStorage.serverHost || 'http://localhost';
+    // const port = localStorage.serverPort || '8060';
+    this.setState({
+      stationId: appConfig.getStationId(),
+      host: appConfig.getApiHost(),
+      port: appConfig.getApiPort()
+    });
   }
 
   open = () => this.setState({ open: true })
@@ -33,15 +40,15 @@ class ServerSettingModal extends Component {
   }
 
   saveConfig() {
-    localStorage.serverHost = this.state.host;
-    localStorage.serverPort = this.state.port;
-    axios.defaults.baseURL = `${localStorage.serverHost}:${localStorage.serverPort}`;
+    appConfig.setApiUrl(this.state.host, this.state.port);
+    appConfig.setStationId(this.state.stationId);
+    this.props.setStationId(this.state.stationId); // should be removed
     this.setState({open: false});
     console.log('NEW SERVER CONFIG SAVED!');
   }
 
   render() {
-    const { host, port, open } = this.state;
+    const { stationId, host, port, open } = this.state;
     return (
       <Modal trigger={<Button className="setting-btn" icon="cogs" size="massive" />}
         size="tiny"
@@ -49,9 +56,10 @@ class ServerSettingModal extends Component {
         onOpen={this.open}
         onClose={this.close}
         style={{ marginTop: '10%', marginLeft: 'auto', marginRight: 'auto' }}>
-        <Modal.Header><Icon name='cogs' size="large" /> Server URL Setting</Modal.Header>
+        <Modal.Header><Icon name='cogs' size="large" />Station Configuration Setting</Modal.Header>
         <Modal.Content>
           <Form>
+            <Form.Field control={Input} label="Station ID" name="stationId" value={stationId} onChange={this.handleChange} />
             <Form.Field control={Input} label="Host" name="host" value={host} onChange={this.handleChange} />
             <Form.Field control={Input} label="Port" name="port" value={port} onChange={this.handleChange} />
           </Form>
@@ -68,4 +76,4 @@ ServerSettingModal.propTypes = {
 
 };
 
-export default ServerSettingModal;
+export default connect(null, { setStationId })(ServerSettingModal);
