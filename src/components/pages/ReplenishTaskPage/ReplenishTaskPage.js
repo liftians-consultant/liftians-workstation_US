@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { Grid, Menu, Dropdown, Loader, Button, Input } from 'semantic-ui-react';
 import ReactTable from "react-table";
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
+import moment from "moment";
 import api from '../../../api';
 // import InlineError from '../../messages/InlineError';
 // import OrderListTable from '../../common/OrderListTable/OrderListTable';
@@ -87,9 +88,13 @@ class ReplenishTaskPage extends Component {
 
   retrieveReplenishRecords = () => {
     this.setState({loading: true});
-    console.log('task:', this.state.activeBillType, 'process:', this.state.activeProcessType);
+    console.log(`[RETRIEVE REPLENISH TASK] BillType: ${this.state.activeBillType}, ProcessType: ${this.state.activeProcessType}`);
     api.replenish.retrieveReplenishRecords(this.props.stationId, this.state.activeBillType, this.state.activeProcessType).then( res => {
-      // res.data = testListData;
+      console.log('[RETRIEVE REPLENISH TASK] Record Retrieved', res.data);
+      res.data.map((object) => {
+        object.replenishDate = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
+        return object;
+      });
       this.setState({ ordersList: res.data, loading: false }, this.filterOrderListBySourceId);
     })
   }

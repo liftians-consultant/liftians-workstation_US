@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-// import ReactTable from 'react-table';
-// import 'react-table/react-table.css';
+import moment from "moment";
 import { Grid, Menu, Dropdown, Loader, Button } from 'semantic-ui-react';
 import api from '../../../api';
 import InlineError from '../../messages/InlineError';
@@ -100,6 +99,10 @@ class PickTaskPage extends Component {
     this.setState({loading: true});
     console.log('task:', this.state.activeBillType, 'process:', this.state.activeProcessType);
     api.pick.retrievePickOrderReocrdsByTypeAndState(1, this.state.activeBillType, this.state.activeProcessType).then( res => {
+      res.data.map((object) => {
+        object.pick_DATE = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
+        return object;
+      })
       this.setState({ ordersList: res.data, loading: false });
     })
   }
@@ -117,8 +120,16 @@ class PickTaskPage extends Component {
       this.props.history.push('/operation');
     }).catch(error => {
       this.setState({ errors: { station: 'Error while server generate pick task. Please contact system admin.'}});
+    }) 
+  }
+
+  handlePauseBtn = (e) => {
+    console.log('[PAUSE PICK OPERATION] Pausing Pick Operation');
+    api.pick.stopPickOperation(this.props.stationId, this.props.username, 'P').then( res => {
+      console.log('[PAUSE PICK OPERATION] Pick Operation Paused');
+    }).catch(err => {
+      console.log('[PAUSE PICK OPERATION] Pause Failed:', err);
     })
-    
   }
 
   render() {
@@ -168,7 +179,7 @@ class PickTaskPage extends Component {
             <Grid.Column>
               <div className="order-list-btn-group">
                 <Button size="huge" primary onClick={() => this.handleStartBtn() }>Start</Button>
-                <Button size="huge" secondary>Pause</Button>
+                <Button size="huge" secondary onClick={ () => this.handlePauseBtn() }>Pause</Button>
                 <Button size="huge" secondary>Print</Button>
               </div>
             </Grid.Column>

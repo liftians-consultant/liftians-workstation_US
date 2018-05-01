@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ReactTable from 'react-table';
+import moment from "moment";
 import api from '../../../api';
 import { OrderDetailsTableColumn } from "../../../models/OrderDetailsTableColumn";
 import { ReplenishDetailTableColumns } from "../../../models/ReplenishDetailTableColumns";
@@ -22,11 +23,20 @@ class OrderDetailTable extends Component {
 
     if (this.props.taskType === 'P') {
       api.pick.retrievePickOrderItems(this.props.recordId).then(res => {
-        console.log('order detail', res.data);
+        console.log(`[PICK ORDER DETAIL] RecordId: ${this.props.recordId}`, res.data);
+        res.data.map((object) => {
+          object.pick_DATE = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
+          return object;
+        });
         this.setState({ recordDetails: res.data, loading: false});
       })
     } else if (this.props.taskType === 'R') {
       api.replenish.getReplenishDetailBySourceId(this.props.recordId).then(res => {
+        console.log(`[REPLENISH ORDER DETAIL] RecordId: ${this.props.recordId}`, res.data);
+        res.data.map((object) => {
+          object.pick_DATE = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
+          return object;
+        });
         this.setState({ recordDetails: res.data, loading: false });
       })
     }
@@ -55,7 +65,7 @@ class OrderDetailTable extends Component {
 }
 
 OrderDetailTable.propTypes = {
-  recordId: PropTypes.string.isRequired,
+  recordId: PropTypes.number.isRequired,
   taskType: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,

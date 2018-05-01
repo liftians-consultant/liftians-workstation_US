@@ -4,21 +4,23 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button } from 'semantic-ui-react';
 import * as actions from '../../actions/auth';
-// import leftLogo from '../../assets/images/logo@2x.png';
+import appConfig from '../../AppConfig';
 import './SideNavigation.css';
 
 
 const SideNavigation = ({ logout }) => ({
 
+  stationId: appConfig.getStationId(),
+
   render() {
-    const { stationId, operationType } = this.props;
+    const { operationType } = this.props;
     const operationUrl = operationType === 'P' ? "/operation" : '/replenish-operation';
 
     return (
       <div className="side-navigation">
         <div className="nav-top">
           <div className="nav-item-container nav-station-container">
-            <span>Station #{stationId}</span>
+            <span>Station #{this.stationId}</span>
           </div>
           <div className="nav-item-container">
           <Link to="/"><Button className="nav-btn">Menu</Button></Link>
