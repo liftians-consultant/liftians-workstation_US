@@ -19,13 +19,34 @@
     color: #fff;
   }
 
-  // .scan-input-holder {
-  //   opacity: 0;
-  //   width: 0;
-  //   input {
-  //     width: 0;
-  //   }
-  // }
+  .action-group-container {
+    margin-top: 50px;
+    height: 116px;
+
+    .scan-input-group, .action-btn-group {
+      width: 49%;
+      display: inline-block;
+    }
+
+    .scan-input-holder {
+      // opacity: 0;
+      // width: 0;
+      margin: 10px;
+
+      .ui.input {
+        width: 250px;
+        // width: 0;
+      }
+    }
+
+    .action-btn-group {
+      vertical-align: bottom;
+
+      button {
+        height: 116px;
+      }
+    }
+  }
 }
 
 

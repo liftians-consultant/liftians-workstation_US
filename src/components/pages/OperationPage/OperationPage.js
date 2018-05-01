@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
-import { Segment, Grid, Button, Dimmer, Loader } from 'semantic-ui-react';
+import { Segment, Grid, Button, Dimmer, Loader, Input } from 'semantic-ui-react';
 import api from '../../../api';
 import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
 // import RemainPickAmount from "./components/RemainPickAmount/RemainPickAmount";
@@ -13,6 +13,7 @@ import BinGroup from './components/BinGroup/BinGroup';
 import OrderDetailListModal from './components/OrderDetailListModal/OrderDetailListModal';
 import OrderFinishModal from './components/OrderFinishModal/OrderFinishModal';
 import WrongProductModal from './components/WrongProductModal/WrongProductModal';
+import WarningModal from "../../common/WarningModal/WarningModal";
 
 class OperationPage extends Component {
   state = {
@@ -32,7 +33,7 @@ class OperationPage extends Component {
     showBox: false,
     openOrderFinishModal: false,
     openWrongProductModal: false,
-    scanCount: 0
+    warningMessage: ''
   }
 
   checkPodInterval = {};
@@ -58,6 +59,8 @@ class OperationPage extends Component {
     this.finishPick = this.finishPick.bind(this);
     this.handleScanKeyPress = this.handleScanKeyPress.bind(this);
     this.setFocusToScanInput = this.setFocusToScanInput.bind(this);
+    this.handleShortageClick = this.handleShortageClick.bind(this);
+    this.closeWarningModal = this.closeWarningModal.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
@@ -96,12 +99,12 @@ class OperationPage extends Component {
       if (!isRecieve) {
         api.station.atStationTask(this.props.stationId).then( res => {
           if (res.data > 0) {
-            console.log('Pod arrive station');
+            console.log('[GET UPCOMING POD] Pod arrive station');
             this.setState({ orderProductList: res.data, taskId: res.data }, () => isRecieve = true);
           }
         });
       } else {
-        console.log('stop interval');
+        console.log('[GET UPCOMING POD] Stop interval');
         clearInterval(this.checkPodInterval);
         this.retrieveNextOrder();
       }
@@ -109,11 +112,7 @@ class OperationPage extends Component {
   }
 
   validateAfterPickData(data) {
-    if (data.packageBarcode && data.pickQuantity > 0 && data.shortQty >= 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return true; // need to work on
   }
 
   finishPick() {
@@ -137,14 +136,14 @@ class OperationPage extends Component {
     if (this.validateAfterPickData(data)) {
       api.pick.atStationAfterPickProduct(data).then(res => {
         if (res.data) { // return 1 if success
-          console.log(`[PICK OPERATION] AtStationAfterPickProduct success:`, res.data);
+          console.log(`[PICK OPERATION] AtStationAfterPickProduct Success`);
           // this.setState({ showBox: false }, () => this.retrieveNextOrder());
           data.holderId = this.state.currentPickProduct.holderID;
 
           // after placed in bin, inform db
           api.pick.atHolderAfterPickProduct(data).then( res => {
             // set here because avoid data changed after async call
-            console.log(`[PICK OPERATION] atHolderAfterPickProduct success:`, res.data);
+            console.log(`[PICK OPERATION] AtHolderAfterPickProduct Success:`, res.data);
             this.finishedOrder = {
               orderNo: this.state.currentPickProduct.order_no,
               binNum: parseInt(this.state.currentPickProduct.binPosition, 10)
@@ -172,7 +171,7 @@ class OperationPage extends Component {
   checkIsOrderFinished() {
     api.pick.checkIsOrderFinished(this.state.currentPickProduct.order_no).then( res => {
       if (res.data) { // return 1 or 0
-        console.log("order finished", res.data);
+        console.log("[CHECK ORDER FINISHED] Order finished", res.data);
         this.setState({ openOrderFinishModal: true });
       }
     });
@@ -180,23 +179,25 @@ class OperationPage extends Component {
 
   getPodInfo() {
     api.station.atStationPodLayoutInfo(this.state.podInfo.podId, this.state.podInfo.podSide).then(res => {
-      // console.log(res.data);
       if (res.data.length) {
+        console.log(`[POD LAYOUT] Pod height: ${res.data.length}`)
         const podInfo = {
           ...this.state.podInfo,
           shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxNumberOfBox, 10) }).reverse().value()
         }
         this.setState({ podInfo, loading: false });
+      } else {
+        console.log('[POD LAYOUT] NO GOOD. Empty array returned..')
       }
     }).catch( err => {
-      console.error('error getting pod info', err);
+      console.log('[ERROR] getting pod info', err);
     });
   }
 
   getProductList() {
     api.pick.getPickInfoByTaskId(this.state.taskId).then(res => {
-      console.log(res.data);
       if (res.data.length) {
+        console.log("[GET PRODUCT LIST] Pick info retrevied")
         this.setState({
           currentPickProduct: res.data[0],
           orderList: res.data,
@@ -214,11 +215,11 @@ class OperationPage extends Component {
       } else {
         // when nothing return, that means the pod is finished
         // and need to wait for the next pod come in to station
-        console.log("No order return from the server");
+        console.log("[GET PRODUCT LIST] No order return from the server");
         this.getUpcomingPod();
       }
     }).catch((err) => {
-      console.error('Error getting products list', err);
+      console.error('[ERROR] getting products list', err);
     });
   }
 
@@ -230,23 +231,60 @@ class OperationPage extends Component {
     }
   }
 
+  validatePharmacyBarcode(barcode) {
+    return new Promise( (resolve, reject) => {
+      // check for duplicate
+      if (this.state.barcode.indexOf(barcode) !== -1) {
+        resolve({ valid: false, message: 'Duplicate barcode!'});
+      }
+  
+      // check if barcode on shelf
+      api.pick.getInventoryByProductBarcode(barcode, this.state.podInfo.podId, this.state.podInfo.podSide).then( res => {
+        // api.pick.getInventoryByProductBarcode('T168000', 33 , 0).then( res => {
+        console.log('[VALIDATE BARCODE]', res);
+        if (res.data.length > 0) { // barcode is on the shelf
+          resolve({ valid: true });
+        } else {
+          resolve({ valid: false, message: 'Wrong Product (this barcode is not on the shelf)'});
+        }
+      }).catch(err => {
+        resolve({ valid: false, message: 'Something went wrong while validating the barcode.'});
+      });
+    });
+  }
+
+  closeWarningModal() {
+    this.setFocusToScanInput();
+    this.setState({ warningMessage: '' });
+  }
+
   handleScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
-      console.log('[Scanned]', e.target.value);
+      console.log('[SCANNED]', e.target.value);
       const scannedValue = e.target.value;
       if (this.businessMode === 'pharmacy') {
-        const barcode = this.state.scanCount === 0 ? scannedValue : `${this.state.barcode},${scannedValue}`;
-        const scanCount = this.state.scanCount + 1;
-        if (scanCount === this.state.currentPickProduct.quantity) {
-          this.setState({showBox: true, barcode, scanCount: 0});
-        } else {
-          this.setState({ barcode, scanCount });
-        }
-        console.log(`[Scanned] New Barcode: ${barcode}`);
+        // validate barcode
+        this.validatePharmacyBarcode(scannedValue).then((result) => {
+          if (result.valid) {
+            const barcode = this.state.pickedAmount === 0 ? scannedValue : `${this.state.barcode},${scannedValue}`;
+            const pickedAmount = this.state.pickedAmount + 1;
+            if (pickedAmount === this.state.currentPickProduct.quantity) {
+              this.setState({ showBox: true, barcode, pickedAmount });
+            } else {
+              this.setState({ barcode, pickedAmount });
+              this.setFocusToScanInput();
+            }
+            console.log(`[SCANNED] New Barcode: ${barcode}`);
+          } else {
+            console.log('[SCANNED] Invalid Barcode');
+            this.setState({ warningMessage: result.message });
+          }
+        });
+        
       } else if (this.businessMode === 'ecommerce') {
         if (this.scanValidation(scannedValue)) {
           this.setState({ showBox: !this.state.showBox, barcode: scannedValue });
-          console.log(`[Scanned] New Barcode: ${scannedValue}`);
+          console.log(`[SCANNED] New Barcode: ${scannedValue}`);
         } else {
           this.setState({ barcode: scannedValue } , () => {
             this.setState({ openWrongProductModal: true })
@@ -266,14 +304,15 @@ class OperationPage extends Component {
         boxId: this.state.currentPickProduct.boxID,
       };
       api.pick.getProductSerialNum(data).then( res => {
-        const barCodeIndex = res.data[0].barcode ? 0 : 1;
+        const barCodeIndex = res.data[0].barcode ? 0 : 1; // sometimes there will have empty barcode data return...
+        console.log(`[SCANNED][SIMULATE] Get barcode ${res.data[barCodeIndex].barcode}`);
         if (this.businessMode === 'pharmacy') {
-          const barcode = this.state.scanCount === 0 ? res.data[barCodeIndex].barcode : `${this.state.barcode},${res.data[barCodeIndex].barcode}`;
-          const scanCount = this.state.scanCount + 1;
-          if (scanCount === this.state.currentPickProduct.quantity) {
-            this.setState({showBox: true, barcode, scanCount: 0});
+          const barcode = this.state.pickedAmount === 0 ? res.data[barCodeIndex].barcode : `${this.state.barcode},${res.data[barCodeIndex].barcode}`;
+          const pickedAmount = this.state.pickedAmount + 1;
+          if (pickedAmount === this.state.currentPickProduct.quantity) {
+            this.setState({showBox: true, barcode, pickedAmount});
           } else {
-            this.setState({ barcode, scanCount });
+            this.setState({ barcode, pickedAmount });
           }
         } else if (this.businessMode === 'ecommerce') {
           this.setState({ showBox: !this.state.showBox, barcode: res.data[barCodeIndex].barcode });
@@ -289,6 +328,11 @@ class OperationPage extends Component {
     } else {
       this.setState({ barcode: ''});
     }
+  }
+
+  handleShortageClick() {
+    console.log('[PICK OPERATION] Shortage Clicked!');
+    this.finishPick();
   }
 
   handleWrongProductBtnClick() {
@@ -321,7 +365,7 @@ class OperationPage extends Component {
   }
 
   render() {
-    const { podInfo, currentPickProduct, pickedAmount, showBox,
+    const { warningMessage, podInfo, currentPickProduct, pickedAmount, showBox,
       orderList, openOrderFinishModal, openWrongProductModal, barcode } = this.state;
     const highlightBox = {
       row: currentPickProduct ? parseInt(currentPickProduct.shelfID, 10) : 0,
@@ -345,26 +389,33 @@ class OperationPage extends Component {
                 </Segment>
               </Segment.Group>
               { orderList.length > 0 && <OrderDetailListModal orderList={ orderList } /> }
-              <Button color="red" onClick={ () => this.finishPick() }>Shortage</Button>
+              <Button color="red" onClick={ () => this.handleShortageClick() }>Shortage</Button>
             </Grid.Column>
 
             <Grid.Column width={11}>
               { !showBox ? (
                 <div>
                   <ProductInfoDisplay product={ currentPickProduct } quantity={ currentPickProduct.quantity } pickedAmount={ pickedAmount }></ProductInfoDisplay>
-                  <br />
-                  <h4>[{ this.state.barcode}]</h4>
-                  <br></br>
-                  <div className="scan-input-holder">
-                    <input type="text"
-                      ref={this.scanInputRef}
-                      onKeyPress={this.handleScanKeyPress}/>
+                  <div className="action-group-container">
+                    <div className="scan-input-group">
+                      <h4>[ { this.state.barcode} ]</h4>
+                      <br />
+                      <div className="scan-input-holder">
+                        <Input type="text"
+                          placeholder="Enter or Scan Box Barcode"
+                          ref={this.scanInputRef}
+                          onKeyPress={this.handleScanKeyPress}/>
+                      </div>
+                    </div>
+                    <div className="action-btn-group">
+                      
+                      <Button primary size="medium" onClick={ () => this.setFocusToScanInput() }>Set Focus</Button>
+                      {/* <Button size="medium" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button> */}
+                    </div>
                   </div>
-                  {/* { process.env.REACT_APP_ENV === 'DEV' && ( */}
-                    <Button primary size="medium" onClick={ () => this.handleScanBtnClick() }>Scan</Button>)
-                  {/* } */}
-                  <Button size="medium" onClick={ () => this.setFocusToScanInput() }>Set Focus</Button>
-                  {/* <Button size="medium" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button> */}
+                  { process.env.REACT_APP_ENV === 'DEV' && (
+                        <Button primary size="medium" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
+                      )}
                 </div>
               ) : (
                 <div>
@@ -376,7 +427,6 @@ class OperationPage extends Component {
                       callback={this.selectPickedAmount}
                     ></NumPad>
                   )}
-                  
                 </div>
               ) }
             </Grid.Column>
@@ -392,6 +442,11 @@ class OperationPage extends Component {
           productId={ barcode }
           open={ openWrongProductModal }
           close={ this.closeWrongProductModal } /> }
+
+        { warningMessage && <WarningModal open={true}
+          onClose={ this.closeWarningModal }
+          headerText="Warning"
+          contentText={ warningMessage } /> }
       </div>
     );
   }

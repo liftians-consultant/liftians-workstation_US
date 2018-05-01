@@ -7,7 +7,7 @@
       color: #FFF;
       font-size: 2rem;
       white-space: nowrap;
-    }    
+    }
   }
 
   .numpad-container {
@@ -16,11 +16,37 @@
     right: 0;
   }
 
-  // .scan-input-holder {
-  //   opacity: 0;
-  //   width: 0;
-  //   input {
-  //     width: 0;
-  //   }
-  // }
+  .product-image {
+    min-height: 300px;
+    min-width: 300px;
+  }
+
+  .action-group-container {
+    margin-top: 50px;
+    height: 116px;
+
+    .scan-input-group, .action-btn-group {
+      width: 49%;
+      display: inline-block;
+    }
+
+    .scan-input-holder {
+      // opacity: 0;
+      // width: 0;
+      margin: 10px;
+
+      .ui.input {
+        width: 250px;
+        // width: 0;
+      }
+    }
+
+    .action-btn-group {
+      vertical-align: bottom;
+
+      button {
+        height: 116px;
+      }
+    }
+  }
 }

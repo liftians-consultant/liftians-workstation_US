@@ -159,11 +159,11 @@ const pick = {
       parameter: [ orderNum ]
     }),
 
-  getInventoryByProductBarcode: (productId, podId, podSide) =>
+  getInventoryByProductBarcode: (barcode, podId, podSide) =>
     axios.post(appConfig.getApiUrl() + '/Pick', {
       name: 'GetInventoryByProductBarcode',
       parameter: [
-        productId,
+        String(barcode),
         String(podId || 0),
         String(podSide || 0)
       ]

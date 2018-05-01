@@ -40,11 +40,6 @@ class OrderDetailListModal extends Component {
             
           </Modal.Description>
         </Modal.Content>
-        <Modal.Actions>
-          <Button primary>
-            Ok <Icon name='right chevron' />
-          </Button>
-        </Modal.Actions>
       </Modal>
     );
   }

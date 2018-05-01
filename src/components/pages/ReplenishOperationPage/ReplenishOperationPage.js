@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
-import { Segment, Grid, Button, Dimmer, Loader, Image } from 'semantic-ui-react';
+import { Segment, Grid, Button, Dimmer, Loader, Image, Input } from 'semantic-ui-react';
 import api from '../../../api';
 // import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
 import PodShelf from '../../common/PodShelf/PodShelf';
@@ -79,6 +79,8 @@ class ReplenishOperationPage extends Component {
     this.closeWrongProductModal = this.closeWrongProductModal.bind(this);
     this.handleBoxScanKeyPress = this.handleBoxScanKeyPress.bind(this);
     this.handleProductScanKeyPress = this.handleProductScanKeyPress.bind(this);
+    this.setFocusToInputManual = this.setFocusToInputManual.bind(this);
+    this.closeWarningModal = this.closeWarningModal.bind(this);
   }
 
   componentWillMount() {
@@ -93,15 +95,24 @@ class ReplenishOperationPage extends Component {
     this.setFocusToBoxScanInput();
   }
 
+
+  setFocusToInputManual() {
+    if (this.state.boxBarcode) {
+      this.setFocusToProductScanInput();
+    } else {
+      this.setFocusToBoxScanInput();
+    }
+  }
+
   setFocusToBoxScanInput() {
     this.scanBoxInputRef.current.focus();
-    this.scanBoxInputRef.current.value = '';
-    this.scanProductInputRef.current.value = '';
+    this.scanBoxInputRef.current.inputRef.value = '';
+    this.scanProductInputRef.current.inputRef.value = '';
   }
 
   setFocusToProductScanInput() {
+    this.scanProductInputRef.current.inputRef.value = '';
     this.scanProductInputRef.current.focus();
-    this.scanProductInputRef.current.value = '';
   }
 
   selectReplenishedAmount(num) {
@@ -142,10 +153,10 @@ class ReplenishOperationPage extends Component {
   finishReplenish(replenishAmount, isNextPod=false, retry=false) {
     this.setState({ loading: true });
     const product = this.state.currentReplenishProduct;
-    let barcodeList = this.state.barcode;
-    if (this.state.businessMode === 'pharmacy' ) {
-      barcodeList = this.state.barcodeList.slice(0, replenishAmount).join(',');
-    }
+    let barcodeList = this.state.barcodeList.filter(o => o.scanned).map(o => o.barcode).join(','); // only take barcode that are scanned
+    // if (this.state.businessMode === 'pharmacy' ) {
+    //   barcodeList = this.state.barcodeList.slice(0, replenishAmount).join(',');
+    // }
     const data = {
       taskId: this.state.taskId,
       boxBarcode: this.state.boxBarcode,
@@ -274,9 +285,14 @@ class ReplenishOperationPage extends Component {
     const { productID, source_lines_id } = this.state.currentReplenishProduct;
     api.replenish.getProductInfoByTaskId(this.state.taskId, source_lines_id, productID, 100).then( res => {
       if (res.data) {
-        const barcodeList = res.data.map(item => item.productBarCode)
+        const barcodeList = res.data.map(item => {
+          return {
+            barcode: item.productBarCode,
+            scanned: false
+          }
+        })
         console.log('[GET PRODUCT BARCODE LIST] Barcode List', barcodeList);
-        this.setState({ barcodeList: barcodeList});
+        this.setState({ barcodeList });
       }
 
       if (callback) {
@@ -331,17 +347,61 @@ class ReplenishOperationPage extends Component {
     }
   }
 
+  validatePharmacyBarcode(barcode) {
+    return new Promise( (resolve, reject) => {
+      const barcodeIndex = _.findIndex(this.state.barcodeList, function(o) { return o.barcode === barcode });
+      // validate if barcode is in barcode list
+      if (barcodeIndex === -1) { // TODO: this is not right, its an object now. User lodash
+        resolve({ valid: false, message: 'This barcode is not in the replenish list.'});
+      }
+
+      // check for duplicate
+      if (this.state.barcodeList[barcodeIndex].scanned === true) {
+        resolve({ valid: false, message: 'Duplicate barcode!'});
+      }
+  
+      // // check if barcode on shelf
+      // api.pick.getInventoryByProductBarcode(barcode, this.state.podInfo.podId, this.state.podInfo.podSide).then( res => {
+      //   // api.pick.getInventoryByProductBarcode('T168000', 33 , 0).then( res => {
+      //   console.log('[VALIDATE BARCODE]', res);
+      //   if (res.data.length > 0) { // barcode is on the shelf
+      //     resolve({ valid: true });
+      //   } else {
+      //     resolve({ valid: false, message: 'Wrong Product (this barcode is not on the shelf)'});
+      //   }
+      // }).catch(err => {
+      //   resolve({ valid: false, message: 'Something went wrong while validating the barcode.'});
+      // });
+      const barcodeList = this.state.barcodeList;
+      barcodeList[barcodeIndex].scanned = true;
+      console.log('[SCAN PRODUCT] Barcode List', barcodeList);
+      this.setState({ barcodeList }, () => resolve({ valid: true }) );
+    });
+  }
+
   handleProductScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
       console.log(`[SCAN PRODUCT] Product Scanned: ${e.target.value}`);
 
       if (this.state.businessMode === 'pharmacy') {
-        // all product have unique barcode. scann all product then send out the finish request
-
-        this.setState({ replenishedAmount: this.state.replenishedAmount + 1 }, () => {
-          console.log(`[SCAN PRODUCT] Replenished amount: ${this.state.replenishedAmount}`);
-          if (this.state.replenishedAmount === this.state.currentReplenishProduct.totalReplenishQuantity) {
-            this.finishReplenish(this.state.replenishedAmount);
+        this.validatePharmacyBarcode(e.target.value).then((result) => {
+          if (result.valid) {
+            // all product have unique barcode. scann all product then send out the finish request
+            this.setState({ replenishedAmount: this.state.replenishedAmount + 1 }, () => {
+              console.log(`[SCAN PRODUCT] Replenished amount: ${this.state.replenishedAmount}`);
+              this.setFocusToProductScanInput();
+              if (this.state.replenishedAmount === this.state.currentReplenishProduct.totalReplenishQuantity) {
+                this.finishReplenish(this.state.replenishedAmount);
+              }
+            });
+          } else {
+            console.log('[SCANNED] Invalid Barcode');
+            const warningMessage = {
+              onCloseFunc: this.closeWrongProductModal,
+              headerText: 'Warning',
+              contentText: result.message
+            }
+            this.setState({ openＷarningModal: true, warningMessage });
           }
         });
       } else if (this.state.businessMode === 'ecommerce' ) {
@@ -349,7 +409,7 @@ class ReplenishOperationPage extends Component {
         // scanned once, send request everything number pad is clicked.
         if (this.scanValidation(e.target.value)) {
           console.log('[SCAN PRODUCT] Product correct');
-          this.setState({ barcode: e.target.value});
+          this.setState({ barcodeList: [e.target.value]});
         } else {
           console.log('[SCAN PRODUCT] Wrong product!');
           this.setState({ openＷarningModal: true, warningMessage: this.wrongProductWarningMessage });
@@ -424,7 +484,7 @@ class ReplenishOperationPage extends Component {
               </Segment.Group>
 
               <div>
-                <Button>Shortage</Button>
+                <Button color="red" >Shortage</Button>
               </div>
 
               {/* { orderList.length > 0 && <OrderDetailListModal orderList={ orderList } /> } */}
@@ -440,32 +500,40 @@ class ReplenishOperationPage extends Component {
                       <span className="product-name">{ currentReplenishProduct.productName }</span>
                     </div>
                     <div className="product-remain-container">
-                      <span className="remain-amount">{ currentReplenishProduct.totalReplenishQuantity }</span>
+                      <span className="remain-amount">{ currentReplenishProduct.totalReplenishQuantity - this.state.replenishedAmount }</span>
                     </div>
                     <div className="product-image-container">
                       <Image className="product-image" src={ imageUrl } onError={(e) => { e.target.src = ImageNotFound }}></Image>
                     </div>
                   </div>
-                  <br></br>
-                  <div className="scan-input-holder">
-                    <input type="text"
-                      ref={this.scanBoxInputRef}
-                      onKeyPress={this.handleBoxScanKeyPress} />
+                  <div className="action-group-container">
+                    <div className="scan-input-group">
+                      <div className="scan-input-holder">
+                        <Input type="text"
+                          placeholder="Enter or Scan Box Barcode"
+                          ref={this.scanBoxInputRef}
+                          onKeyPress={this.handleBoxScanKeyPress} />
+                      </div>
+                      <div className="scan-input-holder">
+                        <Input type="text"
+                          placeholder="Enter or scan Product Barcode"
+                          ref={this.scanProductInputRef}
+                          onKeyPress={this.handleProductScanKeyPress} />
+                      </div>
+                    </div>
+                    <div className="action-btn-group">
+                      <Button primary onClick={ () => this.setFocusToInputManual() }>Set Focus</Button>
+                      <Button size="medium" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
+                    </div>
                   </div>
-                  <div className="scan-input-holder">
-                    <input type="text"
-                      ref={this.scanProductInputRef}
-                      onKeyPress={this.handleProductScanKeyPress} />
-                  </div>
-                  { process.env.REACT_APP_ENV === 'DEV' && (
+
+                  {/* { process.env.REACT_APP_ENV === 'DEV' && (
                     <div>
                       <Button primary size="medium" onClick={ () => this.handleScanBoxBtnClick() }>Scan Box</Button>
                       <Button primary size="medium" onClick={ () => this.handleProductScanBtnClick() } disabled={ this.state.boxBarcode === 0 } >Scan Product</Button>
                     </div>
-                  )}
-                  <br></br>
-                    <Button size="medium" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
-
+                  )} */}
+                
                   { this.state.businessMode === 'ecommerce' && <NumPad highlightAmount={ currentReplenishProduct.totalReplenishQuantity - replenishedAmount }
                     callback={this.selectReplenishedAmount}
                     disabled={ !barcode || !boxBarcode }></NumPad> }
