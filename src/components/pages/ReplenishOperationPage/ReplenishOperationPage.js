@@ -36,6 +36,7 @@ class ReplenishOperationPage extends Component {
     openＷarningModal: false,
     nextPod: {},
     warningMessage: {
+      onCloseFunc: () => {},
       headerText: '',
       contentText: ''
     }
@@ -409,7 +410,7 @@ class ReplenishOperationPage extends Component {
         // scanned once, send request everything number pad is clicked.
         if (this.scanValidation(e.target.value)) {
           console.log('[SCAN PRODUCT] Product correct');
-          this.setState({ barcodeList: [e.target.value]});
+          this.setState({ barcodeList: [{ barcode: e.target.value, scanned: true }]});
         } else {
           console.log('[SCAN PRODUCT] Wrong product!');
           this.setState({ openＷarningModal: true, warningMessage: this.wrongProductWarningMessage });
@@ -458,13 +459,15 @@ class ReplenishOperationPage extends Component {
   }
 
   render() {
-    const { podInfo, currentReplenishProduct, replenishedAmount, barcode, boxBarcode, warningMessage } = this.state;
+    const { podInfo, currentReplenishProduct, replenishedAmount, barcodeList, boxBarcode, warningMessage } = this.state;
     const highlightBox = {
       row: currentReplenishProduct ? parseInt(currentReplenishProduct.shelfID, 10) : 0,
       column: currentReplenishProduct ? parseInt(currentReplenishProduct.boxID, 10) : 0
     };
 
     const imageUrl = productImgBaseUrl + currentReplenishProduct.productID + '.png';
+
+    const isScanned = (barcodeList.filter(o => o.scanned).length > 0);
 
     return (
       <div className="replenish-operation-page">
@@ -486,67 +489,57 @@ class ReplenishOperationPage extends Component {
               <div>
                 <Button color="red" >Shortage</Button>
               </div>
-
-              {/* { orderList.length > 0 && <OrderDetailListModal orderList={ orderList } /> } */}
-              {/* <Button color="red" onClick={ () => this.finishReplenish() }>Shortage</Button> */}
             </Grid.Column>
 
             <Grid.Column width={11}>
-              {/* { showBox === false ? ( */}
-                <div>
-                  {/* <ProductInfoDisplay product={ currentReplenishProduct } quantity={ currentReplenishProduct.totalReplenishQuantity } pickedAmount={ replenishedAmount }></ProductInfoDisplay> */}
-                  <div className="product-info-block">
-                    <div className="product-name-container">
-                      <span className="product-name">{ currentReplenishProduct.productName }</span>
-                    </div>
-                    <div className="product-remain-container">
-                      <span className="remain-amount">{ currentReplenishProduct.totalReplenishQuantity - this.state.replenishedAmount }</span>
-                    </div>
-                    <div className="product-image-container">
-                      <Image className="product-image" src={ imageUrl } onError={(e) => { e.target.src = ImageNotFound }}></Image>
-                    </div>
-                  </div>
-                  <div className="action-group-container">
-                    <div className="scan-input-group">
-                      <div className="scan-input-holder">
-                        <Input type="text"
-                          placeholder="Enter or Scan Box Barcode"
-                          ref={this.scanBoxInputRef}
-                          onKeyPress={this.handleBoxScanKeyPress} />
-                      </div>
-                      <div className="scan-input-holder">
-                        <Input type="text"
-                          placeholder="Enter or scan Product Barcode"
-                          ref={this.scanProductInputRef}
-                          onKeyPress={this.handleProductScanKeyPress} />
-                      </div>
-                    </div>
-                    <div className="action-btn-group">
-                      <Button primary onClick={ () => this.setFocusToInputManual() }>Set Focus</Button>
-                      <Button size="medium" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
-                    </div>
-                  </div>
-
-                  {/* { process.env.REACT_APP_ENV === 'DEV' && (
-                    <div>
-                      <Button primary size="medium" onClick={ () => this.handleScanBoxBtnClick() }>Scan Box</Button>
-                      <Button primary size="medium" onClick={ () => this.handleProductScanBtnClick() } disabled={ this.state.boxBarcode === 0 } >Scan Product</Button>
-                    </div>
-                  )} */}
-                
-                  { this.state.businessMode === 'ecommerce' && <NumPad highlightAmount={ currentReplenishProduct.totalReplenishQuantity - replenishedAmount }
-                    callback={this.selectReplenishedAmount}
-                    disabled={ !barcode || !boxBarcode }></NumPad> }
+              <div className="product-info-block">
+                <div className="product-name-container">
+                  <span className="product-name">{ currentReplenishProduct.productName }</span>
                 </div>
-              {/* ) : (
+                <div className="product-remain-container">
+                  <span className="remain-amount">{ currentReplenishProduct.totalReplenishQuantity - this.state.replenishedAmount }</span>
+                </div>
+                <div className="product-image-container">
+                  <Image className="product-image" src={ imageUrl } onError={(e) => { e.target.src = ImageNotFound }}></Image>
+                </div>
+              </div>
+              <div className="action-group-container">
+                <div className="scan-input-group">
+                  <div className="scan-input-holder">
+                    <Input type="text"
+                      placeholder="Enter or Scan Box Barcode"
+                      ref={this.scanBoxInputRef}
+                      onKeyPress={this.handleBoxScanKeyPress} />
+                  </div>
+                  <div className="scan-input-holder">
+                    <Input type="text"
+                      placeholder="Enter or scan Product Barcode"
+                      ref={this.scanProductInputRef}
+                      onKeyPress={this.handleProductScanKeyPress} />
+                  </div>
+                </div>
+                <div className="action-btn-group">
+                  <Button primary onClick={ () => this.setFocusToInputManual() }>Set Focus</Button>
+                  <Button size="medium" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
+                </div>
 
-              ) } */}
+                {/* { process.env.REACT_APP_ENV === 'DEV' && (
+                  <div>
+                    <Button primary size="medium" onClick={ () => this.handleScanBoxBtnClick() }>Scan Box</Button>
+                    <Button primary size="medium" onClick={ () => this.handleProductScanBtnClick() } disabled={ this.state.boxBarcode === 0 } >Scan Product</Button>
+                  </div>
+                )} */}
+              
+                { this.state.businessMode === 'ecommerce' && <NumPad highlightAmount={ currentReplenishProduct.totalReplenishQuantity - replenishedAmount }
+                  callback={this.selectReplenishedAmount}
+                  disabled={ !isScanned || !boxBarcode }></NumPad> }
+              </div>
             </Grid.Column>
           </Grid.Row>
         </Grid>
 
         <WarningModal open={ this.state.openＷarningModal}
-          onClose={warningMessage.onCloseFunc}
+          onClose={warningMessage.onCloseFunc.bind(this)}
           headerText={warningMessage.headerText}
           contentText={warningMessage.contentText}
         />

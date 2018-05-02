@@ -34,7 +34,8 @@
   }
 
   .product-image-container .product-image {
-    width: 350px;
+    min-width: 350px;
+    min-height: 350px;
   }
 }
 
