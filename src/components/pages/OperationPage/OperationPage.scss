@@ -49,4 +49,12 @@
   }
 }
 
+@media(max-width: 1300px) {
 
+  .operationPage {
+    padding: 5% 5% 0;
+  }
+  .operationPage .action-group-container {
+    margin-top: 10px;
+  }
+}

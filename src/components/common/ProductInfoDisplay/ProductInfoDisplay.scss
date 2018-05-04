@@ -52,3 +52,10 @@
     width: 280px;
   }
 }
+
+@media (max-width: 1200px) {
+  .product-info-block .product-image-container .product-image {
+    width: 280px;
+    height: 280px;
+  }
+}

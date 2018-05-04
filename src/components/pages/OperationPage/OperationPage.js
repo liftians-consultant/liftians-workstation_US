@@ -78,8 +78,8 @@ class OperationPage extends Component {
   }
 
   setFocusToScanInput() {
+    this.scanInputRef.current.inputRef.value = '';
     this.scanInputRef.current.focus();
-    this.scanInputRef.current.value = '';
   }
   
 
@@ -141,16 +141,7 @@ class OperationPage extends Component {
           data.holderId = this.state.currentPickProduct.holderID;
 
           // after placed in bin, inform db
-          api.pick.atHolderAfterPickProduct(data).then( res => {
-            // set here because avoid data changed after async call
-            console.log(`[PICK OPERATION] AtHolderAfterPickProduct Success:`, res.data);
-            this.finishedOrder = {
-              orderNo: this.state.currentPickProduct.order_no,
-              binNum: parseInt(this.state.currentPickProduct.binPosition, 10)
-            };
-            this.checkIsOrderFinished();
-            this.retrieveNextOrder();
-          })
+          this.atHolderAfterPickProduct(data);
         } else {
           // TODO: ERROR MESSAGE
         }
@@ -160,6 +151,32 @@ class OperationPage extends Component {
     } else {
       console.log('[PICK OPERATION] Validation error')
     }
+  }
+
+  atHolderAfterPickProduct(data, retry = false) {
+    api.pick.atHolderAfterPickProduct(data).then( res => {
+      if ( res.data > 0 ) {
+        // set here because avoid data changed after async call
+        console.log(`[PICK OPERATION] AtHolderAfterPickProduct Success:`, res.data);
+        this.finishedOrder = {
+          orderNo: this.state.currentPickProduct.order_no,
+          binNum: parseInt(this.state.currentPickProduct.binPosition, 10)
+        };
+        this.checkIsOrderFinished();
+        this.retrieveNextOrder();
+      } else {
+        console.log(`[ERROR] AtHolderAfterPickProduct FAILED: ${res.data}`);
+        if (!retry) { // first time retry
+          console.log('[ERROR - RETRY] Retry AtHolderAfterPickProduct...');
+          setTimeout(() => { // set timeout just to let database buffer
+            this.atHolderAfterPickProduct(data, true);  
+          }, 1000);
+        } else {
+          // retry also failed
+          console.log(`[ERROR - RETRY] AtHolderAfterPickProduct Failed after retry: ${res.data}`);
+        }
+      }
+    });
   }
 
   retrieveNextOrder() {
@@ -271,8 +288,8 @@ class OperationPage extends Component {
             if (pickedAmount === this.state.currentPickProduct.quantity) {
               this.setState({ showBox: true, barcode, pickedAmount });
             } else {
-              this.setState({ barcode, pickedAmount });
               this.setFocusToScanInput();
+              this.setState({ barcode, pickedAmount });
             }
             console.log(`[SCANNED] New Barcode: ${barcode}`);
           } else {

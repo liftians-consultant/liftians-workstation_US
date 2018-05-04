@@ -50,7 +50,7 @@ const station = {
     }),
 
   atStationTask: (stationId) =>
-    axios.get('atStation/CurrentTask?stationID=' + stationId),
+    axios.get(appConfig.getApiUrl() + '/atStation/CurrentTask?stationID=' + stationId),
 
   startStationOperation: (stationId, empId, operationType) =>
     axios.post(appConfig.getApiUrl() + '/Pick', {

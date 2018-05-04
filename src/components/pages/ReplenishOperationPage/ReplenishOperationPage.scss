@@ -50,3 +50,13 @@
     }
   }
 }
+
+@media(max-width: 1300px) {
+
+  .replenish-operation-page {
+    padding: 5% 5% 0;
+  }
+  .replenish-operation-page .action-group-container {
+    margin-top: 10px;
+  }
+}
