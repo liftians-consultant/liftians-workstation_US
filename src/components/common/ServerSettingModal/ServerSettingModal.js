@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { Modal, Icon, Button, Form, Input } from 'semantic-ui-react';
-import axios from 'axios';
 import { setStationId } from "../../../actions/station";
 import appConfig from '../../../AppConfig';
 
@@ -72,8 +71,8 @@ class ServerSettingModal extends Component {
   }
 }
 
-ServerSettingModal.propTypes = {
+// ServerSettingModal.propTypes = {
 
-};
+// };
 
 export default connect(null, { setStationId })(ServerSettingModal);

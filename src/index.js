@@ -7,8 +7,6 @@ import { Provider } from "react-redux";
 import thunk from "redux-thunk";
 import decode from "jwt-decode";
 import { composeWithDevTools } from "redux-devtools-extension";
-import { Loader } from 'semantic-ui-react';
-import axios from 'axios';
 
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";

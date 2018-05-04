@@ -52,7 +52,7 @@ class OrderDetailTable extends Component {
           data={recordDetails}
           loading={loading}
           manual
-          defaultPageSize={5}
+          defaultPageSize={1}
           resizable={false}
           filterable={false}
           showPageJump={false}
@@ -65,7 +65,10 @@ class OrderDetailTable extends Component {
 }
 
 OrderDetailTable.propTypes = {
-  recordId: PropTypes.number.isRequired,
+  recordId: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
   taskType: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
