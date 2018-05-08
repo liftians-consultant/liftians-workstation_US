@@ -19,6 +19,6 @@ export const PickOrderTableColumns = [
     minWidth: 130
   }, {
     Header: 'Status',
-    accessor: 'processStatusCHN'
+    accessor: 'processStatus'
   }
 ]

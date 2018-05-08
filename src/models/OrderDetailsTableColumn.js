@@ -10,6 +10,6 @@ export const OrderDetailsTableColumn = [
     accessor: 'case_QTY'
   }, {
     Header: 'Status',
-    accessor: 'processStatusCHN'
+    accessor: 'processStatus'
   }
 ];

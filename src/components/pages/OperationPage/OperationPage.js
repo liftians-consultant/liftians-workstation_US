@@ -277,37 +277,40 @@ class OperationPage extends Component {
 
   handleScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
-      console.log('[SCANNED]', e.target.value);
-      const scannedValue = e.target.value;
-      if (this.businessMode === 'pharmacy') {
-        // validate barcode
-        this.validatePharmacyBarcode(scannedValue).then((result) => {
-          if (result.valid) {
-            const barcode = this.state.pickedAmount === 0 ? scannedValue : `${this.state.barcode},${scannedValue}`;
-            const pickedAmount = this.state.pickedAmount + 1;
-            if (pickedAmount === this.state.currentPickProduct.quantity) {
-              this.setState({ showBox: true, barcode, pickedAmount });
+      e.persist();
+      setTimeout(() => {
+        console.log('[SCANNED]', e.target.value);
+        const scannedValue = e.target.value;
+        if (this.businessMode === 'pharmacy') {
+          // validate barcode
+          this.validatePharmacyBarcode(scannedValue).then((result) => {
+            if (result.valid) {
+              const barcode = this.state.pickedAmount === 0 ? scannedValue : `${this.state.barcode},${scannedValue}`;
+              const pickedAmount = this.state.pickedAmount + 1;
+              if (pickedAmount === this.state.currentPickProduct.quantity) {
+                this.setState({ showBox: true, barcode, pickedAmount });
+              } else {
+                this.setFocusToScanInput();
+                this.setState({ barcode, pickedAmount });
+              }
+              console.log(`[SCANNED] New Barcode: ${barcode}`);
             } else {
-              this.setFocusToScanInput();
-              this.setState({ barcode, pickedAmount });
+              console.log('[SCANNED] Invalid Barcode');
+              this.setState({ warningMessage: result.message });
             }
-            console.log(`[SCANNED] New Barcode: ${barcode}`);
-          } else {
-            console.log('[SCANNED] Invalid Barcode');
-            this.setState({ warningMessage: result.message });
-          }
-        });
-        
-      } else if (this.businessMode === 'ecommerce') {
-        if (this.scanValidation(scannedValue)) {
-          this.setState({ showBox: !this.state.showBox, barcode: scannedValue });
-          console.log(`[SCANNED] New Barcode: ${scannedValue}`);
-        } else {
-          this.setState({ barcode: scannedValue } , () => {
-            this.setState({ openWrongProductModal: true })
           });
+          
+        } else if (this.businessMode === 'ecommerce') {
+          if (this.scanValidation(scannedValue)) {
+            this.setState({ showBox: !this.state.showBox, barcode: scannedValue });
+            console.log(`[SCANNED] New Barcode: ${scannedValue}`);
+          } else {
+            this.setState({ barcode: scannedValue } , () => {
+              this.setState({ openWrongProductModal: true })
+            });
+          }
         }
-      }
+      }, 1500);
     }
   }
 
@@ -415,7 +418,9 @@ class OperationPage extends Component {
                   <ProductInfoDisplay product={ currentPickProduct } quantity={ currentPickProduct.quantity } pickedAmount={ pickedAmount }></ProductInfoDisplay>
                   <div className="action-group-container">
                     <div className="scan-input-group">
-                      <h4>[ { this.state.barcode} ]</h4>
+                      { this.businessMode === 'pharmacy' && (
+                        <h4>[ { this.state.barcode} ]</h4>
+                      )}
                       <br />
                       <div className="scan-input-holder">
                         <Input type="text"

@@ -15,9 +15,6 @@ export const ReplenishDetailTableColumns = [
     Header: 'Qty',
     accessor: 'receiveQty'
   }, {
-    Header: 'Package Type',
-    accessor: 'locateActDesc'
-  }, {
     Header: 'Status',
     accessor: 'processStatus'
   }
