@@ -519,8 +519,8 @@ class ReplenishOperationPage extends Component {
                   </div>
                 </div>
                 <div className="action-btn-group">
-                  <Button primary onClick={ () => this.setFocusToInputManual() }>Set Focus</Button>
-                  <Button size="medium" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
+                  {/* <Button primary onClick={ () => this.setFocusToInputManual() }>Set Focus</Button> */}
+                  <Button primary size="medium" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
                 </div>
 
                 {/* { process.env.REACT_APP_ENV === 'DEV' && (

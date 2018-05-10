@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 // import PropTypes from 'prop-types';
-// import _ from "lodash";
-// import DatePicker from "react-datepicker";
-// import moment from "moment";
+import moment from "moment";
 import ReactTable from "react-table";
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
 import { Form, Input, Select, Button } from 'semantic-ui-react';
@@ -56,6 +54,7 @@ class InventorySearchPage extends Component {
     
     this.handleDateChange = this.handleDateChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.resetForm = this.resetForm.bind(this);
   }
 
   componentWillMount() {
@@ -109,6 +108,20 @@ class InventorySearchPage extends Component {
     })
   }
 
+  resetForm() {
+    console.log('[INVENTORY SEARCH] Reset Form');
+    this.setState({
+      type: '',
+      category: '',
+      productId: '',
+      productName: '',
+      expireDate: '9999',
+      searchedList: [],
+      selection: [],
+      selectAll: false
+    });
+  }
+
   handleSubmit() {
     const data = {
       type: this.state.type || '',
@@ -121,6 +134,10 @@ class InventorySearchPage extends Component {
     console.log('Search Submit Data:', data);
     api.inventory.getInventorySummaryByProduct(data).then(res => {
       if (res.data) {
+        res.data.map((object) => {
+          object.pick_DATE = moment(object.expirDate).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
+          return object;
+        });
         this.setState({ searchedList: res.data });
       }
     });
@@ -209,8 +226,9 @@ class InventorySearchPage extends Component {
             <Form.Field control={ Input } label='Product Name' name="productName" value={ productName } onChange={ this.handleFormChange } />
             {/* <Form.Field control={ Input } label='Lot' value={ lot } onChange={ this.handleFormChange } /> */}
             {/* <Form.Field control={ DatePicker } label='Expire Date' value={ String(expireDate) } onChange={this.handleDateChange} /> */}
-            <Form.Field control={ Select } label='Expire Date' value={ expireDate } options={ expirationDateOptions } onChange={ this.handleFormChange } />
+            <Form.Field control={ Select } label='Expire Date' name="expireDate" value={ expireDate } options={ expirationDateOptions } onChange={ this.handleFormChange } />
             <Form.Field control={ Button } primary className="submit-btn">Submit</Form.Field>
+            <Button type="button" className="reset-btn" onClick={this.resetForm}>Reset</Button>
           </Form.Group>
         </Form>
 

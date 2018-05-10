@@ -431,7 +431,7 @@ class OperationPage extends Component {
                     </div>
                     <div className="action-btn-group">
                       
-                      <Button primary size="medium" onClick={ () => this.setFocusToScanInput() }>Set Focus</Button>
+                      {/* <Button primary size="medium" onClick={ () => this.setFocusToScanInput() }>Set Focus</Button> */}
                       {/* <Button size="medium" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button> */}
                     </div>
                   </div>

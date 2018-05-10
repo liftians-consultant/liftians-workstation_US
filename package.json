@@ -1,9 +1,9 @@
 {
   "name": "liftians-workstation",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Kevin Hong",
   "private": true,
-  "proxy": "http://localhost:8060",
+  "proxy": "http://l1.liftians.com:8060",
   "dependencies": {
     "axios": "^0.18.0",
     "classnames": "^2.2.5",
