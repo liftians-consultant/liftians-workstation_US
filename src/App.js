@@ -13,6 +13,7 @@ import UserRoute from "./components/routes/UserRoute";
 import ReplenishTaskPage from './components/pages/ReplenishTaskPage/ReplenishTaskPage';
 import ReplenishOperationPage from './components/pages/ReplenishOperationPage/ReplenishOperationPage';
 import InventorySearchPage from "./components/pages/InventorySearchPage/InventorySearchPage";
+import TaskListPage from "./components/pages/TaskListPage/TaskListPage";
 import "./App.css";
 
 const App = ({ location, isAuthenticated }) => (
@@ -24,6 +25,7 @@ const App = ({ location, isAuthenticated }) => (
       <UserRoute path="/replenish-task" exact component={ReplenishTaskPage} />
       <UserRoute path="/replenish-operation" exact component={ReplenishOperationPage} />
       <UserRoute path="/inventory-search" exact component={InventorySearchPage} />
+      <UserRoute path="/task-list" exact component={TaskListPage} />
       <GuestRoute path="/login" component={LoginPage} />
       <UserRoute path="/" exact component={HomePage} />
     </Switch>

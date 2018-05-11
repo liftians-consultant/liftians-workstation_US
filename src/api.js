@@ -245,25 +245,25 @@ const replenish = {
 
 const inventory = {
   getProductCategory: () =>
-    axios.post('Inventory', {
+    axios.post(appConfig.getApiUrl() + '/Inventory', {
       name: 'GetProductCategory',
       parameter: []
     }),
 
   getProductType: () =>
-    axios.post('Inventory', {
+    axios.post(appConfig.getApiUrl() + '/Inventory', {
       name: 'GetProductType',
       parameter: []
     }),
 
   getExpirationMonthRange: () =>
-    axios.post('Inventory', {
+    axios.post(appConfig.getApiUrl() + '/Inventory', {
       name: 'GetExpirationMonthRange',
       parameter: []
     }),
 
   getInventorySummaryByProduct: (data) =>
-    axios.post('Inventory', {
+    axios.post(appConfig.getApiUrl() + '/Inventory', {
       name: 'GetInventorySumByProduct',
       parameter: [
         String(data.type),
@@ -273,7 +273,11 @@ const inventory = {
         String(data.expireDate)
       ]
     }),
+};
 
+const system = {
+  getTaskList: () => 
+    axios.get("http://l1.liftians.com:8090" + '/task'),
 }
 
 export default {
@@ -282,5 +286,6 @@ export default {
   station,
   pick,
   replenish,
-  inventory
+  inventory,
+  system
 };

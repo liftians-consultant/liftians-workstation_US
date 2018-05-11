@@ -19,9 +19,10 @@ class SystemSettingPage extends Component {
     this.resetSystemModalCloseHandler = this.resetSystemModalCloseHandler.bind(this);
   }
 
-  goToPage = pageName =>
-    this.props.history.push(pageName);
-
+  goToPage = name => {
+    console.log(name);
+    this.props.history.push(name);
+  }
   resetSystemBtnHandler() {
     this.setState({ openSystemResetModal: true });
   }
@@ -72,6 +73,9 @@ class SystemSettingPage extends Component {
             </Grid.Column>
             <Grid.Column>
               <MenuButton title="User" name="user-profile" />
+            </Grid.Column>
+            <Grid.Column>
+              <MenuButton title="Task List" name="task-list" clickHandler={ this.goToPage }/>
             </Grid.Column>
           </Grid.Row>
         </Grid>

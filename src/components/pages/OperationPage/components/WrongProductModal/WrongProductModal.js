@@ -27,9 +27,14 @@ class WrongProductModal extends Component {
     const { podInfo, open, close } = this.props;
     const { productLocation } = this.state;
     
+    // const highlightBox = {
+    //   row: productLocation ? productLocation.shelfID : 0,
+    //   column: productLocation ? productLocation.boxID : 0
+    // };
+
     const highlightBox = {
-      row: productLocation ? productLocation.shelfID : 0,
-      column: productLocation ? productLocation.boxID : 0
+      row: 4,
+      column: 1
     };
 
     return (
