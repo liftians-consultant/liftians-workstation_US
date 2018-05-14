@@ -277,6 +277,7 @@ const inventory = {
 
 const system = {
   getTaskList: () => 
+    // TODO: need to change port number once api is create
     axios.get("http://l1.liftians.com:8090" + '/task'),
 }
 

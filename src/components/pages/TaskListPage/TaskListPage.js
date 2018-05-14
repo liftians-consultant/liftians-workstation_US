@@ -31,15 +31,18 @@ class TaskListPage extends Component {
           </Table.Cell>
           <Table.Cell>{ task.TaskStatusID }</Table.Cell>
           <Table.Cell>{ task.TaskTypeID }</Table.Cell>
-          <Table.Cell>{ moment(task.TaskCreateTime).format(process.env.REACT_APP_TABLE_DATE_FORMAT) }</Table.Cell>
+          <Table.Cell>{ moment(task.TaskCreateTime).format(process.env.REACT_APP_TABLE_DATE_FORMAT_NO_SEC) }</Table.Cell>
           <Table.Cell>{ task.BOTID }</Table.Cell>
           <Table.Cell>{ task.BotStatusID }</Table.Cell>
+          <Table.Cell>{ task.PODID }</Table.Cell>
+          <Table.Cell>{ task.PodStatusID }</Table.Cell>
+          <Table.Cell>{ task.PODRotation }</Table.Cell>
           <Table.Cell>{ task.Origin_X / 1000 }</Table.Cell>
           <Table.Cell>{ task.Origin_Y / 1000 }</Table.Cell>
           <Table.Cell>{ task.Destination_X / 1000 }</Table.Cell>
           <Table.Cell>{ task.Destination_Y / 1000 }</Table.Cell>
           <Table.Cell>{ task.Priority }</Table.Cell>
-          {/* <Table.Cell>{ task.StationID }</Table.Cell> */}
+          <Table.Cell>{ task.StationID }</Table.Cell>
           <Table.Cell>{ task.PairTaskID }</Table.Cell>
         </Table.Row>
       )
@@ -59,15 +62,19 @@ class TaskListPage extends Component {
                 <Table.HeaderCell rowSpan='2'>TypeID</Table.HeaderCell>
                 <Table.HeaderCell rowSpan='2'>Create Time</Table.HeaderCell>
                 <Table.HeaderCell colSpan='2'>Bot</Table.HeaderCell>
-                <Table.HeaderCell colSpan='2'>Original Cord.</Table.HeaderCell>
-                <Table.HeaderCell colSpan='2'>Destinated Cord.</Table.HeaderCell>
+                <Table.HeaderCell colSpan='3'>Pod</Table.HeaderCell>
+                <Table.HeaderCell colSpan='2'>Original</Table.HeaderCell>
+                <Table.HeaderCell colSpan='2'>Destinated</Table.HeaderCell>
                 <Table.HeaderCell rowSpan='2'>Priority</Table.HeaderCell>
-                {/* <Table.HeaderCell rowSpan='2'>StationID</Table.HeaderCell> */}
-                <Table.HeaderCell rowSpan='2'>PairTaskID</Table.HeaderCell>
+                <Table.HeaderCell rowSpan='2'>Station</Table.HeaderCell>
+                <Table.HeaderCell rowSpan='2'>PairTask</Table.HeaderCell>
               </Table.Row>
               <Table.Row>
                 <Table.HeaderCell>ID</Table.HeaderCell>
                 <Table.HeaderCell>Status</Table.HeaderCell>
+                <Table.HeaderCell>ID</Table.HeaderCell>
+                <Table.HeaderCell>Status</Table.HeaderCell>
+                <Table.HeaderCell>Rotation</Table.HeaderCell>
                 <Table.HeaderCell>X</Table.HeaderCell>
                 <Table.HeaderCell>Y</Table.HeaderCell>
                 <Table.HeaderCell>X</Table.HeaderCell>
