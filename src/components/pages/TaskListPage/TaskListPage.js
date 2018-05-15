@@ -53,7 +53,7 @@ class TaskListPage extends Component {
         <div className="page-header">
           <span>Task List</span>
         </div>
-        <div className="task-list-table-container">
+        <div className="task-list-table-container page-content-container">
           <Table className="task-list-table" celled inverted structured selectable striped>
             <Table.Header>
               <Table.Row>

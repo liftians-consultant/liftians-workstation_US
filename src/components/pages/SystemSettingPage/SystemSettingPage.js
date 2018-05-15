@@ -60,7 +60,7 @@ class SystemSettingPage extends Component {
               <MenuButton title="Reset System" name="reset-system" clickHandler={ this.resetSystemBtnHandler }/>
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Business Rule" name="business-rule" />
+              <MenuButton title="Business Rules" name="business-rules" clickHandler={ this.goToPage } />
             </Grid.Column>
             <Grid.Column>
               <MenuButton title="Log Search" name="log-search" />

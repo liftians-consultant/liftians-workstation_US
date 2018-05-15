@@ -10,7 +10,7 @@ const user = {
   logout: () =>
     axios.post(appConfig.getApiUrl() + '/logout').then(res => res),
   getInfoById: (empId) =>
-    axios.post(appConfig.getApiUrl() + '/Login', { name: 'EmpolyeesFindByID', parameter: [empId] }).then(res => res.data),
+    axios.post(appConfig.getApiUrl() + '/Setup', { name: 'EmpolyeesFindByID', parameter: [empId] }).then(res => res.data),
 };
 
 const menu = {
@@ -28,14 +28,14 @@ const menu = {
 
 const station = {
   activateStationWithUser: (stationId, empId) =>
-    axios.post(appConfig.getApiUrl() + '/Login', {
+    axios.post(appConfig.getApiUrl() + '/Setup', {
       name: 'ActivateStationOperation',
       parameter: [String(stationId), empId, '4']
     }
   ).then(res => res.data),
 
   checkCurrentUnFinishTask: stationId =>
-    axios.post(appConfig.getApiUrl() + '/Login', {
+    axios.post(appConfig.getApiUrl() + '/Setup', {
       name: 'CheckCurrentUnFinishTask',
       parameter: [stationId]
     }).then(res => res.data),
@@ -276,9 +276,26 @@ const inventory = {
 };
 
 const system = {
-  getTaskList: () => 
+  getTaskList: () =>
     // TODO: need to change port number once api is create
     axios.get("http://l1.liftians.com:8090" + '/task'),
+
+  getExpirationRule: () =>
+    axios.post(appConfig.getApiUrl() + '/Common', {
+      name: 'GetExpirationRule',
+      parameter: [
+      ]
+    }),
+
+  setExpirationRule: (empId, taskType, numDays) =>
+    axios.post(appConfig.getApiUrl() + '/Common', {
+      name: 'SetExpirationRule',
+      parameter: [
+        String(empId),
+        String(taskType),
+        String(numDays),
+      ]
+    }),
 }
 
 export default {
