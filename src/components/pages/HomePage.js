@@ -31,7 +31,6 @@ class HomePage extends Component {
   }
 
   checkCurrentUnFinishTaskCall() {
-    // TODO: station id
     this.props.checkCurrentUnFinishTask(this.props.stationId).then(res => {
       console.log("currentUnfinishedTask", res);
       this.setState({ isLoading: false });
@@ -42,7 +41,6 @@ class HomePage extends Component {
     const { stationInfo } = this.props;
     const stationTaskType = stationInfo ? stationInfo.taskType : null;
 
-    // TODO: add loading
     return (
       <div className="workstation-menu ui container menu-page">
         <Dimmer active={this.state.isLoading}>

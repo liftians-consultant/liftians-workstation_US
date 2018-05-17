@@ -34,6 +34,13 @@ const station = {
     }
   ).then(res => res.data),
 
+  deactivateStationWithUser: (stationId, empId) =>
+    axios.post(appConfig.getApiUrl() + '/Setup', {
+      name: 'DeactivateStationOperation',
+      parameter: [String(stationId), empId]
+    }
+  ).then(res => res.data),
+
   checkCurrentUnFinishTask: stationId =>
     axios.post(appConfig.getApiUrl() + '/Setup', {
       name: 'CheckCurrentUnFinishTask',
@@ -59,7 +66,7 @@ const station = {
     }),
 
   stopStationOperation: (stationId, empId, taskType) =>
-    axios.post(appConfig.getApiUrl() + '/Temp', {
+    axios.post(appConfig.getApiUrl() + '/Setup', {
       name: 'StopStationOperation',
       parameter: [stationId, empId, taskType]
     }),
@@ -91,13 +98,13 @@ const pick = {
     }),
 
   retrievePickOrderItems: (orderId) =>
-    axios.post(appConfig.getApiUrl() + '/Temp', {
+    axios.post(appConfig.getApiUrl() + '/Pick', {
       name: 'DisplayPickOrderDetail',
       parameter: [orderId]
     }),
 
   callServerGeneratePickTask: (stationId) =>
-    axios.post(appConfig.getApiUrl() + '/Temp', {
+    axios.post(appConfig.getApiUrl() + '/Pick', {
       name: 'GenPickTask',
       parameter: [stationId]
     }),
@@ -112,7 +119,7 @@ const pick = {
     }),
 
   atStationAfterPickProduct: (data) =>
-    axios.post(appConfig.getApiUrl() + '/Temp', {
+    axios.post(appConfig.getApiUrl() + '/Pick', {
       name: 'AtStationAfterPickProduct',
       parameter: [
         String(data.stationId),
@@ -140,7 +147,7 @@ const pick = {
     }),
 
   atHolderAfterPickProduct: (data) =>
-    axios.post(appConfig.getApiUrl() + '/Temp', {
+    axios.post(appConfig.getApiUrl() + '/Pick', {
       name: 'AtHolderAfterPickProduct',
       parameter: [
         String(data.holderId),
@@ -154,7 +161,7 @@ const pick = {
     }),
 
   checkIsOrderFinished: (orderNum) =>
-    axios.post(appConfig.getApiUrl() + '/Temp', {
+    axios.post(appConfig.getApiUrl() + '/Pick', {
       name: 'IsOrderFinished',
       parameter: [ orderNum ]
     }),
@@ -171,12 +178,6 @@ const pick = {
 };
 
 const replenish = {
-  genReplenishTask: (stationId) =>
-    axios.post(appConfig.getApiUrl() + '/Temp', {
-      name: 'GenReplenishTask',
-      parameter: [ stationId ]
-    }),
-
   retrieveReplenishRecords: (stationId, billTypeId, processId) =>
     axios.post(appConfig.getApiUrl() + '/Replenish', {
       name: 'DisplayReplenish',
@@ -192,6 +193,7 @@ const replenish = {
       name: 'GetReplenishDetailBySourceID',
       parameter: [ String(sourceId) ]
     }),
+
   replenishBySourceId: (stationId, userId, sourceIdList, jobPriority) =>
     axios.post(appConfig.getApiUrl() + '/Replenish', {
       name: 'ReplenishBySourceID',

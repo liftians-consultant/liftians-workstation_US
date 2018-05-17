@@ -22,11 +22,13 @@ export const login = credentials => dispatch =>
     dispatch(userLoggedIn(user));
   });
 
-export const logout = () => dispatch => {
-  localStorage.removeItem("liftiansJWT");
-  setAuthorizationHeader();
-  dispatch(userLoggedOut());
-};
+export const logout = () => dispatch => 
+  new Promise((resolve, reject) => {
+    localStorage.removeItem("liftiansJWT");
+    setAuthorizationHeader();
+    dispatch(userLoggedOut());
+    resolve(true);
+  });
 
 // export const confirm = token => dispatch =>
 //   api.user.confirm(token).then(user => {
