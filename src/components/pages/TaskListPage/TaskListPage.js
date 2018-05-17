@@ -14,8 +14,8 @@ class TaskListPage extends Component {
   componentWillMount() {
     api.system.getTaskList().then(res => {
       if (res.data) {
-        console.log('[TASK LIST] Get task list');
-        this.setState({ taskList: res.data.taskList });
+        console.log('[TASK LIST] Get task list', res.data);
+        this.setState({ taskList: res.data });
       }
     });
   }
@@ -25,25 +25,25 @@ class TaskListPage extends Component {
 
     const tableRows = taskList.map((task, index) => {
       return (
-        <Table.Row key={task.TaskID}>
+        <Table.Row key={task.taskID}>
           <Table.Cell>
-            <Label>{task.TaskID}</Label>
+            <Label>{task.taskID}</Label>
           </Table.Cell>
-          <Table.Cell>{ task.TaskStatusID }</Table.Cell>
-          <Table.Cell>{ task.TaskTypeID }</Table.Cell>
-          <Table.Cell>{ moment(task.TaskCreateTime).format(process.env.REACT_APP_TABLE_DATE_FORMAT_NO_SEC) }</Table.Cell>
-          <Table.Cell>{ task.BOTID }</Table.Cell>
-          <Table.Cell>{ task.BotStatusID }</Table.Cell>
-          <Table.Cell>{ task.PODID }</Table.Cell>
-          <Table.Cell>{ task.PodStatusID }</Table.Cell>
-          <Table.Cell>{ task.PODRotation }</Table.Cell>
-          <Table.Cell>{ task.Origin_X / 1000 }</Table.Cell>
-          <Table.Cell>{ task.Origin_Y / 1000 }</Table.Cell>
-          <Table.Cell>{ task.Destination_X / 1000 }</Table.Cell>
-          <Table.Cell>{ task.Destination_Y / 1000 }</Table.Cell>
-          <Table.Cell>{ task.Priority }</Table.Cell>
-          <Table.Cell>{ task.StationID }</Table.Cell>
-          <Table.Cell>{ task.PairTaskID }</Table.Cell>
+          <Table.Cell>{ task.taskStatusID }</Table.Cell>
+          <Table.Cell>{ task.taskTypeID }</Table.Cell>
+          <Table.Cell>{ moment(task.taskCreateTime).format(process.env.REACT_APP_TABLE_DATE_FORMAT_NO_SEC) }</Table.Cell>
+          <Table.Cell>{ task.botid }</Table.Cell>
+          <Table.Cell>{ task.botStatusID }</Table.Cell>
+          <Table.Cell>{ task.podid }</Table.Cell>
+          <Table.Cell>{ task.podStatusID }</Table.Cell>
+          <Table.Cell>{ task.podrotation }</Table.Cell>
+          <Table.Cell>{ task.origin_X / 1000 }</Table.Cell>
+          <Table.Cell>{ task.origin_Y / 1000 }</Table.Cell>
+          <Table.Cell>{ task.destination_X / 1000 }</Table.Cell>
+          <Table.Cell>{ task.destination_Y / 1000 }</Table.Cell>
+          <Table.Cell>{ task.priority }</Table.Cell>
+          <Table.Cell>{ task.stationID }</Table.Cell>
+          <Table.Cell>{ task.pairTaskID }</Table.Cell>
         </Table.Row>
       )
     })

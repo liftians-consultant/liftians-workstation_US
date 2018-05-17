@@ -278,9 +278,10 @@ const inventory = {
 };
 
 const system = {
+  // /Info/getTaskInfo?taskID=${taskID}&podID=${podID}&botID=${botID}
   getTaskList: () =>
     // TODO: need to change port number once api is create
-    axios.get("http://l1.liftians.com:8090" + '/task'),
+    axios.get(appConfig.getApiUrl() + '/Info/getTaskInfo'),
 
   getExpirationRule: () =>
     axios.post(appConfig.getApiUrl() + '/Common', {
