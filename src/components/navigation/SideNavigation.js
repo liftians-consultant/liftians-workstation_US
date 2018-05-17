@@ -57,20 +57,27 @@ class SideNavigation extends Component {
             }
           })
         } else {
-          this.props.logout().then((res) => {
-            if (res) {
-              toast.success('Successfully logged out');
-            }
-          });
+          api.station.deactivateStationWithUser(this.stationId, this.props.username).then(res => {
+            console.log('[DEACTIVATE STATION] Station Deactivated');
+            this.props.logout().then((res) => {
+              if (res) {
+                toast.success('Successfully logged out');
+              }
+            });
+          }).catch(err => {
+            toast.error('Error while deactivating station');
+            console.log('[ERROR] error while deactivating station');
+          })
         }
       }
     });
   }
 
   render() {
-    const { operationType } = this.props;
-    const operationUrl = operationType === 'P' ? "/operation" : '/replenish-operation';
-
+    const { taskType } = this.props;
+    const operationUrl = taskType === 'R' ? '/replenish-operation' : '/operation';
+    const taskListUrl = taskType === 'R' ? '/replenish-task' : '/pick-task';
+    console.log('refresh');
     return (
       <div className="side-navigation">
         <div className="nav-top">
@@ -78,10 +85,13 @@ class SideNavigation extends Component {
             <span>Station #{this.stationId}</span>
           </div>
           <div className="nav-item-container">
-          <Link to="/"><Button className="nav-btn">Menu</Button></Link>
+            <Link to="/"><Button className="nav-btn">Menu</Button></Link>
           </div>
           <div className="nav-item-container">
-          <Link to={ operationUrl }><Button className="nav-btn">Operation</Button></Link>
+            <Link to={ operationUrl }><Button className="nav-btn">Operation</Button></Link>
+          </div>
+          <div className="nav-item-container">
+            <Link to={ taskListUrl }><Button className="nav-btn">Task List</Button></Link>
           </div>
         </div>
         <div className="nav-buffer"></div>
@@ -103,7 +113,7 @@ function mapStateToProps(state) {
   return {
     username: state.user.username,
     stationId: state.station.id,
-    stationInfo: state.station.info
+    taskType: state.station.info.taskType,
   };
 }
 

@@ -6,11 +6,9 @@ import ReactTable from "react-table";
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
 import moment from "moment";
 import api from '../../../api';
-// import InlineError from '../../messages/InlineError';
-// import OrderListTable from '../../common/OrderListTable/OrderListTable';
 import { ReplenishOrderTableColumns } from '../../../models/ReplenishOrderTableColumns';
 import OrderDetailTable from '../../common/OrderDetailTable/OrderDetailTable';
-
+import { setStationTaskType } from '../../../actions/station';
 import './ReplenishTaskPage.css';
 
 const CheckboxTable = checkboxHOC(ReactTable);
@@ -51,9 +49,14 @@ class ReplenishTaskPage extends Component {
   ];
 
   componentWillMount() {
+    this.setStationTaskType();
     this.startStationOperationCall();
     this.getBillTypeName();
     this.getProcessStatusName();
+  }
+
+  setStationTaskType() {
+    this.props.setStationTaskType('R');
   }
 
   getBillTypeName() {
@@ -318,4 +321,4 @@ function mapStateToProps(state) {
   }
 }
 
-export default connect(mapStateToProps, {} )(ReplenishTaskPage);
+export default connect(mapStateToProps, { setStationTaskType } )(ReplenishTaskPage);

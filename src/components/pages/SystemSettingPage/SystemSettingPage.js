@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { Grid, Message } from 'semantic-ui-react';
-// import {BrowserHistory} from 'react-router';
+import { toast } from "react-toastify";
 import MenuButton from '../../common/MenuButton/MenuButton';
 import api from '../../../api';
 import ConfirmDialogModal from '../../common/ConfirmDialogModal/ConfirmDialogModal';
@@ -33,7 +33,7 @@ class SystemSettingPage extends Component {
       api.pick.resetTestData(this.props.stationId).then(res => {
         if (res.data) { // server return boolean value
           console.log('Reset Success');
-          this.setState({ successMessage: 'You have successfully reset test data!'});
+          toast.success('You have successfully reset test data!');
         }
       }).catch((e) => {
         console.error('Reset Failed');
@@ -52,8 +52,6 @@ class SystemSettingPage extends Component {
     return (
       <div className="ui container system-setting-page-container menu-page">
         {/* <Button onClick={ () => this.backBtnHandler() }>Go Back</Button> */}
-        { successMessage && <Message header="Reset Success" success
-          content={ successMessage } /> }
         <Grid columns={3} >
           <Grid.Row>
             <Grid.Column>

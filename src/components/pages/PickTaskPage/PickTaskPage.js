@@ -7,6 +7,7 @@ import api from '../../../api';
 import InlineError from '../../messages/InlineError';
 import OrderListTable from '../../common/OrderListTable/OrderListTable';
 import { PickOrderTableColumns } from '../../../models/PickOrderTableModel';
+import { setStationTaskType } from '../../../actions/station';
 import './PickTaskPage.css';
 
 class PickTaskPage extends Component {
@@ -45,9 +46,14 @@ class PickTaskPage extends Component {
   ];
 
   componentWillMount() {
+    this.setStationTaskType();
     this.startStationOperationCall();
     this.getBillTypeName();
     this.getProcessStatusName();
+  }
+
+  setStationTaskType() {
+    this.props.setStationTaskType('P');
   }
 
   startStationOperationCall() {
@@ -205,4 +211,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps, {})(PickTaskPage);
+export default connect(mapStateToProps, { setStationTaskType })(PickTaskPage);
