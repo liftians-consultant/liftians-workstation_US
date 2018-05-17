@@ -1,6 +1,6 @@
 {
   "name": "liftians-workstation",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "author": "Kevin Hong",
   "private": true,
   "proxy": "http://l1.liftians.com:8060",
