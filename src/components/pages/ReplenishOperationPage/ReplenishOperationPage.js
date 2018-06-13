@@ -232,12 +232,12 @@ class ReplenishOperationPage extends Component {
 
     this.getProductBarcodeList(); // SIMULATION: GET BARCODE
 
-    api.station.atStationPodLayoutInfo(this.state.podInfo.podId, this.state.podInfo.podSide).then(res => {
+    api.station.atStationPodLayoutInfo(this.props.stationId).then(res => {
       // console.log(res.data);
       if (res.data.length) {
         const podInfo = {
           ...this.state.podInfo,
-          shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxNumberOfBox, 10) }).reverse().value()
+          shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxBox, 10) }).reverse().value()
         }
         this.setState({ podInfo, loading: false })
       }
@@ -320,7 +320,7 @@ class ReplenishOperationPage extends Component {
       // only one barcode will be return and all product use same barcode
       // scanned once, send request everything number pad is clicked.
       console.log('[SCAN PRODUCT] SIMULATION: product scanned');
-      this.setState({ barcode: this.state.barcodeList[0]});
+      this.setState({ barcodeList: [{ barcode: this.state.currentReplenishProduct.productID, scanned: true }]});
     }
   }
 
@@ -523,12 +523,12 @@ class ReplenishOperationPage extends Component {
                   <Button primary size="medium" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
                 </div>
 
-                {/* { process.env.REACT_APP_ENV === 'DEV' && (
+                { process.env.REACT_APP_ENV === 'DEV' && (
                   <div>
                     <Button primary size="medium" onClick={ () => this.handleScanBoxBtnClick() }>Scan Box</Button>
                     <Button primary size="medium" onClick={ () => this.handleProductScanBtnClick() } disabled={ this.state.boxBarcode === 0 } >Scan Product</Button>
                   </div>
-                )} */}
+                )}
               
                 { this.state.businessMode === 'ecommerce' && <NumPad highlightAmount={ currentReplenishProduct.totalReplenishQuantity - replenishedAmount }
                   callback={this.selectReplenishedAmount}

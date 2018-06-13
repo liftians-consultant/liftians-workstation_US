@@ -108,7 +108,7 @@ class OperationPage extends Component {
         clearInterval(this.checkPodInterval);
         this.retrieveNextOrder();
       }
-    }, 1500);
+    }, 500);
   }
 
   validateAfterPickData(data) {
@@ -195,16 +195,19 @@ class OperationPage extends Component {
   }
 
   getPodInfo() {
-    api.station.atStationPodLayoutInfo(this.state.podInfo.podId, this.state.podInfo.podSide).then(res => {
+    api.station.atStationPodLayoutInfo(this.props.stationId).then(res => {
       if (res.data.length) {
         console.log(`[POD LAYOUT] Pod height: ${res.data.length}`)
         const podInfo = {
           ...this.state.podInfo,
-          shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxNumberOfBox, 10) }).reverse().value()
+          shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxBox, 10) }).reverse().value()
         }
         this.setState({ podInfo, loading: false });
       } else {
         console.log('[POD LAYOUT] NO GOOD. Empty array returned..')
+        setTimeout(() => {
+          this.getPodInfo();  
+        }, 300);
       }
     }).catch( err => {
       console.log('[ERROR] getting pod info', err);
@@ -376,7 +379,9 @@ class OperationPage extends Component {
   }
 
   closeOrderFinishModal() {
-    this.setState({ openOrderFinishModal: false });
+    this.setState({ showBox: false, openOrderFinishModal: false }, () => {
+      this.setFocusToScanInput();
+    });
   }
 
   closeWrongProductModal() {
@@ -401,7 +406,7 @@ class OperationPage extends Component {
           <Grid.Row >
             <Grid.Column width={5}>
               <div className="pod-info-block">
-                <span>Pod #{ podInfo.podId } - { podInfo.podSide }</span>
+                <span>Pod #{ podInfo.podId } - { podInfo.podSide === 0 ? 'A' : 'B' }</span>
               </div>
               <Segment.Group>
                 <Segment>

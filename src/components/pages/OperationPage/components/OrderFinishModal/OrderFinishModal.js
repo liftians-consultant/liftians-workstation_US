@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button, Modal } from 'semantic-ui-react';
 import BinGroup from '../BinGroup/BinGroup';
+import './OrderFinishModal.css';
 
 class OrderFinishModal extends Component {
 
@@ -12,8 +13,9 @@ class OrderFinishModal extends Component {
       <Modal open={ modalOpen }
         size="small" basic
         style={{ marginTop: '1rem', marginLeft: 'auto', marginRight: 'auto' }} 
+        className="order-finish-modal-container"
       >
-        <Modal.Header><h1>Order #{ data.orderNo } completed</h1></Modal.Header>
+        <Modal.Header><h1 className="modal-header">Order #{ data.orderNo } completed</h1></Modal.Header>
         <Modal.Content scrolling>
           <Modal.Description>
             <BinGroup openedBinNum={ data.binNum } highlightColor={ 'lightgreen' }></BinGroup>

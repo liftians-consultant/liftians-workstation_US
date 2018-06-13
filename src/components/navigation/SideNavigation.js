@@ -91,7 +91,7 @@ class SideNavigation extends Component {
             <Link to={ operationUrl }><Button className="nav-btn">Operation</Button></Link>
           </div>
           <div className="nav-item-container">
-            <Link to={ taskListUrl }><Button className="nav-btn">Task List</Button></Link>
+            <Link to={ taskListUrl }><Button className="nav-btn">{ taskType === 'R' ? 'Replenishment List' : 'Picking List'}</Button></Link>
           </div>
         </div>
         <div className="nav-buffer"></div>

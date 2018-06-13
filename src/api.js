@@ -47,12 +47,11 @@ const station = {
       parameter: [stationId]
     }).then(res => res.data),
 
-  atStationPodLayoutInfo: (podId, podSide) =>
+  atStationPodLayoutInfo: (stationId) =>
     axios.post(appConfig.getApiUrl() + '/Common', {
-      name: 'GetPodLayout',
+      name: 'AtStationPodLayoutInfo',
       parameter: [
-        String(podId),
-        String(podSide)
+        String(stationId),
       ]
     }),
 
@@ -280,8 +279,7 @@ const inventory = {
 const system = {
   // /Info/getTaskInfo?taskID=${taskID}&podID=${podID}&botID=${botID}
   getTaskList: () =>
-    // TODO: need to change port number once api is create
-    axios.get(appConfig.getApiUrl() + '/Info/getTaskInfo'),
+    axios.get(appConfig.getApiUrl() + '/Info/GetTaskInfo'),
 
   getExpirationRule: () =>
     axios.post(appConfig.getApiUrl() + '/Common', {

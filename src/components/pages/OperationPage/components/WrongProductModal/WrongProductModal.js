@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Button, Modal, Grid } from 'semantic-ui-react';
 import PodShelf from '../../../../common/PodShelf/PodShelf';
 import api from "../../../../../api";
+import './WrongProductModal.css';
 
 class WrongProductModal extends Component {
 
@@ -27,21 +28,22 @@ class WrongProductModal extends Component {
     const { podInfo, open, close } = this.props;
     const { productLocation } = this.state;
     
-    // const highlightBox = {
-    //   row: productLocation ? productLocation.shelfID : 0,
-    //   column: productLocation ? productLocation.boxID : 0
-    // };
-
     const highlightBox = {
-      row: 4,
-      column: 1
+      row: productLocation ? productLocation.shelfID : 0,
+      column: productLocation ? productLocation.boxID : 0
     };
 
+    // const highlightBox = {
+    //   row: 4,
+    //   column: 1
+    // };
+
     return (
-      <Modal open={ open }
+      <Modal className="wrong-product-modal-container"
+        open={ open }
         size="small" basic
         style={{ marginTop: '1rem', marginLeft: 'auto', marginRight: 'auto' }} >
-        <Modal.Header><h1>WRONG PRODUCT</h1></Modal.Header>
+        <Modal.Header><h1 className="modal-header">WRONG PRODUCT</h1></Modal.Header>
         <Modal.Content scrolling>
           <Grid>
             <Grid.Row>

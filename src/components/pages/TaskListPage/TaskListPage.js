@@ -31,6 +31,7 @@ class TaskListPage extends Component {
           </Table.Cell>
           <Table.Cell>{ task.taskStatusID }</Table.Cell>
           <Table.Cell>{ task.taskTypeID }</Table.Cell>
+          <Table.Cell>{ task.isManual ? 'Yes' : 'No' }</Table.Cell>
           <Table.Cell>{ moment(task.taskCreateTime).format(process.env.REACT_APP_TABLE_DATE_FORMAT_NO_SEC) }</Table.Cell>
           <Table.Cell>{ task.botid }</Table.Cell>
           <Table.Cell>{ task.botStatusID }</Table.Cell>
@@ -57,9 +58,10 @@ class TaskListPage extends Component {
           <Table className="task-list-table" celled inverted structured selectable striped>
             <Table.Header>
               <Table.Row>
-                <Table.HeaderCell rowSpan='2'>Task ID</Table.HeaderCell>
-                <Table.HeaderCell rowSpan='2'>StatusID</Table.HeaderCell>
-                <Table.HeaderCell rowSpan='2'>TypeID</Table.HeaderCell>
+                <Table.HeaderCell rowSpan='2'>Task</Table.HeaderCell>
+                <Table.HeaderCell rowSpan='2'>Status</Table.HeaderCell>
+                <Table.HeaderCell rowSpan='2'>Type</Table.HeaderCell>
+                <Table.HeaderCell rowSpan='2'>Manual</Table.HeaderCell>
                 <Table.HeaderCell rowSpan='2'>Create Time</Table.HeaderCell>
                 <Table.HeaderCell colSpan='2'>Bot</Table.HeaderCell>
                 <Table.HeaderCell colSpan='3'>Pod</Table.HeaderCell>
