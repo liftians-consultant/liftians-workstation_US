@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import moment from "moment";
 import { Grid, Menu, Dropdown, Loader, Button } from 'semantic-ui-react';
+import { toast } from "react-toastify";
 import api from '../../../api';
 import InlineError from '../../messages/InlineError';
 import OrderListTable from '../../common/OrderListTable/OrderListTable';
@@ -62,11 +63,13 @@ class PickTaskPage extends Component {
       // return 1 if success, 0 if failed
       let newState = { loading: false };
       if (!res.data) {
-        newState = Object.assign(newState, { errors: { station: 'Cannot start station. Please contact your system admin'}});
+        toast.error('Cannot start station. Please contact your system admin');
       }
+      console.log('[REPLENISH PICK TASK] Station Started with P');
       this.setState(newState, this.retrievePickOrderReocrds);
     }).catch((e) => {
-      this.setState({ errors: { station: 'Server Error. Please contact your system admin'}, loading: false })
+      toast.error('Server Error. Please contact your system admin');
+      this.setState({ loading: false });
       console.error(e);
     })
   }
@@ -125,7 +128,7 @@ class PickTaskPage extends Component {
     api.pick.callServerGeneratePickTask(this.props.stationId).then( res => {
       this.props.history.push('/operation');
     }).catch(error => {
-      this.setState({ errors: { station: 'Error while server generate pick task. Please contact system admin.'}});
+      toast.error('Error while server generate pick task. Please contact system admin.');
     }) 
   }
 

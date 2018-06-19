@@ -5,6 +5,7 @@ import { Grid, Menu, Dropdown, Loader, Button, Input } from 'semantic-ui-react';
 import ReactTable from "react-table";
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
 import moment from "moment";
+import { toast } from "react-toastify";
 import api from '../../../api';
 import { ReplenishOrderTableColumns } from '../../../models/ReplenishOrderTableColumns';
 import OrderDetailTable from '../../common/OrderDetailTable/OrderDetailTable';
@@ -141,11 +142,13 @@ class ReplenishTaskPage extends Component {
       // return 1 if success, 0 if failed
       let newState = { loading: false };
       if (!res.data) {
-        newState = Object.assign(newState, { errors: { station: 'Cannot start station. Please contact your system admin'}});
+        toast.error('Cannot start station. Please contact your system admin');
       }
+      console.log('[REPLENISH PICK TASK] Station Started with R');
       this.setState(newState, this.retrieveReplenishRecords);
     }).catch((e) => {
-      this.setState({ errors: { station: 'Server Error. Please contact your system admin'}, loading: false })
+      toast.error('Server Error. Please contact your system admin');
+      this.setState({ loading: false })
       console.error(e);
     })
   }

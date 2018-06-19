@@ -85,14 +85,18 @@ class OperationPage extends Component {
 
   selectPickedAmount(num) {
     this.setState({ pickedAmount: this.state.pickedAmount + num }, () => {
+
+      // if all item are being placed in bin
       if (this.state.pickedAmount === parseInt(this.state.currentPickProduct.quantity, 10)) {
+        this.turnOffELabelById(parseInt(this.state.currentPickProduct.binPosition, 10));
         this.finishPick();
+      } else {
+        this.turnOnELabelById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity - this.state.pickedAmount);
       }
     });
   }
 
   getUpcomingPod() {
-    // TODO: add simulation mode to .env
     let isRecieve = false;
 
     this.checkPodInterval = setInterval( () => {
@@ -278,6 +282,26 @@ class OperationPage extends Component {
     this.setState({ warningMessage: '' });
   }
 
+  turnOnELabelById(labelId, num) {
+    api.eLabel.turnOnById(labelId, num).then( res => {
+      if (res.data) {
+        console.log(`[ELECTRONIC LABEL] Turn on label #${labelId} with ${num}`);
+      } else {
+        console.log(`[ELECTRONIC LABEL] Label turn on failed #${labelId} with ${num}`);
+      }
+    })
+  }
+
+  turnOffELabelById(labelId) {
+    api.eLabel.turnOffById(labelId).then(res => {
+      if (res.data) {
+        console.log(`[ELECTRONIC LABEL] Turn off label #${labelId}`);
+      } else {
+        console.log(`[ELECTRONIC LABEL] Label turn off failed #${labelId}`);
+      }
+    })
+  }
+
   handleScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
@@ -305,8 +329,9 @@ class OperationPage extends Component {
           
         } else if (this.businessMode === 'ecommerce') {
           if (this.scanValidation(scannedValue)) {
-            this.setState({ showBox: !this.state.showBox, barcode: scannedValue });
             console.log(`[SCANNED] New Barcode: ${scannedValue}`);
+            this.setState({ showBox: !this.state.showBox, barcode: scannedValue });
+            this.turnOnELabelById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity);
           } else {
             this.setState({ barcode: scannedValue } , () => {
               this.setState({ openWrongProductModal: true })
@@ -317,9 +342,9 @@ class OperationPage extends Component {
     }
   }
 
+  /* WARNING: SIMULATION ONLY */
   handleScanBtnClick() {
     if (!this.state.showBox) {
-      // TODO: SIMULATION ONLY! NO PRODUCTION
       const data = {
         podId: this.state.currentPickProduct.podID,
         podSide: this.state.currentPickProduct.podSide,
@@ -341,13 +366,6 @@ class OperationPage extends Component {
           this.setState({ showBox: !this.state.showBox, barcode: res.data[barCodeIndex].barcode });
         }
       });
-
-      /* PRODUCTION CODE */
-      // After get barcode from scanner
-      // if (this.scanValidation(something)) {
-      //   this.setState({ showBox: !this.state.showBox, barcode: res.data[0].barcode });
-      // }
-
     } else {
       this.setState({ barcode: ''});
     }
@@ -359,8 +377,6 @@ class OperationPage extends Component {
   }
 
   handleWrongProductBtnClick() {
-    // const wrongBarcode = "191618";
-
     const data = {
       podId: this.state.currentPickProduct.podID,
       podSide: this.state.currentPickProduct.podSide,
@@ -368,7 +384,7 @@ class OperationPage extends Component {
       boxId: 1,
     };
 
-    //  TODO: THE FOLLWING CODE IS JUST TRYIGN TO MAKE THE SIMULATION WORK....
+    // THE FOLLWING CODE IS JUST TRYIGN TO MAKE THE SIMULATION WORK....
     api.pick.getProductSerialNum(data).then( res => {
       this.setState({ barcode: res.data[1].barcode }, () => {
         if (!this.scanValidation(res.data[1].barcode)) {
@@ -435,9 +451,7 @@ class OperationPage extends Component {
                       </div>
                     </div>
                     <div className="action-btn-group">
-                      
-                      {/* <Button primary size="medium" onClick={ () => this.setFocusToScanInput() }>Set Focus</Button> */}
-                      {/* <Button size="medium" onClick={ () => this.handleWrongProductBtnClick() }>Simulate wrong scan</Button> */}
+                  
                     </div>
                   </div>
                   { process.env.REACT_APP_ENV === 'DEV' && (

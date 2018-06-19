@@ -297,6 +297,18 @@ const system = {
         String(numDays),
       ]
     }),
+};
+
+const eLabel = {
+  turnOnById: (labelId, pickNum) =>
+    axios.post(appConfig.getApiUrl() + '/eLabel/turnOnById', {
+      labelId,
+      pickNum
+    }),
+  turnOffById: (labelId) =>
+    axios.post(appConfig.getApiUrl() + '/eLabel/turnOffById', {
+      labelId
+    })
 }
 
 export default {
@@ -306,5 +318,6 @@ export default {
   pick,
   replenish,
   inventory,
-  system
+  system,
+  eLabel
 };
