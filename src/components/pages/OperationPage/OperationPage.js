@@ -5,8 +5,6 @@ import _ from "lodash";
 import { Segment, Grid, Button, Dimmer, Loader, Input } from 'semantic-ui-react';
 import api from '../../../api';
 import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
-// import RemainPickAmount from "./components/RemainPickAmount/RemainPickAmount";
-import './OperationPage.css';
 import PodShelf from '../../common/PodShelf/PodShelf';
 import NumPad from '../../common/NumPad/NumPad';
 import BinGroup from './components/BinGroup/BinGroup';
@@ -14,6 +12,9 @@ import OrderDetailListModal from './components/OrderDetailListModal/OrderDetailL
 import OrderFinishModal from './components/OrderFinishModal/OrderFinishModal';
 import WrongProductModal from './components/WrongProductModal/WrongProductModal';
 import WarningModal from "../../common/WarningModal/WarningModal";
+import BinSetupModal from '../../common/BinSetupModal/BinSetupModal';
+import { getStationDeviceList } from '../../../actions/station';
+import './OperationPage.css';
 
 class OperationPage extends Component {
   state = {
@@ -31,10 +32,15 @@ class OperationPage extends Component {
     loading: true,
     barcode: '',
     showBox: false,
+
+    binSetupWaitlist: [],
+    currentSetupBin: -1,
+
     openOrderFinishModal: false,
     openWrongProductModal: false,
+    openBinSetupModal: false,
     warningMessage: ''
-  }
+  };
 
   checkPodInterval = {};
 
@@ -61,12 +67,22 @@ class OperationPage extends Component {
     this.setFocusToScanInput = this.setFocusToScanInput.bind(this);
     this.handleShortageClick = this.handleShortageClick.bind(this);
     this.closeWarningModal = this.closeWarningModal.bind(this);
+    this.closeBinSetupModal = this.closeBinSetupModal.bind(this);
+    this.handleBinSetupInputEnter = this.handleBinSetupInputEnter.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
   componentWillMount() {
     this.getUpcomingPod();
-    // this.retrieveNextOrder();
+
+    // Register bin when first init
+    if (this.props.taskCount === 0) {
+      this.initialBinSetup(); 
+    } else if (!this.props.deviceOrderMap) {
+      this.props.getStationDeviceList(this.props.stationId).then(res => {
+        console.log('[GET STATION DEVICE] device list get on CWM');
+      })
+    }
   }
 
   componentWillUnmount() {
@@ -77,11 +93,32 @@ class OperationPage extends Component {
     this.setFocusToScanInput();
   }
 
+  initialBinSetup() {
+    // refresh device list first 
+    this.props.getStationDeviceList(this.props.stationId).then(deviceList => {
+      const binSetupWaitlist = this.state.binSetupWaitlist.concat(deviceList);
+      const currentSetupBin = binSetupWaitlist.shift();
+      this.setState({ binSetupWaitlist, currentSetupBin, openBinSetupModal: true });
+    });
+    
+  }
+
   setFocusToScanInput() {
     this.scanInputRef.current.inputRef.value = '';
     this.scanInputRef.current.focus();
   }
   
+  linkBinToOrder(deviceId, binId) {
+    api.station.linkBinToOrder(binId, deviceId, this.props.username).then(res => {
+      if (res.data) {
+        console.log('[LINK BIN TO ORDER] Success');
+      } else {
+        // TODO: error success
+      }
+    }).catch(err => {
+      // TODO: Error toast
+    });
+  }
 
   selectPickedAmount(num) {
     this.setState({ pickedAmount: this.state.pickedAmount + num }, () => {
@@ -144,6 +181,9 @@ class OperationPage extends Component {
           // this.setState({ showBox: false }, () => this.retrieveNextOrder());
           data.holderId = this.state.currentPickProduct.holderID;
 
+          // call liftman to generate new task
+          this.callGenStationTask();
+
           // after placed in bin, inform db
           this.atHolderAfterPickProduct(data);
         } else {
@@ -180,6 +220,12 @@ class OperationPage extends Component {
           console.log(`[ERROR - RETRY] AtHolderAfterPickProduct Failed after retry: ${res.data}`);
         }
       }
+    });
+  }
+
+  callGenStationTask() {
+    api.station.genStationTask(this.props.stationId).then( res => {
+      console.log('[GEN STATION TASK] Called');
     });
   }
 
@@ -394,10 +440,14 @@ class OperationPage extends Component {
     });
   }
 
-  closeOrderFinishModal() {
-    this.setState({ showBox: false, openOrderFinishModal: false }, () => {
-      this.setFocusToScanInput();
+  closeOrderFinishModal(binId, binLocation) {
+    const deviceId = this.props.deviceOrderMap[binLocation - 1].deviceID; // should use find, but since its already order by sequence...
+    api.station.linkBinToOrder(binId, deviceId, this.props.username).then( res => {
+      this.setState({ showBox: false, openOrderFinishModal: false }, () => {
+        this.setFocusToScanInput();
+      });
     });
+    
   }
 
   closeWrongProductModal() {
@@ -405,9 +455,34 @@ class OperationPage extends Component {
     this.setFocusToScanInput();
   }
 
+  handleBinSetupInputEnter(binId, binLocation) {
+    api.station.linkBinToOrder(binId, this.state.currentSetupBin.deviceId, this.props.username).then( res => {
+      // if (res.data) {
+        console.log('LINK BIN TO ORDER] Success');
+        if (this.state.binSetupWaitlist.length > 0) {
+          // more bin to setup 
+          const binSetupWaitlist = this.state.binSetupWaitlist;
+          const currentSetupBin = binSetupWaitlist.shift();
+          this.setState({ binSetupWaitlist, currentSetupBin });
+        } else {
+          // no more bin to set up
+          this.setState({ openBinSetupModal: false });
+        }
+      // } else {
+      //   console.log('LINK BIN TO ORDER] Failed in server');
+      //   // TODO: toast error
+      // }
+    });
+  }
+
+  closeBinSetupModal() {
+    this.setState({ openBinSetupModal: false });
+    this.setFocusToScanInput();
+  }
+
   render() {
     const { warningMessage, podInfo, currentPickProduct, pickedAmount, showBox,
-      orderList, openOrderFinishModal, openWrongProductModal, barcode } = this.state;
+      orderList, openOrderFinishModal, openWrongProductModal, barcode, openBinSetupModal } = this.state;
     const highlightBox = {
       row: currentPickProduct ? parseInt(currentPickProduct.shelfID, 10) : 0,
       column: currentPickProduct ? parseInt(currentPickProduct.boxID, 10) : 0
@@ -484,6 +559,12 @@ class OperationPage extends Component {
           open={ openWrongProductModal }
           close={ this.closeWrongProductModal } /> }
 
+        { openBinSetupModal && <BinSetupModal
+          open={ openBinSetupModal }
+          location={ this.state.currentSetupBin.deviceIndex }
+          onInputEnter={ this.handleBinSetupInputEnter }
+           /> }
+
         { warningMessage && <WarningModal open={true}
           onClose={ this.closeWarningModal }
           headerText="Warning"
@@ -498,8 +579,12 @@ OperationPage.propTypes = {
 };
 
 function mapStateToProps(state) {
+  console.log(state);
   return {
-    stationId: state.station.id
+    username: state.user.username,
+    stationId: state.station.id,
+    taskCount: state.station.info.taskCount,
+    deviceOrderMap: state.station.deviceList,
   }
 }
-export default connect(mapStateToProps, {})(OperationPage);
+export default connect(mapStateToProps, { getStationDeviceList })(OperationPage);

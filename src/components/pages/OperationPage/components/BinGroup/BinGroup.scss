@@ -6,23 +6,24 @@ $bin-height: 120px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  height: $bin-height;
+  // height: $bin-height;
   position: relative;
 }
 
 .bin-item-container {
   padding: 10px;
-  height: $bin-height;
-  width: $bin-height;
+  // height: $bin-height;
+  // width: $bin-height;
 }
 
 .bin-item {
   height: 100%;
   width: 100%;
   background: #fff;
-  line-height: $bin-height - 20;
+  // line-height: $bin-height - 20;
   text-align: center;
   font-size: 3rem;
+  border: 1px black solid;
 }
 
 .highlight {

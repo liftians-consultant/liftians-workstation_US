@@ -4,7 +4,8 @@ import { STATION_ID_SET,
          STATION_CURRENT_UNFINISH_TASK_FETCHED,
          AT_STATION_POD_LAYOUT_INFO_FETCHED,
          COMING_PODS_FETCHED,
-         SET_STATION_TASK_TYPE
+         SET_STATION_TASK_TYPE,
+         DEVICE_LIST_FETCHED
 } from "../types";
 
 export default function station(state = { id: localStorage.stationId || "1", info: { taskType: 'U'}}, action = {}) {
@@ -23,6 +24,8 @@ export default function station(state = { id: localStorage.stationId || "1", inf
       return { ...state, ...action.pods };
     case SET_STATION_TASK_TYPE:
       return { ...state, info: action.stationInfo};
+    case DEVICE_LIST_FETCHED:
+      return { ...state, deviceList: action.stationDeviceMap };
     default:
       return state;
   }

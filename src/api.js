@@ -78,6 +78,32 @@ const station = {
         String(taskId)
       ]
     }),
+
+  genStationTask: (stationId) =>
+    axios.post(appConfig.getApiUrl() + '/Common', {
+      name: 'GenStationTask',
+      parameter: [
+        String(stationId),
+      ]
+    }),
+
+  getStationDeviceList: (stationId) =>
+    axios.post(appConfig.getApiUrl() + '/Pick', {
+      name: 'GetDeviceListByStationId',
+      parameter: [
+        String(stationId),
+      ]
+    }),
+  
+  linkBinToOrder: (binId, deviceId, userId) =>
+    axios.post(appConfig.getApiUrl() + '/Common', {
+      name: 'LinkBinToOrder',
+      parameter: [
+        String(binId),
+        String(deviceId),
+        String(userId),
+      ]
+    }),
 };
 
 const pick = {

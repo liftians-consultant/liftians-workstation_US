@@ -1,10 +1,34 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Modal } from 'semantic-ui-react';
+import { Button, Modal, Input } from 'semantic-ui-react';
 import BinGroup from '../BinGroup/BinGroup';
 import './OrderFinishModal.css';
 
 class OrderFinishModal extends Component {
+
+
+  constructor() {
+    super();
+
+    this.inputRef = React.createRef();
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleOnOpen = this.handleOnOpen.bind(this);
+  }
+
+  handleOnOpen() {
+    this.inputRef.current.focus();
+  }
+
+  handleInputChange(e) {
+    if (e.key === 'Enter' && e.target.value) {
+      e.persist();
+      setTimeout(() => {
+        this.props.modalClose(e.target.value, this.props.data.binNum);
+        this.inputRef.current.inputRef.value = '';
+        this.inputRef.current.focus();
+      }, 500)
+    }
+  }
 
   render() {
     const { data, modalOpen, modalClose } = this.props;
@@ -12,6 +36,7 @@ class OrderFinishModal extends Component {
     return (
       <Modal open={ modalOpen }
         size="small" basic
+        onOpen={this.handleOnOpen}
         style={{ marginTop: '1rem', marginLeft: 'auto', marginRight: 'auto' }} 
         className="order-finish-modal-container"
       >
@@ -20,14 +45,16 @@ class OrderFinishModal extends Component {
           <Modal.Description>
             <BinGroup openedBinNum={ data.binNum } highlightColor={ 'lightgreen' }></BinGroup>
             <h2>Please remove the hightlighted bin</h2>
+            <Input onKeyPress={this.handleInputChange}
+                 ref={this.inputRef} />
           </Modal.Description>
         </Modal.Content>
-        <Modal.Actions>
+        {/* <Modal.Actions>
           <Button primary size="huge"
             onClick={ modalClose }>
             Ok
           </Button>
-        </Modal.Actions>
+        </Modal.Actions> */}
       </Modal>
     );
   }
