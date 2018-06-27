@@ -1,5 +1,5 @@
 import axios from 'axios';
-import appConfig from './AppConfig';
+import appConfig from 'utils/AppConfig';
 
 /**
  * All API call.

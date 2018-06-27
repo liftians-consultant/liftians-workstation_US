@@ -3,17 +3,20 @@ import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
 import { Segment, Grid, Button, Dimmer, Loader, Input } from 'semantic-ui-react';
-import api from '../../../api';
-import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
-import PodShelf from '../../common/PodShelf/PodShelf';
-import NumPad from '../../common/NumPad/NumPad';
-import BinGroup from './components/BinGroup/BinGroup';
-import OrderDetailListModal from './components/OrderDetailListModal/OrderDetailListModal';
-import OrderFinishModal from './components/OrderFinishModal/OrderFinishModal';
-import WrongProductModal from './components/WrongProductModal/WrongProductModal';
-import WarningModal from "../../common/WarningModal/WarningModal";
-import BinSetupModal from '../../common/BinSetupModal/BinSetupModal';
-import { getStationDeviceList } from '../../../actions/station';
+import api from 'api';
+
+import ProductInfoDisplay from 'components/common/ProductInfoDisplay/ProductInfoDisplay';
+import PodShelf from 'components/common/PodShelf/PodShelf';
+import NumPad from 'components/common/NumPad/NumPad';
+import WarningModal from "components/common/WarningModal/WarningModal";
+import BinSetupModal from 'components/common/BinSetupModal/BinSetupModal';
+
+import BinGroup from 'components/Operation/BinGroup/BinGroup';
+import OrderDetailListModal from 'components/Operation/OrderDetailListModal/OrderDetailListModal';
+import OrderFinishModal from 'components/Operation/OrderFinishModal/OrderFinishModal';
+import WrongProductModal from 'components/Operation/WrongProductModal/WrongProductModal';
+import { getStationDeviceList } from 'redux/actions/station';
+
 import './OperationPage.css';
 
 class OperationPage extends Component {

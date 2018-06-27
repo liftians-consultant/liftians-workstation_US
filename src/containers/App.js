@@ -3,21 +3,21 @@ import { Switch } from 'react-router';
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { ToastContainer } from 'react-toastify';
-import HomePage from "./components/pages/HomePage";
-import LoginPage from "./components/pages/LoginPage";
-import PickTaskPage from "./components/pages/PickTaskPage/PickTaskPage";
-import OperationPage from './components/pages/OperationPage/OperationPage';
-import SystemSettingPage from './components/pages/SystemSettingPage/SystemSettingPage';
-import GuestRoute from "./components/routes/GuestRoute";
-import UserRoute from "./components/routes/UserRoute";
-import ReplenishTaskPage from './components/pages/ReplenishTaskPage/ReplenishTaskPage';
-import ReplenishOperationPage from './components/pages/ReplenishOperationPage/ReplenishOperationPage';
-import InventorySearchPage from "./components/pages/InventorySearchPage/InventorySearchPage";
-import TaskListPage from "./components/pages/TaskListPage/TaskListPage";
-import BusinessRulesPage from "./components/pages/BusinessRulesPage/BusinessRulesPage";
-import ExpireRuleConfigPage from "./components/pages/ExpireRuleConfigPage/ExpireRuleConfigPage";
-import "./App.css";
+import HomePage from "components/pages/HomePage";
+import LoginPage from "components/pages/LoginPage";
+import PickTaskPage from "components/pages/PickTaskPage/PickTaskPage";
+import OperationPage from 'components/pages/OperationPage/OperationPage';
+import SystemSettingPage from 'components/pages/SystemSettingPage/SystemSettingPage';
+import GuestRoute from "components/routes/GuestRoute";
+import UserRoute from "components/routes/UserRoute";
+import ReplenishTaskPage from 'components/pages/ReplenishTaskPage/ReplenishTaskPage';
+import ReplenishOperationPage from 'components/pages/ReplenishOperationPage/ReplenishOperationPage';
+import InventorySearchPage from "components/pages/InventorySearchPage/InventorySearchPage";
+import TaskListPage from "containers/TaskListPage/TaskListPage";
+import BusinessRulesPage from "components/pages/BusinessRulesPage/BusinessRulesPage";
+import ExpireRuleConfigPage from "components/pages/ExpireRuleConfigPage/ExpireRuleConfigPage";
 import 'react-toastify/dist/ReactToastify.css';
+import "./App.css";
 
 const App = ({ location, isAuthenticated }) => (
   <div className="app-comp-container">

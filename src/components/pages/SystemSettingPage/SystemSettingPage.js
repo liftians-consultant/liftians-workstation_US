@@ -3,9 +3,10 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { Grid, Message } from 'semantic-ui-react';
 import { toast } from "react-toastify";
-import MenuButton from '../../common/MenuButton/MenuButton';
-import api from '../../../api';
-import ConfirmDialogModal from '../../common/ConfirmDialogModal/ConfirmDialogModal';
+
+import api from 'api';
+import MenuButton from 'components/common/MenuButton/MenuButton';
+import ConfirmDialogModal from 'components/common/ConfirmDialogModal/ConfirmDialogModal';
 class SystemSettingPage extends Component {
   state = {
     openSystemResetModal: false,

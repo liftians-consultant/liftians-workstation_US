@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { Grid, Button } from 'semantic-ui-react';
 // import {BrowserHistory} from 'react-router';
-import MenuButton from '../../common/MenuButton/MenuButton';
-import api from '../../../api';
+import MenuButton from 'components/common/MenuButton/MenuButton';
+import api from 'api';
 
 class BusinessRulesPage extends Component {
   state = {

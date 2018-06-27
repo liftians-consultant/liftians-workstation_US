@@ -8,12 +8,12 @@ import thunk from "redux-thunk";
 import decode from "jwt-decode";
 import { composeWithDevTools } from "redux-devtools-extension";
 
-import App from "./App";
+import App from "containers/App";
 import registerServiceWorker from "./registerServiceWorker";
-import rootReducer from "./rootReducer";
-import { userLoggedIn, userLoggedOut } from "./actions/auth";
-import setAuthorizationHeader from "./utils/setAuthorizationHeader";
-import appConfig from './AppConfig';
+import rootReducer from "redux/reducers/rootReducer";
+import { userLoggedIn, userLoggedOut } from "redux/actions/auth";
+import setAuthorizationHeader from "utils/setAuthorizationHeader";
+import appConfig from 'utils/AppConfig';
 import './index.css';
 
 let store = createStore(

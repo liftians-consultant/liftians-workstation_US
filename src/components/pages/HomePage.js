@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-// import { Link } from 'react-router-dom';
 import { Grid, Dimmer, Loader } from 'semantic-ui-react';
-import * as actions from "../../actions/auth";
-import MenuButton from '../common/MenuButton/MenuButton';
-import { getUserInfoById } from '../../actions/users';
-import { activateStation, checkCurrentUnFinishTask } from "../../actions/station";
+
+import MenuButton from 'components/common/MenuButton/MenuButton';
+import * as actions from "redux/actions/auth";
+import { getUserInfoById } from 'redux/actions/users';
+import { activateStation, checkCurrentUnFinishTask } from "redux/actions/station";
 
 class HomePage extends Component {
   state = {

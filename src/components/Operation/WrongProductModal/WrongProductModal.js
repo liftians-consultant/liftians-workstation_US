@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button, Modal, Grid } from 'semantic-ui-react';
-import PodShelf from '../../../../common/PodShelf/PodShelf';
-import api from "../../../../../api";
+
+import api from "api";
+import PodShelf from 'components/common/PodShelf/PodShelf';
+
 import './WrongProductModal.css';
 
 class WrongProductModal extends Component {

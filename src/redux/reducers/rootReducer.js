@@ -1,7 +1,7 @@
 import { combineReducers } from "redux";
 
-import user from "./reducers/user";
-import station from './reducers/station';
+import user from "./user";
+import station from './station';
 export default combineReducers({
   user,
   station

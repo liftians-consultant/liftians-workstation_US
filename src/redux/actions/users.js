@@ -1,4 +1,4 @@
-import api from '../api';
+import api from 'api';
 import { USER_INFO_FETCHED } from '../types';
 
 export const userInfoFetched = userInfo => ({

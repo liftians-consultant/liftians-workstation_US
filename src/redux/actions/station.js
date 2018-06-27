@@ -4,8 +4,8 @@ import { STATION_ID_SET,
   STATION_CURRENT_UNFINISH_TASK_FETCHED,
   SET_STATION_TASK_TYPE,
   DEVICE_LIST_FETCHED
-} from "../types";
-import api from '../api';
+} from "redux/types";
+import api from 'api';
 
 export const stationActivateSuccess = () => ({
   type: STATION_ACTIVATE_SUCCESS

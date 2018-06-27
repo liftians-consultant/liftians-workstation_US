@@ -2,11 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { Grid, Image, Segment } from 'semantic-ui-react'
-import LoginForm from '../forms/LoginForm';
-import { login } from "../../actions/auth";
-// import logo from '../../assets/images/loginPage.png';
-import ServerSettingModal from "../common/ServerSettingModal/ServerSettingModal";
-import logo from '../../assets/images/assembly_logo_trans.png';
+
+import LoginForm from 'components/forms/LoginForm';
+import ServerSettingModal from "components/common/ServerSettingModal/ServerSettingModal";
+import { login } from "redux/actions/auth";
+
+import logo from 'assets/images/assembly_logo_trans.png';
 
 class LoginPage extends Component {
 

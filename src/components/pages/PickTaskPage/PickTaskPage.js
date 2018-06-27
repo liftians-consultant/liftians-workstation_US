@@ -4,11 +4,11 @@ import { connect } from "react-redux";
 import moment from "moment";
 import { Grid, Menu, Dropdown, Loader, Button } from 'semantic-ui-react';
 import { toast } from "react-toastify";
-import api from '../../../api';
-import InlineError from '../../messages/InlineError';
-import OrderListTable from '../../common/OrderListTable/OrderListTable';
-import { PickOrderTableColumns } from '../../../models/PickOrderTableModel';
-import { setStationTaskType } from '../../../actions/station';
+import api from 'api';
+import InlineError from 'components/messages/InlineError';
+import OrderListTable from 'components/common/OrderListTable/OrderListTable';
+import { PickOrderTableColumns } from 'models/PickOrderTableModel';
+import { setStationTaskType } from 'redux/actions/station';
 import './PickTaskPage.css';
 
 class PickTaskPage extends Component {

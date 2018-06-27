@@ -3,13 +3,14 @@ import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
 import { Segment, Grid, Button, Dimmer, Loader, Image, Input } from 'semantic-ui-react';
-import api from '../../../api';
-// import ProductInfoDisplay from '../../common/ProductInfoDisplay/ProductInfoDisplay';
-import PodShelf from '../../common/PodShelf/PodShelf';
-import NumPad from '../../common/NumPad/NumPad';
+
+import api from 'api';
+import PodShelf from 'components/common/PodShelf/PodShelf';
+import NumPad from 'components/common/NumPad/NumPad';
+import WarningModal from 'components/common/WarningModal/WarningModal';
+
 import './ReplenishOperationPage.css';
-import WarningModal from '../../common/WarningModal/WarningModal';
-import ImageNotFound from '../../../assets/images/no_photo_available.jpg';
+import ImageNotFound from 'assets/images/no_photo_available.jpg';
 
 
 const productImgBaseUrl = process.env.REACT_APP_IMAGE_BASE_URL;

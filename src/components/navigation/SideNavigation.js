@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Button } from 'semantic-ui-react';
 import { toast } from "react-toastify";
-import api from '../../api';
-import * as actions from '../../actions/auth';
-import appConfig from '../../AppConfig';
+import api from 'api';
+import * as actions from 'redux/actions/auth';
+import appConfig from 'utils/AppConfig';
+import { checkCurrentUnFinishTask } from "redux/actions/station";
 import './SideNavigation.css';
-import { checkCurrentUnFinishTask } from "../../actions/station";
 
 class SideNavigation extends Component {
 

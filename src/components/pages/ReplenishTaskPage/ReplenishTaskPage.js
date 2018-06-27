@@ -6,10 +6,12 @@ import ReactTable from "react-table";
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
 import moment from "moment";
 import { toast } from "react-toastify";
-import api from '../../../api';
-import { ReplenishOrderTableColumns } from '../../../models/ReplenishOrderTableColumns';
-import OrderDetailTable from '../../common/OrderDetailTable/OrderDetailTable';
-import { setStationTaskType } from '../../../actions/station';
+import api from 'api';
+
+import { ReplenishOrderTableColumns } from 'models/ReplenishOrderTableColumns';
+import OrderDetailTable from 'components/common/OrderDetailTable/OrderDetailTable';
+import { setStationTaskType } from 'redux/actions/station';
+
 import './ReplenishTaskPage.css';
 
 const CheckboxTable = checkboxHOC(ReactTable);
