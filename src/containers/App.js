@@ -7,17 +7,17 @@ import { ToastContainer } from 'react-toastify';
 import GuestRoute from "components/routes/GuestRoute";
 import UserRoute from "components/routes/UserRoute";
 
-import HomePage from "components/pages/HomePage";
-import LoginPage from "components/pages/LoginPage";
+import HomePage from "containers/HomePage";
+import LoginPage from "containers/LoginPage";
 import PickTaskPage from "containers/PickTaskPage/PickTaskPage";
-import OperationPage from 'components/pages/OperationPage/OperationPage';
-import SystemSettingPage from 'components/pages/SystemSettingPage/SystemSettingPage';
-import ReplenishTaskPage from 'components/pages/ReplenishTaskPage/ReplenishTaskPage';
-import ReplenishOperationPage from 'components/pages/ReplenishOperationPage/ReplenishOperationPage';
-import InventorySearchPage from "components/pages/InventorySearchPage/InventorySearchPage";
+import OperationPage from 'containers/OperationPage/OperationPage';
+import SystemSettingPage from 'containers/SystemSettingPage/SystemSettingPage';
+import ReplenishTaskPage from 'containers/ReplenishTaskPage/ReplenishTaskPage';
+import ReplenishOperationPage from 'containers/ReplenishOperationPage/ReplenishOperationPage';
+import InventorySearchPage from "containers/InventorySearchPage/InventorySearchPage";
 import TaskListPage from "containers/TaskListPage/TaskListPage";
-import BusinessRulesPage from "components/pages/BusinessRulesPage/BusinessRulesPage";
-import ExpireRuleConfigPage from "components/pages/ExpireRuleConfigPage/ExpireRuleConfigPage";
+import BusinessRulesPage from "containers/BusinessRulesPage/BusinessRulesPage";
+import ExpireRuleConfigPage from "containers/ExpireRuleConfigPage/ExpireRuleConfigPage";
 import 'react-toastify/dist/ReactToastify.css';
 import "./App.css";
 

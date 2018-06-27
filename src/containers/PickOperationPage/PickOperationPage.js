@@ -17,9 +17,9 @@ import OrderFinishModal from 'components/Operation/OrderFinishModal/OrderFinishM
 import WrongProductModal from 'components/Operation/WrongProductModal/WrongProductModal';
 import { getStationDeviceList } from 'redux/actions/station';
 
-import './OperationPage.css';
+import './PickOperationPage.css';
 
-class OperationPage extends Component {
+class PickOperationPage extends Component {
   state = {
     podInfo: {
       podId: 0,
@@ -492,7 +492,7 @@ class OperationPage extends Component {
     };
 
     return (
-      <div className="operationPage">
+      <div className="PickOperationPage">
         <Dimmer active={this.state.loading}>
           <Loader content='Waiting for pod...' indeterminate size="massive"/>
         </Dimmer>
@@ -577,7 +577,7 @@ class OperationPage extends Component {
   }
 }
 
-OperationPage.propTypes = {
+PickOperationPage.propTypes = {
   stationId: PropTypes.string.isRequired,
 };
 
@@ -590,4 +590,4 @@ function mapStateToProps(state) {
     deviceOrderMap: state.station.deviceList,
   }
 }
-export default connect(mapStateToProps, { getStationDeviceList })(OperationPage);
+export default connect(mapStateToProps, { getStationDeviceList })(PickOperationPage);
