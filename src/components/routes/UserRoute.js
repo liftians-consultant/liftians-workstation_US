@@ -12,10 +12,10 @@ const UserRoute = ({ isAuthenticated, component: Component, ...rest }) => (
       isAuthenticated ? (
         <Grid padded={false} relaxed={false}>
           <Grid.Row stretched>
-            <Grid.Column width={13}>
+            <Grid.Column width={14}>
               <Component {...props} />
             </Grid.Column>
-            <Grid.Column width={3} className="navGridColumn">
+            <Grid.Column width={2} className="navGridColumn">
               <SideNavigation />
             </Grid.Column>
           </Grid.Row>
