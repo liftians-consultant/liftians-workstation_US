@@ -3,13 +3,15 @@ import { Switch } from 'react-router';
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { ToastContainer } from 'react-toastify';
-import HomePage from "components/pages/HomePage";
-import LoginPage from "components/pages/LoginPage";
-import PickTaskPage from "components/pages/PickTaskPage/PickTaskPage";
-import OperationPage from 'components/pages/OperationPage/OperationPage';
-import SystemSettingPage from 'components/pages/SystemSettingPage/SystemSettingPage';
+
 import GuestRoute from "components/routes/GuestRoute";
 import UserRoute from "components/routes/UserRoute";
+
+import HomePage from "components/pages/HomePage";
+import LoginPage from "components/pages/LoginPage";
+import PickTaskPage from "containers/PickTaskPage/PickTaskPage";
+import OperationPage from 'components/pages/OperationPage/OperationPage';
+import SystemSettingPage from 'components/pages/SystemSettingPage/SystemSettingPage';
 import ReplenishTaskPage from 'components/pages/ReplenishTaskPage/ReplenishTaskPage';
 import ReplenishOperationPage from 'components/pages/ReplenishOperationPage/ReplenishOperationPage';
 import InventorySearchPage from "components/pages/InventorySearchPage/InventorySearchPage";

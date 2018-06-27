@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { Grid, Menu, Dropdown, Loader, Button, Input } from 'semantic-ui-react';
+import { Grid, Loader, Button, Input } from 'semantic-ui-react';
 import ReactTable from "react-table";
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
 import moment from "moment";
 import { toast } from "react-toastify";
-import api from 'api';
 
-import { ReplenishOrderTableColumns } from 'models/ReplenishOrderTableColumns';
-import OrderDetailTable from 'components/common/OrderDetailTable/OrderDetailTable';
+import api from 'api';
 import { setStationTaskType } from 'redux/actions/station';
+import { ReplenishOrderTableColumns } from 'models/ReplenishOrderTableColumns';
+import OperationTaskMenu from 'components/OperationTaskMenu/OperationTaskMenu';
+import OrderDetailTable from 'components/common/OrderDetailTable/OrderDetailTable';
 
 import './ReplenishTaskPage.css';
 
@@ -203,16 +204,6 @@ class ReplenishTaskPage extends Component {
   render() {
     const { toggleSelection, toggleAll, isSelected } = this;
     const { activeBillType, activeProcessType, loading, ordersList, selectAll, searchedList, selection } = this.state;
-    
-    const processList = activeBillType === 4 ? this.processOptions[1] : this.processOptions[0]; // If billType is Adjustment then use special process list
-    const processMenuItems = processList.map((option, i) => 
-      <Menu.Item key={i}
-        index={i}
-        active={ activeProcessType === option.value }
-        content={ option.text }
-        value={ option.value }
-        onClick={ this.handleProcessChange }></Menu.Item>
-    );
 
     const checkboxProps = {
       selectAll,
@@ -230,18 +221,12 @@ class ReplenishTaskPage extends Component {
         <Grid>
           <Grid.Row>
             <Grid.Column width={16}>
-              <Menu>
-                <Menu.Item name="taskType">
-                <Dropdown placeholder='Select Task' 
-                  value={ activeBillType } 
-                  fluid
-                  selection
-                  options={ this.billTypeOptions }
-                  onChange={ this.handleTaskChange }  
-                />
-                </Menu.Item>
-                { processMenuItems }
-              </Menu>
+              <OperationTaskMenu activeBillType={activeBillType}
+                processOptions={this.processOptions}
+                billTypeOptions={this.billTypeOptions}
+                onTaskChange={this.handleTaskChange}
+                onProcessChange={this.handleProcessChange}
+              />
             </Grid.Column>
           </Grid.Row>
           <Grid.Row>
