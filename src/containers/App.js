@@ -10,7 +10,7 @@ import UserRoute from "components/routes/UserRoute";
 import HomePage from "containers/HomePage";
 import LoginPage from "containers/LoginPage";
 import PickTaskPage from "containers/PickTaskPage/PickTaskPage";
-import OperationPage from 'containers/OperationPage/OperationPage';
+import PickOperationPage from 'containers/PickOperationPage/PickOperationPage';
 import SystemSettingPage from 'containers/SystemSettingPage/SystemSettingPage';
 import ReplenishTaskPage from 'containers/ReplenishTaskPage/ReplenishTaskPage';
 import ReplenishOperationPage from 'containers/ReplenishOperationPage/ReplenishOperationPage';
@@ -36,7 +36,7 @@ const App = ({ location, isAuthenticated }) => (
     />
     <Switch>
       <UserRoute path="/pick-task" exact component={PickTaskPage} />
-      <UserRoute path="/operation" exact component={OperationPage} />
+      <UserRoute path="/operation" exact component={PickOperationPage} />
       <UserRoute path="/system-setting" exact component={SystemSettingPage} />
       <UserRoute path="/replenish-task" exact component={ReplenishTaskPage} />
       <UserRoute path="/replenish-operation" exact component={ReplenishOperationPage} />

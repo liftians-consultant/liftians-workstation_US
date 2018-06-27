@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { Grid, Button } from 'semantic-ui-react';
-// import {BrowserHistory} from 'react-router';
 import MenuButton from 'components/common/MenuButton/MenuButton';
-import api from 'api';
 
 class BusinessRulesPage extends Component {
   state = {
@@ -26,7 +24,6 @@ class BusinessRulesPage extends Component {
   }
 
   render() {
-    const { successMessage } = this.state;
 
     return (
       <div className="ui container business-rule-page-container menu-page">

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { Grid, Message } from 'semantic-ui-react';
+import { Grid } from 'semantic-ui-react';
 import { toast } from "react-toastify";
 
 import api from 'api';
@@ -10,7 +10,6 @@ import ConfirmDialogModal from 'components/common/ConfirmDialogModal/ConfirmDial
 class SystemSettingPage extends Component {
   state = {
     openSystemResetModal: false,
-    successMessage: ''
   }
 
   constructor(props) {
@@ -48,7 +47,6 @@ class SystemSettingPage extends Component {
   }
 
   render() {
-    const { successMessage } = this.state;
 
     return (
       <div className="ui container system-setting-page-container menu-page">

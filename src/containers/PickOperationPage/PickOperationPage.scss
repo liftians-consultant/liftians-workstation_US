@@ -1,5 +1,5 @@
-.operationPage {
-  padding: 10% 5% 0;
+.pick-operation-page {
+  padding: 10% 4% 0;
 
   .numpad-container, .ok-btn {
     position: absolute;
@@ -51,10 +51,10 @@
 
 @media(max-width: 1300px) {
 
-  .operationPage {
-    padding: 5% 5% 0;
+  .pick-operation-page {
+    padding: 5% 2% 0;
   }
-  .operationPage .action-group-container {
+  .pick-operation-page .action-group-container {
     margin-top: 10px;
   }
 }

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { Button, Input } from 'semantic-ui-react';
 import { toast } from 'react-toastify';
-import _ from 'lodash';
 import api from 'api';
 
 import './ExpireRuleConfigPage.css';

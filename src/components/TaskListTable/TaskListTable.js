@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from "moment";
-import { Icon, Label, Table } from 'semantic-ui-react'
+import { Label, Table } from 'semantic-ui-react'
 
 const TaskListTable = props => {
   const tableRows = props.taskList.map((task, index) => {

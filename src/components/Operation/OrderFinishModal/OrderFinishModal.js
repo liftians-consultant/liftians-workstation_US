@@ -42,12 +42,11 @@ class OrderFinishModal extends Component {
       >
         <Modal.Header><h1 className="modal-header">Order #{ data.orderNo } completed</h1></Modal.Header>
         <Modal.Content scrolling>
-          <Modal.Description>
-            <BinGroup openedBinNum={ data.binNum } highlightColor={ 'lightgreen' }></BinGroup>
-            <h2>Please remove the hightlighted bin</h2>
-            <Input onKeyPress={this.handleInputChange}
-                 ref={this.inputRef} />
-          </Modal.Description>
+          <BinGroup openedBinNum={ data.binNum } highlightColor={ 'lightgreen' }></BinGroup>
+          <h2>Please replaced the highlighed bin with an empty bin</h2>
+          <h2>Please scan the bin</h2>
+          <Input onKeyPress={this.handleInputChange}
+                ref={this.inputRef} />
         </Modal.Content>
         {/* <Modal.Actions>
           <Button primary size="huge"

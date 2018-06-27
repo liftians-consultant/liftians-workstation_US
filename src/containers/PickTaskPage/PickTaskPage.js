@@ -5,7 +5,6 @@ import moment from "moment";
 import { Grid, Loader, Button } from 'semantic-ui-react';
 import { toast } from "react-toastify";
 import api from 'api';
-import InlineError from 'components/messages/InlineError';
 import OrderListTable from 'components/common/OrderListTable/OrderListTable';
 import { PickOrderTableColumns } from 'models/PickOrderTableModel';
 import { setStationTaskType } from 'redux/actions/station';
@@ -143,7 +142,7 @@ class PickTaskPage extends Component {
   }
 
   render() {
-    const { activeBillType, activeProcessType, loading, errors, ordersList } = this.state;
+    const { activeBillType, loading, ordersList } = this.state;
     
     return (
       <div className="ui pick-task-page-container">

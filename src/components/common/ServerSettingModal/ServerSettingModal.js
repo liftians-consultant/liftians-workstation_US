@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { Modal, Icon, Button, Form, Input } from 'semantic-ui-react';
 import { setStationId } from "redux/actions/station";
@@ -70,9 +69,5 @@ class ServerSettingModal extends Component {
     );
   }
 }
-
-// ServerSettingModal.propTypes = {
-
-// };
 
 export default connect(null, { setStationId })(ServerSettingModal);

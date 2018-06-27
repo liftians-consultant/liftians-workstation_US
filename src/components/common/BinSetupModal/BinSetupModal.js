@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Input } from 'semantic-ui-react';
-import BinGroup from '../../pages/OperationPage/components/BinGroup/BinGroup';
+import BinGroup from 'components/Operation/BinGroup/BinGroup';
 import './BinSetupModal.css';
 
 class BinSetupModal extends Component {

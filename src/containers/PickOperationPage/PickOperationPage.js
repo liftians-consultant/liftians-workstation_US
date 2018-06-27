@@ -3,8 +3,9 @@ import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
 import { Segment, Grid, Button, Dimmer, Loader, Input } from 'semantic-ui-react';
-import api from 'api';
+import { toast } from "react-toastify";
 
+import api from 'api';
 import ProductInfoDisplay from 'components/common/ProductInfoDisplay/ProductInfoDisplay';
 import PodShelf from 'components/common/PodShelf/PodShelf';
 import NumPad from 'components/common/NumPad/NumPad';
@@ -115,11 +116,13 @@ class PickOperationPage extends Component {
     api.station.linkBinToOrder(binId, deviceId, this.props.username).then(res => {
       if (res.data) {
         console.log('[LINK BIN TO ORDER] Success');
+        toast.success(`Bin ${binId} has successfully linked`);
       } else {
-        // TODO: error success
+        toast.warn('Please try again') ;
       }
     }).catch(err => {
       // TODO: Error toast
+      toast.error('SERVER ERROR: Link bin to order failed')
     });
   }
 
@@ -191,12 +194,15 @@ class PickOperationPage extends Component {
           this.atHolderAfterPickProduct(data);
         } else {
           // TODO: ERROR MESSAGE
+          
         }
       }).catch((err) => {
         console.error('[ERROR] for atStationAfterPickProduct', err);
+        toast.error('ERROR: atStationAfterPickProduct');
       });
     } else {
       console.log('[PICK OPERATION] Validation error')
+      toast.warn('Barcode did not psas validation. Please try again.');
     }
   }
 
@@ -215,12 +221,14 @@ class PickOperationPage extends Component {
         console.log(`[ERROR] AtHolderAfterPickProduct FAILED: ${res.data}`);
         if (!retry) { // first time retry
           console.log('[ERROR - RETRY] Retry AtHolderAfterPickProduct...');
+          toast.error('ERROR: AtHolderAfterPickProduct: Will retry in 2 sec');
           setTimeout(() => { // set timeout just to let database buffer
             this.atHolderAfterPickProduct(data, true);  
-          }, 1000);
+          }, 2000);
         } else {
           // retry also failed
           console.log(`[ERROR - RETRY] AtHolderAfterPickProduct Failed after retry: ${res.data}`);
+          toast.error('ERROR: AtHolderAfterPickProduct. Retry failed as well');
         }
       }
     });
@@ -243,6 +251,7 @@ class PickOperationPage extends Component {
       if (res.data) { // return 1 or 0
         console.log("[CHECK ORDER FINISHED] Order finished", res.data);
         this.setState({ openOrderFinishModal: true });
+        toast.success('Order finished');
       }
     });
   }
@@ -260,7 +269,7 @@ class PickOperationPage extends Component {
         console.log('[POD LAYOUT] NO GOOD. Empty array returned..')
         setTimeout(() => {
           this.getPodInfo();  
-        }, 300);
+        }, 1000);
       }
     }).catch( err => {
       console.log('[ERROR] getting pod info', err);
@@ -492,7 +501,7 @@ class PickOperationPage extends Component {
     };
 
     return (
-      <div className="PickOperationPage">
+      <div className="pick-operation-page">
         <Dimmer active={this.state.loading}>
           <Loader content='Waiting for pod...' indeterminate size="massive"/>
         </Dimmer>
@@ -562,11 +571,11 @@ class PickOperationPage extends Component {
           open={ openWrongProductModal }
           close={ this.closeWrongProductModal } /> }
 
-        { openBinSetupModal && <BinSetupModal
+        <BinSetupModal
           open={ openBinSetupModal }
           location={ this.state.currentSetupBin.deviceIndex }
           onInputEnter={ this.handleBinSetupInputEnter }
-           /> }
+        />
 
         { warningMessage && <WarningModal open={true}
           onClose={ this.closeWarningModal }
