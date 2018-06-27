@@ -13,7 +13,7 @@ class BinGroup extends Component {
     const { openedBinNum, highlightColor } = this.props;
     let color = highlightColor || 'red'
     let binElements = [];
-    let size = 120;
+    let size = 110;
     if (this.props.size) {
       size = this.props.size;
     }
