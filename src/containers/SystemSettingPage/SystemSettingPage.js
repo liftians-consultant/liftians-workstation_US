@@ -23,6 +23,11 @@ class SystemSettingPage extends Component {
     console.log(name);
     this.props.history.push(name);
   }
+
+  goToNowhere = name => {
+    // DO NOTHING~~~
+  }
+
   resetSystemBtnHandler() {
     this.setState({ openSystemResetModal: true });
   }
@@ -60,16 +65,16 @@ class SystemSettingPage extends Component {
               <MenuButton title="Business Rules" name="business-rules" clickHandler={ this.goToPage } />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Log Search" name="log-search" />
+              <MenuButton title="Log Search" name="log-search" clickHandler={ this.goToNowhere } />
             </Grid.Column>
           </Grid.Row>
 
           <Grid.Row>
             <Grid.Column>
-              <MenuButton title="Volumne Change" name="volume-change" />
+              <MenuButton title="Volumne Change" name="volume-change" clickHandler={ this.goToNowhere } />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="User" name="user-profile" />
+              <MenuButton title="User" name="user-profile" clickHandler={ this.goToNowhere }/>
             </Grid.Column>
             <Grid.Column>
               <MenuButton title="Task List" name="task-list" clickHandler={ this.goToPage }/>

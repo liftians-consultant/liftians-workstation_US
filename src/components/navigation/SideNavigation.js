@@ -6,7 +6,7 @@ import { Button } from 'semantic-ui-react';
 import { toast } from "react-toastify";
 import api from 'api';
 import * as actions from 'redux/actions/auth';
-import appConfig from 'utils/AppConfig';
+import appConfig from 'services/AppConfig';
 import { checkCurrentUnFinishTask } from "redux/actions/station";
 import './SideNavigation.css';
 
@@ -24,13 +24,14 @@ class SideNavigation extends Component {
   onUnload(event) { // the method that will be used for both add and remove event
     console.log("[WINDOW CLOSE EVENT] Triggered");
     
-    if (this.props.stationInfo.taskType !== 'U' && this.props.stationInfo.taskCount > 0) {
-      toast.error('Please finish all the tasks first! Please go to menu to refresh if you think you finished all tasks');
+    if (this.props.taskType !== 'U' && this.props.taskCount > 0) {
+      toast.error('Please finish all the tasks first! \nPlease go to menu to refresh if you think you finished all tasks');
       event.returnValue = false;
       return false;
     } else {
         this.props.logout();
     }
+    return false;
   }
 
   componentDidMount() {
@@ -106,7 +107,7 @@ class SideNavigation extends Component {
 SideNavigation.propTypes = {
   logout: PropTypes.func.isRequired,
   stationId: PropTypes.string.isRequired,
-  operationType: PropTypes.oneOf(['R', 'P', 'U'])
+  taskType: PropTypes.oneOf(['R', 'P', 'U'])
 };
 
 function mapStateToProps(state) {
@@ -114,6 +115,7 @@ function mapStateToProps(state) {
     username: state.user.username,
     stationId: state.station.id,
     taskType: state.station.info.taskType,
+    taskCount: state.station.info.taskCount
   };
 }
 

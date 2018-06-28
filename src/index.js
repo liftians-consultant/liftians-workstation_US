@@ -13,7 +13,7 @@ import registerServiceWorker from "./registerServiceWorker";
 import rootReducer from "redux/reducers/rootReducer";
 import { userLoggedIn, userLoggedOut } from "redux/actions/auth";
 import setAuthorizationHeader from "utils/setAuthorizationHeader";
-import appConfig from 'utils/AppConfig';
+import appConfig from 'services/AppConfig';
 import './index.css';
 
 let store = createStore(

@@ -45,15 +45,15 @@ class OrderFinishModal extends Component {
           <BinGroup openedBinNum={ data.binNum } highlightColor={ 'lightgreen' }></BinGroup>
           <h2>Please replaced the highlighed bin with an empty bin</h2>
           <h2>Please scan the bin</h2>
-          <Input onKeyPress={this.handleInputChange}
-                ref={this.inputRef} />
+          {/* <Input onKeyPress={this.handleInputChange}
+                ref={this.inputRef} /> */}
         </Modal.Content>
-        {/* <Modal.Actions>
+        <Modal.Actions>
           <Button primary size="huge"
             onClick={ modalClose }>
             Ok
           </Button>
-        </Modal.Actions> */}
+        </Modal.Actions>
       </Modal>
     );
   }

@@ -1,12 +1,13 @@
 import axios from 'axios';
-import appConfig from 'utils/AppConfig';
+import appConfig from 'services/AppConfig';
 
 /**
  * All API call.
  */
+
 const user = {
   login: credentials =>
-    axios.post(appConfig.getApiUrl() + '/login', { ...credentials }, {timeout: 6000}).then(res => res.headers.authorization),
+    axios.post(appConfig.getAdpiUrl() + '/login', { ...credentials }, {timeout: 6000}).then(res => res.headers.authorization),
   logout: () =>
     axios.post(appConfig.getApiUrl() + '/logout').then(res => res),
   getInfoById: (empId) =>
@@ -94,7 +95,7 @@ const station = {
         String(stationId),
       ]
     }),
-  
+
   linkBinToOrder: (binId, deviceId, userId) =>
     axios.post(appConfig.getApiUrl() + '/Common', {
       name: 'LinkBinToOrder',
@@ -325,17 +326,28 @@ const system = {
     }),
 };
 
-const eLabel = {
-  turnOnById: (labelId, pickNum) =>
-    axios.post(appConfig.getApiUrl() + '/eLabel/turnOnById', {
+const eTag = {
+  turnPickLightOnById: (labelId, pickNum) =>
+    axios.post(appConfig.getApiUrl() + '/eTag/pick/on', {
       labelId,
       pickNum
     }),
-  turnOffById: (labelId) =>
-    axios.post(appConfig.getApiUrl() + '/eLabel/turnOffById', {
+
+  turnPickLightOffById: (labelId) =>
+    axios.post(appConfig.getApiUrl() + '/eTag/pick/off', {
       labelId
-    })
-}
+    }),
+
+  turnEndLightOnById: (labelId) =>
+    axios.post(appConfig.getApiUrl() + '/eTag/end/on', {
+      labelId
+    }),
+
+  turnEndLightOffById: (labelId) =>
+    axios.post(appConfig.getApiUrl() + '/eTag/end/off', {
+      labelId
+    }),
+};
 
 export default {
   user,
@@ -345,5 +357,5 @@ export default {
   replenish,
   inventory,
   system,
-  eLabel
+  eTag
 };

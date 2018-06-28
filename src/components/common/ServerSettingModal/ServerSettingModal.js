@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import { Modal, Icon, Button, Form, Input } from 'semantic-ui-react';
 import { setStationId } from "redux/actions/station";
-import appConfig from 'utils/AppConfig';
+import appConfig from 'services/AppConfig';
 
 class ServerSettingModal extends Component {
   state = {

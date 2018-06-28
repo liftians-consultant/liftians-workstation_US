@@ -38,8 +38,9 @@ class PickOperationPage extends Component {
     showBox: false,
 
     binSetupWaitlist: [],
-    currentSetupBin: -1,
-
+    currentSetupBin: {
+      deviceIndex: 0,
+    },
     openOrderFinishModal: false,
     openWrongProductModal: false,
     openBinSetupModal: false,
@@ -81,7 +82,7 @@ class PickOperationPage extends Component {
 
     // Register bin when first init
     if (this.props.taskCount === 0) {
-      this.initialBinSetup(); 
+      // this.initialBinSetup(); 
     } else if (!this.props.deviceOrderMap) {
       this.props.getStationDeviceList(this.props.stationId).then(res => {
         console.log('[GET STATION DEVICE] device list get on CWM');
@@ -97,6 +98,11 @@ class PickOperationPage extends Component {
     this.setFocusToScanInput();
   }
 
+  setFocusToScanInput() {
+    this.scanInputRef.current.inputRef.value = '';
+    this.scanInputRef.current.focus();
+  }
+
   initialBinSetup() {
     // refresh device list first 
     this.props.getStationDeviceList(this.props.stationId).then(deviceList => {
@@ -105,11 +111,6 @@ class PickOperationPage extends Component {
       this.setState({ binSetupWaitlist, currentSetupBin, openBinSetupModal: true });
     });
     
-  }
-
-  setFocusToScanInput() {
-    this.scanInputRef.current.inputRef.value = '';
-    this.scanInputRef.current.focus();
   }
   
   linkBinToOrder(deviceId, binId) {
@@ -131,10 +132,10 @@ class PickOperationPage extends Component {
 
       // if all item are being placed in bin
       if (this.state.pickedAmount === parseInt(this.state.currentPickProduct.quantity, 10)) {
-        this.turnOffELabelById(parseInt(this.state.currentPickProduct.binPosition, 10));
+        this.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
         this.finishPick();
       } else {
-        this.turnOnELabelById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity - this.state.pickedAmount);
+        this.turnPickLightOnById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity - this.state.pickedAmount);
       }
     });
   }
@@ -194,6 +195,7 @@ class PickOperationPage extends Component {
           this.atHolderAfterPickProduct(data);
         } else {
           // TODO: ERROR MESSAGE
+          toast.error('ERROR: atStationAfterPickProduct did not succuss in server');
           
         }
       }).catch((err) => {
@@ -250,6 +252,7 @@ class PickOperationPage extends Component {
     api.pick.checkIsOrderFinished(this.state.currentPickProduct.order_no).then( res => {
       if (res.data) { // return 1 or 0
         console.log("[CHECK ORDER FINISHED] Order finished", res.data);
+        this.turnEndLightOnById(this.finishedOrder.binNum);
         this.setState({ openOrderFinishModal: true });
         toast.success('Order finished');
       }
@@ -340,22 +343,42 @@ class PickOperationPage extends Component {
     this.setState({ warningMessage: '' });
   }
 
-  turnOnELabelById(labelId, num) {
-    api.eLabel.turnOnById(labelId, num).then( res => {
+  turnPickLightOnById(labelId, num) {
+    api.eTag.turnPickLightOnById(labelId, num).then( res => {
       if (res.data) {
-        console.log(`[ELECTRONIC LABEL] Turn on label #${labelId} with ${num}`);
+        console.log(`[E-TAG] Turn on pick light #${labelId} with ${num}`);
       } else {
-        console.log(`[ELECTRONIC LABEL] Label turn on failed #${labelId} with ${num}`);
+        console.log(`[E-TAG] Pick light turn on failed #${labelId} with ${num}`);
       }
     })
   }
 
-  turnOffELabelById(labelId) {
-    api.eLabel.turnOffById(labelId).then(res => {
+  turnPickLightOffById(labelId) {
+    api.eTag.turnPickLightOffById(labelId).then(res => {
       if (res.data) {
-        console.log(`[ELECTRONIC LABEL] Turn off label #${labelId}`);
+        console.log(`[E-TAG] Turn off pick light #${labelId}`);
       } else {
-        console.log(`[ELECTRONIC LABEL] Label turn off failed #${labelId}`);
+        console.log(`[E-TAG] Pick light turn off failed #${labelId}`);
+      }
+    })
+  }
+
+  turnEndLightOnById(labelId) {
+    api.eTag.turnEndLightOnById(labelId).then( res => {
+      if (res.data) {
+        console.log(`[E-TAG] Turn on End light #${labelId}`);
+      } else {
+        console.log(`[E-TAG] End light turn on failed #${labelId}`);
+      }
+    })
+  }
+
+  turnEndLightOffById(labelId) {
+    api.eTag.turnEndLightOffById(labelId).then(res => {
+      if (res.data) {
+        console.log(`[ELECTRONIC LABEL] Turn off End light #${labelId}`);
+      } else {
+        console.log(`[ELECTRONIC LABEL] End light turn off failed #${labelId}`);
       }
     })
   }
@@ -455,6 +478,7 @@ class PickOperationPage extends Component {
   closeOrderFinishModal(binId, binLocation) {
     const deviceId = this.props.deviceOrderMap[binLocation - 1].deviceID; // should use find, but since its already order by sequence...
     api.station.linkBinToOrder(binId, deviceId, this.props.username).then( res => {
+      this.turnEndLightOffById(this.finishedOrder.binNum);
       this.setState({ showBox: false, openOrderFinishModal: false }, () => {
         this.setFocusToScanInput();
       });
