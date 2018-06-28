@@ -7,7 +7,7 @@ import appConfig from 'services/AppConfig';
 
 const user = {
   login: credentials =>
-    axios.post(appConfig.getAdpiUrl() + '/login', { ...credentials }, {timeout: 6000}).then(res => res.headers.authorization),
+    axios.post(appConfig.getApiUrl() + '/login', { ...credentials }, {timeout: 6000}).then(res => res.headers.authorization),
   logout: () =>
     axios.post(appConfig.getApiUrl() + '/logout').then(res => res),
   getInfoById: (empId) =>

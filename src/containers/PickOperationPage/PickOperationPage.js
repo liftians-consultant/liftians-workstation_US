@@ -412,7 +412,7 @@ class PickOperationPage extends Component {
           if (this.scanValidation(scannedValue)) {
             console.log(`[SCANNED] New Barcode: ${scannedValue}`);
             this.setState({ showBox: !this.state.showBox, barcode: scannedValue });
-            this.turnOnELabelById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity);
+            this.turnPickLightOnById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity);
           } else {
             this.setState({ barcode: scannedValue } , () => {
               this.setState({ openWrongProductModal: true })
