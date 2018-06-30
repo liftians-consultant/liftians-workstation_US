@@ -14,7 +14,7 @@
     "history": "^4.7.2",
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.5",
-    "moment": "^2.22.1",
+    "moment": "^2.22.2",
     "prop-types": "^15.6.0",
     "react": "^16.3.2",
     "react-datepicker": "^1.4.0",
@@ -31,7 +31,7 @@
     "redux-thunk": "^2.2.0",
     "semantic-ui-css": "^2.3.1",
     "semantic-ui-react": "^0.78.2",
-    "validator": "^9.4.1"
+    "sockjs-client": "^1.1.5"
   },
   "scripts": {
     "start": "nf start -p 3000",
