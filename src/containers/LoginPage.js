@@ -5,7 +5,7 @@ import { Grid, Image, Segment } from 'semantic-ui-react'
 
 import LoginForm from 'components/forms/LoginForm';
 import ServerSettingModal from "components/common/ServerSettingModal/ServerSettingModal";
-import { login } from "redux/actions/auth";
+import { login } from "redux/actions/authAction";
 
 import logo from 'assets/images/assembly_logo_trans.png';
 

@@ -5,9 +5,9 @@ import { connect } from 'react-redux';
 import { Button } from 'semantic-ui-react';
 import { toast } from "react-toastify";
 import api from 'api';
-import * as actions from 'redux/actions/auth';
+import * as actions from 'redux/actions/authAction';
 import appConfig from 'services/AppConfig';
-import { checkCurrentUnFinishTask } from "redux/actions/station";
+import { checkCurrentUnFinishTask } from "redux/actions/stationAction";
 import './SideNavigation.css';
 
 class SideNavigation extends Component {
@@ -35,11 +35,11 @@ class SideNavigation extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener("beforeunload", this.onUnload);
+    // window.addEventListener("beforeunload", this.onUnload);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("beforeunload", this.onUnload);
+    // window.removeEventListener("beforeunload", this.onUnload);
   }
 
   handleLogoutBtnClicked() {

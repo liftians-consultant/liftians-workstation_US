@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import api from 'api';
 import OrderListTable from 'components/common/OrderListTable/OrderListTable';
 import { PickOrderTableColumns } from 'models/PickOrderTableModel';
-import { setStationTaskType } from 'redux/actions/station';
+import { setStationTaskType } from 'redux/actions/stationAction';
 import './PickTaskPage.css';
 import OperationTaskMenu from 'components/OperationTaskMenu/OperationTaskMenu';
 

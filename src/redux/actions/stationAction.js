@@ -3,7 +3,6 @@ import { STATION_ID_SET,
   STATION_ACTIVATE_ERROR, 
   STATION_CURRENT_UNFINISH_TASK_FETCHED,
   SET_STATION_TASK_TYPE,
-  DEVICE_LIST_FETCHED
 } from "redux/types";
 import api from 'api';
 
@@ -57,9 +56,3 @@ export const setStationTaskType = (taskType) => (dispatch, getState) => {
   dispatch({type: SET_STATION_TASK_TYPE, stationInfo});
 }
 
-export const getStationDeviceList = (stationId) => (dispatch, getState) =>
-  api.station.getStationDeviceList(stationId).then(res => {
-    const stationDeviceMap = res.data.map(device => { return { deviceId: device.deviceID, deviceIndex: device.holderSequence } });
-    dispatch({type: DEVICE_LIST_FETCHED, stationDeviceMap: res.data});
-    return stationDeviceMap;
-  })

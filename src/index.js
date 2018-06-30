@@ -11,7 +11,7 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import App from "containers/App";
 import registerServiceWorker from "./registerServiceWorker";
 import rootReducer from "redux/reducers/rootReducer";
-import { userLoggedIn, userLoggedOut } from "redux/actions/auth";
+import { userLoggedIn, userLoggedOut } from "redux/actions/authAction";
 import setAuthorizationHeader from "utils/setAuthorizationHeader";
 import appConfig from 'services/AppConfig';
 import './index.css';

@@ -24,8 +24,6 @@ export default function station(state = { id: localStorage.stationId || "1", inf
       return { ...state, ...action.pods };
     case SET_STATION_TASK_TYPE:
       return { ...state, info: action.stationInfo};
-    case DEVICE_LIST_FETCHED:
-      return { ...state, deviceList: action.stationDeviceMap };
     default:
       return state;
   }

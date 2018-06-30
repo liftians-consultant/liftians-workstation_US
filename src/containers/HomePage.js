@@ -4,9 +4,9 @@ import { connect } from "react-redux";
 import { Grid, Dimmer, Loader } from 'semantic-ui-react';
 
 import MenuButton from 'components/common/MenuButton/MenuButton';
-import * as actions from "redux/actions/auth";
-import { getUserInfoById } from 'redux/actions/users';
-import { activateStation, checkCurrentUnFinishTask } from "redux/actions/station";
+import * as actions from "redux/actions/authAction";
+import { getUserInfoById } from 'redux/actions/userAction';
+import { activateStation, checkCurrentUnFinishTask } from "redux/actions/stationAction";
 
 class HomePage extends Component {
   state = {

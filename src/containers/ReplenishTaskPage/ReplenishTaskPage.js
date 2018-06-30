@@ -8,7 +8,7 @@ import moment from "moment";
 import { toast } from "react-toastify";
 
 import api from 'api';
-import { setStationTaskType } from 'redux/actions/station';
+import { setStationTaskType } from 'redux/actions/stationAction';
 import { ReplenishOrderTableColumns } from 'models/ReplenishOrderTableColumns';
 import OperationTaskMenu from 'components/OperationTaskMenu/OperationTaskMenu';
 import OrderDetailTable from 'components/common/OrderDetailTable/OrderDetailTable';
