@@ -7,26 +7,30 @@ import './OrderFinishModal.css';
 class OrderFinishModal extends Component {
 
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
-    this.inputRef = React.createRef();
+    this.binInputRef = React.createRef();
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleOnOpen = this.handleOnOpen.bind(this);
   }
 
-  handleOnOpen() {
-    this.inputRef.current.focus();
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.modalOpen !== this.props.modalOpen && this.props.modalOpen === true) {
+      setTimeout(function(){
+        this.binInputRef.current.inputRef.value = '';
+        this.binInputRef.current.focus();
+      }.bind(this), 0)
+    }
   }
 
   handleInputChange(e) {
+    const _this = this;
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
-      setTimeout(() => {
-        this.props.modalClose(e.target.value, this.props.data.binNum);
-        this.inputRef.current.inputRef.value = '';
-        this.inputRef.current.focus();
-      }, 500)
+      const binBarcode = e.target.value;
+      this.binInputRef.current.inputRef.value = '';
+      this.binInputRef.current.focus();
+      this.props.onInputEnter(binBarcode, this.props.data.binNum);
     }
   }
 
@@ -34,9 +38,9 @@ class OrderFinishModal extends Component {
     const { data, modalOpen, modalClose } = this.props;
 
     return (
-      <Modal open={ modalOpen }
-        size="small" basic
+      <Modal open={ this.props.modalOpen }
         onOpen={this.handleOnOpen}
+        size="small" basic
         style={{ marginTop: '1rem', marginLeft: 'auto', marginRight: 'auto' }} 
         className="order-finish-modal-container"
       >
@@ -45,14 +49,15 @@ class OrderFinishModal extends Component {
           <BinGroup openedBinNum={ data.binNum } highlightColor={ 'lightgreen' }></BinGroup>
           <h2>Please replaced the highlighed bin with an empty bin</h2>
           <h2>Please scan the bin</h2>
-          {/* <Input onKeyPress={this.handleInputChange}
-                ref={this.inputRef} /> */}
+          <br />
+          <Input onKeyPress={this.handleInputChange}
+            ref={this.binInputRef} />
         </Modal.Content>
         <Modal.Actions>
-          <Button primary size="huge"
+          {/* <Button primary size="huge"
             onClick={ modalClose }>
             Ok
-          </Button>
+          </Button> */}
         </Modal.Actions>
       </Modal>
     );
@@ -65,7 +70,7 @@ OrderFinishModal.propTypes = {
     orderNo: PropTypes.string,
   }).isRequired,
   modalOpen: PropTypes.bool.isRequired,
-  modalClose: PropTypes.func.isRequired,
+  onInputEnter: PropTypes.func.isRequired,
 };
 
 export default OrderFinishModal;

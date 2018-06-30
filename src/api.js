@@ -95,16 +95,6 @@ const station = {
         String(stationId),
       ]
     }),
-
-  linkBinToOrder: (binId, deviceId, userId) =>
-    axios.post(appConfig.getApiUrl() + '/Common', {
-      name: 'LinkBinToOrder',
-      parameter: [
-        String(binId),
-        String(deviceId),
-        String(userId),
-      ]
-    }),
 };
 
 const pick = {
@@ -200,7 +190,42 @@ const pick = {
         String(podId || 0),
         String(podSide || 0)
       ]
-    })
+    }),
+
+  linkBinToHolder: (binId, deviceId) =>
+    axios.post(appConfig.getApiUrl() + '/Common', {
+      name: 'LinkBinToHolder',
+      parameter: [
+        String(binId),
+        String(deviceId)
+      ]
+    }),
+
+  getBinInfoAfterHolderTag: (binBarcode, holderId) =>
+    axios.post(appConfig.getApiUrl() + '/Pick', {
+      name: 'GetBinInfoAfterHolderTag',
+      parameter: [
+        String(binBarcode),
+        String(holderId),
+      ]
+    }),
+
+  getUnassignedHolderByStation: (stationId) =>
+    axios.post(appConfig.getApiUrl() + '/Pick', {
+      name: 'GetUnassignedHolderByStation',
+      parameter: [
+        String(stationId),
+      ]
+    }),
+
+  unassignBinFromHolder: (holderId, orderId) =>
+    axios.post(appConfig.getApiUrl() + '/Pick', {
+      name: 'UnassignBinFromHolder',
+      parameter: [
+        String(holderId),
+        String(orderId)
+      ]
+    }),
 };
 
 const replenish = {

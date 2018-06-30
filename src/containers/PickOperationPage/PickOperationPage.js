@@ -2,21 +2,25 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
 import _ from "lodash";
-import { Segment, Grid, Button, Dimmer, Loader, Input } from 'semantic-ui-react';
+import { Grid, Button, Dimmer, Loader, Input } from 'semantic-ui-react';
 import { toast } from "react-toastify";
 
 import api from 'api';
 import ProductInfoDisplay from 'components/common/ProductInfoDisplay/ProductInfoDisplay';
-import PodShelf from 'components/common/PodShelf/PodShelf';
 import NumPad from 'components/common/NumPad/NumPad';
 import WarningModal from "components/common/WarningModal/WarningModal";
 import BinSetupModal from 'components/common/BinSetupModal/BinSetupModal';
 
 import BinGroup from 'components/Operation/BinGroup/BinGroup';
-import OrderDetailListModal from 'components/Operation/OrderDetailListModal/OrderDetailListModal';
 import OrderFinishModal from 'components/Operation/OrderFinishModal/OrderFinishModal';
 import WrongProductModal from 'components/Operation/WrongProductModal/WrongProductModal';
-import { getStationDeviceList } from 'redux/actions/station';
+import PodShelfInfo from '../../components/Operation/PodShelfInfo/PodShelfInfo';
+import { 
+  getStationDeviceList,
+  addHoldersToSetupWaitlist,
+  addBinToHolder,
+  unassignBinFromHolder
+} from 'redux/actions/operationAction';
 
 import './PickOperationPage.css';
 
@@ -38,7 +42,7 @@ class PickOperationPage extends Component {
     showBox: false,
 
     binSetupWaitlist: [],
-    currentSetupBin: {
+    currentSetupHolder: {
       deviceIndex: 0,
     },
     openOrderFinishModal: false,
@@ -52,7 +56,7 @@ class PickOperationPage extends Component {
   businessMode = process.env.REACT_APP_BUSINESS_MODE;
 
   finishedOrder = {
-    binNum: 3,
+    binNum: 0,
     orderNo: '235345'
   };
 
@@ -60,11 +64,12 @@ class PickOperationPage extends Component {
     super(props)
 
     this.scanInputRef = React.createRef();
+    this.orderFinishInputRef = React.createRef();
 
     // Bind the this context to the handler function
     this.selectPickedAmount = this.selectPickedAmount.bind(this);
     this.retrieveNextOrder = this.retrieveNextOrder.bind(this);
-    this.closeOrderFinishModal = this.closeOrderFinishModal.bind(this);
+    this.handleOrderFinishInputEnter = this.handleOrderFinishInputEnter.bind(this);
     this.closeWrongProductModal = this.closeWrongProductModal.bind(this);
     this.handleScanBtnClick = this.handleScanBtnClick.bind(this);
     this.finishPick = this.finishPick.bind(this);
@@ -81,9 +86,16 @@ class PickOperationPage extends Component {
     this.getUpcomingPod();
 
     // Register bin when first init
-    if (this.props.taskCount === 0) {
-      // this.initialBinSetup(); 
-    } else if (!this.props.deviceOrderMap) {
+
+    api.pick.getUnassignedHolderByStation(this.props.stationId).then(res => {
+      console.log('[UNASSINGED HOLDER]', res.data);
+      if (res.data.length > 0) {
+        this.props.addHoldersToSetupWaitlist(res.data);
+      }
+    })
+
+    if (!this.props.deviceList) {
+      console.log('[GET STATION DEVICE LIST]');
       this.props.getStationDeviceList(this.props.stationId).then(res => {
         console.log('[GET STATION DEVICE] device list get on CWM');
       })
@@ -99,16 +111,18 @@ class PickOperationPage extends Component {
   }
 
   setFocusToScanInput() {
-    this.scanInputRef.current.inputRef.value = '';
-    this.scanInputRef.current.focus();
+    if (!this.state.openOrderFinishModal) {
+      this.scanInputRef.current.inputRef.value = '';
+      this.scanInputRef.current.focus();
+    }
   }
 
   initialBinSetup() {
     // refresh device list first 
     this.props.getStationDeviceList(this.props.stationId).then(deviceList => {
       const binSetupWaitlist = this.state.binSetupWaitlist.concat(deviceList);
-      const currentSetupBin = binSetupWaitlist.shift();
-      this.setState({ binSetupWaitlist, currentSetupBin, openBinSetupModal: true });
+      const currentSetupHolder = binSetupWaitlist.shift();
+      this.setState({ binSetupWaitlist, currentSetupHolder, openBinSetupModal: true });
     });
     
   }
@@ -196,7 +210,6 @@ class PickOperationPage extends Component {
         } else {
           // TODO: ERROR MESSAGE
           toast.error('ERROR: atStationAfterPickProduct did not succuss in server');
-          
         }
       }).catch((err) => {
         console.error('[ERROR] for atStationAfterPickProduct', err);
@@ -252,9 +265,13 @@ class PickOperationPage extends Component {
     api.pick.checkIsOrderFinished(this.state.currentPickProduct.order_no).then( res => {
       if (res.data) { // return 1 or 0
         console.log("[CHECK ORDER FINISHED] Order finished", res.data);
+        // TOOD: unassign
         this.turnEndLightOnById(this.finishedOrder.binNum);
-        this.setState({ openOrderFinishModal: true });
-        toast.success('Order finished');
+        this.setState({ openOrderFinishModal: true }, () => {
+          this.setFocusToScanInput();
+        });
+        
+        // toast.success('Order finished');
       }
     });
   }
@@ -282,7 +299,7 @@ class PickOperationPage extends Component {
   getProductList() {
     api.pick.getPickInfoByTaskId(this.state.taskId).then(res => {
       if (res.data.length) {
-        console.log("[GET PRODUCT LIST] Pick info retrevied")
+        console.log("[GET PRODUCT LIST] Pick info retrevied", res.data[0].productID);
         this.setState({
           currentPickProduct: res.data[0],
           orderList: res.data,
@@ -475,15 +492,20 @@ class PickOperationPage extends Component {
     });
   }
 
-  closeOrderFinishModal(binId, binLocation) {
-    const deviceId = this.props.deviceOrderMap[binLocation - 1].deviceID; // should use find, but since its already order by sequence...
-    api.station.linkBinToOrder(binId, deviceId, this.props.username).then( res => {
-      this.turnEndLightOffById(this.finishedOrder.binNum);
-      this.setState({ showBox: false, openOrderFinishModal: false }, () => {
-        this.setFocusToScanInput();
-      });
+  handleOrderFinishInputEnter(binBarcode, binLocation) {
+    const holderId = this.props.deviceList.find(device => device.deviceIndex === binLocation).deviceId;
+    this.props.unassignBinFromHolder(holderId, this.finishedOrder.orderNo).then(res => {
+      if (res) {
+        this.props.addBinToHolder(binBarcode, holderId).then(res => {
+          if (res) {
+            this.turnEndLightOffById(this.finishedOrder.binNum);
+            this.setState({ showBox: false, openOrderFinishModal: false }, () => {
+              this.setFocusToScanInput();
+            });
+          }
+        });
+      }
     });
-    
   }
 
   closeWrongProductModal() {
@@ -491,24 +513,8 @@ class PickOperationPage extends Component {
     this.setFocusToScanInput();
   }
 
-  handleBinSetupInputEnter(binId, binLocation) {
-    api.station.linkBinToOrder(binId, this.state.currentSetupBin.deviceId, this.props.username).then( res => {
-      // if (res.data) {
-        console.log('LINK BIN TO ORDER] Success');
-        if (this.state.binSetupWaitlist.length > 0) {
-          // more bin to setup 
-          const binSetupWaitlist = this.state.binSetupWaitlist;
-          const currentSetupBin = binSetupWaitlist.shift();
-          this.setState({ binSetupWaitlist, currentSetupBin });
-        } else {
-          // no more bin to set up
-          this.setState({ openBinSetupModal: false });
-        }
-      // } else {
-      //   console.log('LINK BIN TO ORDER] Failed in server');
-      //   // TODO: toast error
-      // }
-    });
+  handleBinSetupInputEnter(binBarcode, binLocation) {
+    this.props.addBinToHolder(binBarcode, this.props.currentSetupHolder.deviceId);
   }
 
   closeBinSetupModal() {
@@ -532,16 +538,12 @@ class PickOperationPage extends Component {
         <Grid>
           <Grid.Row >
             <Grid.Column width={5}>
-              <div className="pod-info-block">
-                <span>Pod #{ podInfo.podId } - { podInfo.podSide === 0 ? 'A' : 'B' }</span>
-              </div>
-              <Segment.Group>
-                <Segment>
-                  <PodShelf podInfo={ podInfo } highlightBox={ highlightBox }></PodShelf>
-                </Segment>
-              </Segment.Group>
-              { orderList.length > 0 && <OrderDetailListModal orderList={ orderList } /> }
-              <Button color="red" onClick={ () => this.handleShortageClick() }>Shortage</Button>
+              <PodShelfInfo podInfo={ podInfo }
+                highlightBox={ highlightBox }
+                orderList={ orderList }
+                onShortageClicked={ this.handleShortageClick }
+                showAdditionBtns={true}
+              />
             </Grid.Column>
 
             <Grid.Column width={11}>
@@ -585,10 +587,10 @@ class PickOperationPage extends Component {
           </Grid.Row>
         </Grid>
 
-        { openOrderFinishModal && <OrderFinishModal data={ this.finishedOrder }
+        <OrderFinishModal data={ this.finishedOrder }
           modalOpen={ openOrderFinishModal }
-          modalClose={ this.closeOrderFinishModal }
-          ></OrderFinishModal> }
+          onInputEnter={ this.handleOrderFinishInputEnter }
+          ></OrderFinishModal>
 
         { openWrongProductModal && <WrongProductModal podInfo={ podInfo }
           productId={ barcode }
@@ -596,8 +598,8 @@ class PickOperationPage extends Component {
           close={ this.closeWrongProductModal } /> }
 
         <BinSetupModal
-          open={ openBinSetupModal }
-          location={ this.state.currentSetupBin.deviceIndex }
+          open={ this.props.currentSetupHolder.deviceIndex > 0 }
+          location={ this.props.currentSetupHolder.deviceIndex }
           onInputEnter={ this.handleBinSetupInputEnter }
         />
 
@@ -615,12 +617,18 @@ PickOperationPage.propTypes = {
 };
 
 function mapStateToProps(state) {
-  console.log(state);
   return {
     username: state.user.username,
     stationId: state.station.id,
     taskCount: state.station.info.taskCount,
-    deviceOrderMap: state.station.deviceList,
+    deviceList: state.operation.deviceList,
+    binSetupWaitlist: state.operation.binSetupWaitlist,
+    currentSetupHolder: state.operation.currentSetupHolder
   }
 }
-export default connect(mapStateToProps, { getStationDeviceList })(PickOperationPage);
+export default connect(mapStateToProps, {
+  getStationDeviceList,
+  addHoldersToSetupWaitlist,
+  addBinToHolder,
+  unassignBinFromHolder
+})(PickOperationPage);
