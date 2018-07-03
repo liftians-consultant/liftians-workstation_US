@@ -497,6 +497,7 @@ class PickOperationPage extends Component {
 
     if (holder.bin && holder.bin.binBarcode === binBarcode) {
       toast.warn("DO NOT SCAN THE SAME BIN");
+      return;
     }
 
     const holderId = holder.deviceId;
