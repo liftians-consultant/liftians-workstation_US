@@ -3,29 +3,48 @@ import PropTypes from 'prop-types';
 import { Modal, Input } from 'semantic-ui-react';
 import BinGroup from 'components/Operation/BinGroup/BinGroup';
 import './BinSetupModal.css';
+import api from 'api';
 
 class BinSetupModal extends Component {
 
   constructor() {
     super();
 
-    this.inputRef = React.createRef();
+    this.setupInputRef = React.createRef();
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleOnOpen = this.handleOnOpen.bind(this);
   }
 
-  handleOnOpen(e) {
-    this.inputRef.current.focus();
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.open !== this.props.open && this.props.open === true) {
+      setTimeout(function(){
+        this.setupInputRef.current.inputRef.value = '';
+        this.setupInputRef.current.focus();
+      }.bind(this), 0)
+    }
+
+    if (prevProps.location !== this.props.location && this.props.location) {
+      this.turnEndLightOnById(); 
+    }
+  }
+
+  turnEndLightOnById() {
+    api.eTag.turnEndLightOnById(this.props.location).then( res => {
+      if (res.data) {
+        console.log(`[E-TAG] Turn on End light #${this.props.location}`);
+      } else {
+        console.log(`[E-TAG] End light turn on failed #${this.props.location}`);
+      }
+    })
   }
 
   handleInputChange(e) {
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
-      setTimeout(() => {
+      setTimeout(function() {
         this.props.onInputEnter(e.target.value, this.props.location);
-        this.inputRef.current.inputRef.value = '';
-        this.inputRef.current.focus();
-      }, 500)
+        this.setupInputRef.current.inputRef.value = '';
+        this.setupInputRef.current.focus();
+      }.bind(this), 300)
     }
   }
 
@@ -43,7 +62,7 @@ class BinSetupModal extends Component {
           <div className="info-text">Please place an empty bin on correspond location and scan the barcode on it.</div>
           <BinGroup openedBinNum={location} highlighColor='orange' size="150" />
           <Input onKeyPress={this.handleInputChange}
-                 ref={this.inputRef} />
+                 ref={this.setupInputRef} />
         </Modal.Content>
       </Modal>
     );

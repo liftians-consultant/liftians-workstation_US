@@ -7,9 +7,11 @@ import {
 
 const operationDefaultState = {
   currentSetupHolder: {
-    deviceIndex: 0
+    deviceIndex: 0,
+    deviceId: -1
   },
-  holderSetupWaitlist: []
+  holderSetupWaitlist: [],
+  deviceList: []
 }
 
 export default function operation(state = operationDefaultState, action = {}) {
@@ -30,6 +32,7 @@ export default function operation(state = operationDefaultState, action = {}) {
         currentSetupHolder: action.currentSetupHolder
       }
     case UNASSIGN_BIN_FROM_HOLDER:
+
       return {
         ...state,
         deviceList: state.deviceList.map(device => 

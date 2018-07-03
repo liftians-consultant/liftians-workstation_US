@@ -27,10 +27,12 @@ class OrderFinishModal extends Component {
     const _this = this;
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
-      const binBarcode = e.target.value;
-      this.binInputRef.current.inputRef.value = '';
-      this.binInputRef.current.focus();
-      this.props.onInputEnter(binBarcode, this.props.data.binNum);
+      setTimeout(function() {
+        const binBarcode = e.target.value;
+        this.binInputRef.current.inputRef.value = '';
+        this.binInputRef.current.focus();
+        this.props.onInputEnter(binBarcode, this.props.data.binNum);
+      }.bind(this), 300);
     }
   }
 

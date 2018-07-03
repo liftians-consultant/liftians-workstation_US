@@ -85,8 +85,14 @@ class PickOperationPage extends Component {
   componentWillMount() {
     this.getUpcomingPod();
 
+    if (this.props.deviceList.length === 0) {
+      console.log('[GET STATION DEVICE LIST]');
+      this.props.getStationDeviceList(this.props.stationId).then(res => {
+        console.log('[GET STATION DEVICE] device list get on CWM');
+      })
+    }
+    
     // Register bin when first init
-
     api.pick.getUnassignedHolderByStation(this.props.stationId).then(res => {
       console.log('[UNASSINGED HOLDER]', res.data);
       if (res.data.length > 0) {
@@ -94,12 +100,6 @@ class PickOperationPage extends Component {
       }
     })
 
-    if (!this.props.deviceList) {
-      console.log('[GET STATION DEVICE LIST]');
-      this.props.getStationDeviceList(this.props.stationId).then(res => {
-        console.log('[GET STATION DEVICE] device list get on CWM');
-      })
-    }
   }
 
   componentWillUnmount() {
@@ -111,7 +111,7 @@ class PickOperationPage extends Component {
   }
 
   setFocusToScanInput() {
-    if (!this.state.openOrderFinishModal) {
+    if (!this.state.openOrderFinishModal && !this.state.openBinSetupModal) {
       this.scanInputRef.current.inputRef.value = '';
       this.scanInputRef.current.focus();
     }
@@ -493,7 +493,13 @@ class PickOperationPage extends Component {
   }
 
   handleOrderFinishInputEnter(binBarcode, binLocation) {
-    const holderId = this.props.deviceList.find(device => device.deviceIndex === binLocation).deviceId;
+    const holder = this.props.deviceList.find(device => device.deviceIndex === binLocation);
+
+    if (holder.bin && holder.bin.binBarcode === binBarcode) {
+      toast.warn("DO NOT SCAN THE SAME BIN");
+    }
+
+    const holderId = holder.deviceId;
     this.props.unassignBinFromHolder(holderId, this.finishedOrder.orderNo).then(res => {
       if (res) {
         this.props.addBinToHolder(binBarcode, holderId).then(res => {

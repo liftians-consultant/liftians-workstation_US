@@ -43,13 +43,18 @@ export const getStationDeviceList = (stationId) => (dispatch, getState) => {
 
 export const addHoldersToSetupWaitlist = (holderSetupWaitlist) => (dispatch, getState) => {
   const holderId = holderSetupWaitlist.shift();
-  const currentSetupHolder = getState().operation.deviceList.find(device => device.deviceId === holderId);
+  const deviceList = getState().operation.deviceList;
+  let currentSetupHolder = getState().operation.currentSetupHolder;
+  if (deviceList.length > 0) {
+    currentSetupHolder = deviceList.find(device => device.deviceId === holderId);
+  }
   dispatch(setHolderSetupWaitlist(holderSetupWaitlist, currentSetupHolder));
 };
 
 export const addBinToHolder = (binBarcode, holderId) => (dispatch, getState) => {
   return api.pick.linkBinToHolder(binBarcode, holderId).then(res => {
     if (res.data) {
+      api.eTag.turnEndLightOffById(getState().operation.currentSetupHolder.deviceIndex);
       return api.pick.getBinInfoAfterHolderTag(binBarcode, holderId);
     } else {
       return false;
@@ -57,7 +62,6 @@ export const addBinToHolder = (binBarcode, holderId) => (dispatch, getState) => 
   }).then(res => {
     if (!res) return false;
     if (res.data) {
-      console.log(res.data);
       dispatch(addBinInfoToHolder(holderId, res.data));
       return true;
     } else {
