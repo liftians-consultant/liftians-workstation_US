@@ -226,13 +226,12 @@ const pick = {
       ]
     }),
 
-  changeHolderBin: (binBarcode, holderId, orderNo) =>
+  changeHolderBin: (binBarcode, holderId) =>
     axios.post(appConfig.getApiUrl() + '/Pick', {
       name: 'ChangeHolderBin',
       parameter: [
         String(binBarcode),
-        String(holderId),
-        String(orderNo)
+        String(holderId)
       ]
     }),
 };

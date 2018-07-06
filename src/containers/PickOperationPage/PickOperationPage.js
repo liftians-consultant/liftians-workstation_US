@@ -84,6 +84,7 @@ class PickOperationPage extends Component {
     this.closeBinSetupModal = this.closeBinSetupModal.bind(this);
     this.handleBinSetupInputEnter = this.handleBinSetupInputEnter.bind(this);
     this.closeChangeBinModal = this.closeChangeBinModal.bind(this);
+    this.handleChangeBinCallback = this.handleChangeBinCallback.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
@@ -495,9 +496,20 @@ class PickOperationPage extends Component {
   }
 
   handleChangeBinCallback(holderId, binBarcode) {
-    console.log(`holder: ${holderId}, binBarcode: ${binBarcode}`);
-    this.props.changeHolderBin(binBarcode, holderId, this.state.currentPickProduct.order_no).then(res => {
-      toast.success('Successfully change bin');
+    console.log(`[CHANGE BIN] holder: ${holderId}, binBarcode: ${binBarcode}`);
+    this.props.changeHolderBin(binBarcode, holderId).then(res => {
+      if (res === 1) {
+        toast.success('Successfully change bin');
+        this.props.hideChangeBinModal();
+      } else if (res === -1) {
+        toast.warn('Cannot change bin. No order linked to this holder.');
+      } else if (res === -2) {
+        toast.warn('Cannot change bin. Bin is already linked to an order.');
+      } else if (res === -3) {
+        toast.warn('Cannot change bin. Bin is already linked to an holder');
+      } else {
+        toast.warn(`DB P_ChangeHolderBin error. Error code: ${res.data}`);
+      }
     });
   }
 

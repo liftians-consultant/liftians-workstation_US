@@ -6,6 +6,7 @@ import {
   SHOW_CHANGE_BIN_MODAL
 } from "redux/types";
 import api from 'api';
+import ETagService from 'services/ETagService';
 
 function addBinInfoToHolder(holderId, binInfo) {
   return {
@@ -69,7 +70,7 @@ export const addHoldersToSetupWaitlist = (holderSetupWaitlist) => (dispatch, get
 export const addBinToHolder = (binBarcode, holderId) => (dispatch, getState) => {
   return api.pick.linkBinToHolder(binBarcode, holderId).then(res => {
     if (res.data) {
-      api.eTag.turnEndLightOffById(getState().operation.currentSetupHolder.deviceIndex);
+      ETagService.turnEndLightOffById(getState().operation.currentSetupHolder.deviceIndex);
       return api.pick.getBinInfoAfterHolderTag(binBarcode, holderId);
     } else {
       return false;
@@ -115,17 +116,19 @@ export const hideChangeBinModal = () => (dispatch, getState) => {
   dispatch(hideChangeBinModalAction());
 }
 
-export const changeHolderBin = (binBarcode, holderId, orderNo) => (dispatch, getState) => {
-  return api.pick.changeHolderBin(binBarcode, holderId, orderNo).then(res => {
+export const changeHolderBin = (binBarcode, holderId) => (dispatch, getState) => {
+  return api.pick.changeHolderBin(binBarcode, holderId).then(res => {
     if (res.data === 1) {
       return api.pick.getBinInfoAfterHolderTag(binBarcode, holderId)
+    } else {
+      return res.data;
     }
   }).then(res => {
-    if (res.data) {
+    if (res && res.data) {
       dispatch(addBinInfoToHolder(holderId, res.data));
-      return true;
+      return 1;
     } else {
-      return false;
+      return res;
     }
   });
 }

@@ -22,12 +22,13 @@ class ChangeBinModal extends Component {
     this.handleBinScanInputChange = this.handleBinScanInputChange.bind(this);
     // this.checkDeviceIsValid = this.checkDeviceIsValid.bind(this);
     this.handleRescanClick = this.handleRescanClick.bind(this);
+    this.handleOnClose = this.handleOnClose.bind(this);
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.open !== this.props.open && this.props.open === true) {
       setTimeout(function(){
-        this.focusHolderScanInput();
+        this.handleRescanClick();
       }.bind(this), 0)
     }
   }
@@ -49,7 +50,12 @@ class ChangeBinModal extends Component {
         this.focusHolderScanInput();
       }, 100);
     });
+  }
 
+  handleOnClose() {
+    this.setState({selectedHolder: 0, selectedBin: 0}, () => {
+      this.props.onClose();
+    })
   }
 
   /* Bin Group clicked */
@@ -90,7 +96,8 @@ class ChangeBinModal extends Component {
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
       setTimeout(function() {
-        this.props.onChangeBinCallback(this.state.selectedHolder, e.target.value);
+        const holderId = e.target.value;
+        this.props.onChangeBinCallback(this.state.selectedHolder, holderId);
       }.bind(this), 300)
     }
   }
@@ -121,7 +128,7 @@ class ChangeBinModal extends Component {
       <Modal className="change-bin-modal-container"
         size="fullscreen"
         open={this.props.open}
-        onClose={this.props.onClose}
+        onClose={this.handleOnClose}
         style={{ marginTop: '10%', marginLeft: 'auto', marginRight: 'auto' }}
         >
         <Modal.Header>Change Bin</Modal.Header>
