@@ -8,6 +8,19 @@ class BinGroup extends Component {
     binAmount: process.env.REACT_APP_BOX_AMOUNT
   };
 
+  
+  constructor() {
+    super();
+
+    this.handleBinClicked = this.handleBinClicked.bind(this);
+  }
+
+  handleBinClicked(index) {
+    if (this.props.onBinClicked) {
+      this.props.onBinClicked(index + 1);
+    }
+  }
+
   render() {
     const { binAmount } = this.state;
     const { openedBinNum, highlightColor } = this.props;
@@ -35,7 +48,10 @@ class BinGroup extends Component {
     _.times(binAmount, (index) => {
       binElements.push(
         <div key={'bin-' + index} className="bin-item-container" style={styles.binItem}>
-          <div className={"bin-item " + ((index + 1 === openedBinNum) ? 'highlight' : '')} style={styles.binItemContainer}>{index + 1}</div>
+          <div className={"bin-item " + ((index + 1 === openedBinNum) ? 'highlight' : '')}
+            style={styles.binItemContainer}
+            onClick={ () => this.handleBinClicked(index)}
+            >{index + 1}</div>
         </div>
       )
     })
@@ -54,9 +70,10 @@ class BinGroup extends Component {
 }
 
 BinGroup.propTypes = {
-  openedBinNum: PropTypes.number.isRequired,
+  openedBinNum: PropTypes.number,
   highlightColor: PropTypes.string,
   size: PropTypes.string,
+  onBinClicked: PropTypes.func,
 };
 
 export default BinGroup;

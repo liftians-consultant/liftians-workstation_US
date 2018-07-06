@@ -6,6 +6,7 @@ import { Grid, Button, Dimmer, Loader, Input } from 'semantic-ui-react';
 import { toast } from "react-toastify";
 
 import api from 'api';
+import ETagService from 'services/ETagService';
 import ProductInfoDisplay from 'components/common/ProductInfoDisplay/ProductInfoDisplay';
 import NumPad from 'components/common/NumPad/NumPad';
 import WarningModal from "components/common/WarningModal/WarningModal";
@@ -19,10 +20,13 @@ import {
   getStationDeviceList,
   addHoldersToSetupWaitlist,
   addBinToHolder,
-  unassignBinFromHolder
+  unassignBinFromHolder,
+  hideChangeBinModal,
+  changeHolderBin
 } from 'redux/actions/operationAction';
 
 import './PickOperationPage.css';
+import ChangeBinModal from '../../components/Operation/ChangeBinModal/ChangeBinModal';
 
 class PickOperationPage extends Component {
   state = {
@@ -79,6 +83,7 @@ class PickOperationPage extends Component {
     this.closeWarningModal = this.closeWarningModal.bind(this);
     this.closeBinSetupModal = this.closeBinSetupModal.bind(this);
     this.handleBinSetupInputEnter = this.handleBinSetupInputEnter.bind(this);
+    this.closeChangeBinModal = this.closeChangeBinModal.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
@@ -146,10 +151,10 @@ class PickOperationPage extends Component {
 
       // if all item are being placed in bin
       if (this.state.pickedAmount === parseInt(this.state.currentPickProduct.quantity, 10)) {
-        this.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
+        ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
         this.finishPick();
       } else {
-        this.turnPickLightOnById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity - this.state.pickedAmount);
+        ETagService.turnPickLightOnById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity - this.state.pickedAmount);
       }
     });
   }
@@ -170,7 +175,7 @@ class PickOperationPage extends Component {
         clearInterval(this.checkPodInterval);
         this.retrieveNextOrder();
       }
-    }, 500);
+    }, 1000);
   }
 
   validateAfterPickData(data) {
@@ -266,7 +271,7 @@ class PickOperationPage extends Component {
       if (res.data) { // return 1 or 0
         console.log("[CHECK ORDER FINISHED] Order finished", res.data);
         // TOOD: unassign
-        this.turnEndLightOnById(this.finishedOrder.binNum);
+        ETagService.turnEndLightOnById(this.finishedOrder.binNum);
         this.setState({ openOrderFinishModal: true }, () => {
           this.setFocusToScanInput();
         });
@@ -360,46 +365,6 @@ class PickOperationPage extends Component {
     this.setState({ warningMessage: '' });
   }
 
-  turnPickLightOnById(labelId, num) {
-    api.eTag.turnPickLightOnById(labelId, num).then( res => {
-      if (res.data) {
-        console.log(`[E-TAG] Turn on pick light #${labelId} with ${num}`);
-      } else {
-        console.log(`[E-TAG] Pick light turn on failed #${labelId} with ${num}`);
-      }
-    })
-  }
-
-  turnPickLightOffById(labelId) {
-    api.eTag.turnPickLightOffById(labelId).then(res => {
-      if (res.data) {
-        console.log(`[E-TAG] Turn off pick light #${labelId}`);
-      } else {
-        console.log(`[E-TAG] Pick light turn off failed #${labelId}`);
-      }
-    })
-  }
-
-  turnEndLightOnById(labelId) {
-    api.eTag.turnEndLightOnById(labelId).then( res => {
-      if (res.data) {
-        console.log(`[E-TAG] Turn on End light #${labelId}`);
-      } else {
-        console.log(`[E-TAG] End light turn on failed #${labelId}`);
-      }
-    })
-  }
-
-  turnEndLightOffById(labelId) {
-    api.eTag.turnEndLightOffById(labelId).then(res => {
-      if (res.data) {
-        console.log(`[ELECTRONIC LABEL] Turn off End light #${labelId}`);
-      } else {
-        console.log(`[ELECTRONIC LABEL] End light turn off failed #${labelId}`);
-      }
-    })
-  }
-
   handleScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
@@ -429,7 +394,7 @@ class PickOperationPage extends Component {
           if (this.scanValidation(scannedValue)) {
             console.log(`[SCANNED] New Barcode: ${scannedValue}`);
             this.setState({ showBox: !this.state.showBox, barcode: scannedValue });
-            this.turnPickLightOnById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity);
+            ETagService.turnPickLightOnById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity);
           } else {
             this.setState({ barcode: scannedValue } , () => {
               this.setState({ openWrongProductModal: true })
@@ -501,11 +466,11 @@ class PickOperationPage extends Component {
     }
 
     const holderId = holder.deviceId;
-    this.props.unassignBinFromHolder(holderId, this.finishedOrder.orderNo).then(res => {
+    this.props.unassignBinFromHolder(holderId).then(res => {
       if (res) {
         this.props.addBinToHolder(binBarcode, holderId).then(res => {
           if (res) {
-            this.turnEndLightOffById(this.finishedOrder.binNum);
+            ETagService.turnEndLightOffById(this.finishedOrder.binNum);
             this.setState({ showBox: false, openOrderFinishModal: false }, () => {
               this.setFocusToScanInput();
             });
@@ -527,6 +492,17 @@ class PickOperationPage extends Component {
   closeBinSetupModal() {
     this.setState({ openBinSetupModal: false });
     this.setFocusToScanInput();
+  }
+
+  handleChangeBinCallback(holderId, binBarcode) {
+    console.log(`holder: ${holderId}, binBarcode: ${binBarcode}`);
+    this.props.changeHolderBin(binBarcode, holderId, this.state.currentPickProduct.order_no).then(res => {
+      toast.success('Successfully change bin');
+    });
+  }
+
+  closeChangeBinModal() {
+    this.props.hideChangeBinModal();
   }
 
   render() {
@@ -614,6 +590,13 @@ class PickOperationPage extends Component {
           onClose={ this.closeWarningModal }
           headerText="Warning"
           contentText={ warningMessage } /> }
+
+        <ChangeBinModal
+          open={ this.props.openChangeBinModal }
+          onClose={ this.closeChangeBinModal }
+          deviceList={ this.props.deviceList }
+          onChangeBinCallback={ this.handleChangeBinCallback }
+        />
       </div>
     );
   }
@@ -630,12 +613,15 @@ function mapStateToProps(state) {
     taskCount: state.station.info.taskCount,
     deviceList: state.operation.deviceList,
     binSetupWaitlist: state.operation.binSetupWaitlist,
-    currentSetupHolder: state.operation.currentSetupHolder
+    currentSetupHolder: state.operation.currentSetupHolder,
+    openChangeBinModal: state.operation.openChangeBinModal,
   }
 }
 export default connect(mapStateToProps, {
   getStationDeviceList,
   addHoldersToSetupWaitlist,
   addBinToHolder,
-  unassignBinFromHolder
+  unassignBinFromHolder,
+  hideChangeBinModal,
+  changeHolderBin
 })(PickOperationPage);

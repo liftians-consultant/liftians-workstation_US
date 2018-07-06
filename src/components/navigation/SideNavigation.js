@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router'
 import { Button } from 'semantic-ui-react';
 import { toast } from "react-toastify";
 import api from 'api';
 import * as actions from 'redux/actions/authAction';
 import appConfig from 'services/AppConfig';
 import { checkCurrentUnFinishTask } from "redux/actions/stationAction";
+import { showChangeBinModal } from 'redux/actions/operationAction';
 import './SideNavigation.css';
 
 class SideNavigation extends Component {
@@ -18,6 +20,7 @@ class SideNavigation extends Component {
     super();
 
     this.handleLogoutBtnClicked = this.handleLogoutBtnClicked.bind(this);
+    this.handleChangeBinBtnClicked = this.handleChangeBinBtnClicked.bind(this);
     this.onUnload = this.onUnload.bind(this);
   }
 
@@ -74,11 +77,24 @@ class SideNavigation extends Component {
     });
   }
 
+  handleChangeBinBtnClicked() {
+    this.props.showChangeBinModal();
+  }
+
+  renderChangeBinBtn() {
+    if (this.props.location.pathname === '/operation') {
+      return (<Button className="nav-btn" onClick={ this.handleChangeBinBtnClicked }>Change Bin</Button>) 
+    }
+
+    return;
+  }
+
   render() {
-    const { taskType } = this.props;
+    const { taskType, location } = this.props;
     const operationUrl = taskType === 'R' ? '/replenish-operation' : '/operation';
     const taskListUrl = taskType === 'R' ? '/replenish-task' : '/pick-task';
-    console.log('refresh');
+    
+
     return (
       <div className="side-navigation">
         <div className="nav-top">
@@ -97,6 +113,7 @@ class SideNavigation extends Component {
         </div>
         <div className="nav-buffer"></div>
         <div className="nav-item-container nav-bottom">
+          { this.renderChangeBinBtn() }
           <Button className="nav-btn" onClick={ this.handleLogoutBtnClicked }>Logout</Button>
         </div> 
       </div>
@@ -107,7 +124,8 @@ class SideNavigation extends Component {
 SideNavigation.propTypes = {
   logout: PropTypes.func.isRequired,
   stationId: PropTypes.string.isRequired,
-  taskType: PropTypes.oneOf(['R', 'P', 'U'])
+  taskType: PropTypes.oneOf(['R', 'P', 'U']),
+  location: PropTypes.object,
 };
 
 function mapStateToProps(state) {
@@ -119,7 +137,8 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps, {
+export default withRouter(connect(mapStateToProps, {
   logout: actions.logout,
-  checkCurrentUnFinishTask
-})(SideNavigation);
+  checkCurrentUnFinishTask,
+  showChangeBinModal
+})(SideNavigation));

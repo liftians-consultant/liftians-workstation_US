@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Input } from 'semantic-ui-react';
 import BinGroup from 'components/Operation/BinGroup/BinGroup';
+import ETagService from 'services/ETagService';
 import './BinSetupModal.css';
-import api from 'api';
 
 class BinSetupModal extends Component {
 
@@ -23,18 +23,8 @@ class BinSetupModal extends Component {
     }
 
     if (prevProps.location !== this.props.location && this.props.location) {
-      this.turnEndLightOnById(); 
+      ETagService.turnEndLightOnById(this.props.location); 
     }
-  }
-
-  turnEndLightOnById() {
-    api.eTag.turnEndLightOnById(this.props.location).then( res => {
-      if (res.data) {
-        console.log(`[E-TAG] Turn on End light #${this.props.location}`);
-      } else {
-        console.log(`[E-TAG] End light turn on failed #${this.props.location}`);
-      }
-    })
   }
 
   handleInputChange(e) {

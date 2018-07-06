@@ -218,12 +218,21 @@ const pick = {
       ]
     }),
 
-  unassignBinFromHolder: (holderId, orderId) =>
+  unassignBinFromHolder: (holderId) =>
     axios.post(appConfig.getApiUrl() + '/Pick', {
       name: 'UnassignBinFromHolder',
       parameter: [
+        String(holderId)
+      ]
+    }),
+
+  changeHolderBin: (binBarcode, holderId, orderNo) =>
+    axios.post(appConfig.getApiUrl() + '/Pick', {
+      name: 'ChangeHolderBin',
+      parameter: [
+        String(binBarcode),
         String(holderId),
-        String(orderId)
+        String(orderNo)
       ]
     }),
 };

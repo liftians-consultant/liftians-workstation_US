@@ -2,7 +2,8 @@ import {
   DEVICE_LIST_FETCHED,
   SET_HOLDER_SETUP_WAITLIST,
   ADD_BIN_TO_HOLDER,
-  UNASSIGN_BIN_FROM_HOLDER
+  UNASSIGN_BIN_FROM_HOLDER,
+  SHOW_CHANGE_BIN_MODAL
 } from "redux/types";
 import api from 'api';
 
@@ -26,6 +27,20 @@ function removeBinFromHolder(holderId) {
   return {
     type: UNASSIGN_BIN_FROM_HOLDER,
     holderId
+  }
+}
+
+function showChangeBinModalAction() {
+  return {
+    type: SHOW_CHANGE_BIN_MODAL,
+    showChangeBinModal: true
+  }
+}
+
+function hideChangeBinModalAction() {
+  return {
+    type: SHOW_CHANGE_BIN_MODAL,
+    showChangeBinModal: false
   }
 }
 
@@ -85,10 +100,33 @@ export const addBinToHolder = (binBarcode, holderId) => (dispatch, getState) => 
   });
 }
 
-export const unassignBinFromHolder = (holderId, orderId) => (dispatch, getState) => {
-  return api.pick.unassignBinFromHolder(holderId, orderId).then(res => {
+export const unassignBinFromHolder = (holderId) => (dispatch, getState) => {
+  return api.pick.unassignBinFromHolder(holderId).then(res => {
     dispatch(removeBinFromHolder(holderId));
     return Promise.resolve(true);
   })
+}
+
+export const showChangeBinModal = () => (dispatch, getState) => {
+  dispatch(showChangeBinModalAction());
+}
+
+export const hideChangeBinModal = () => (dispatch, getState) => {
+  dispatch(hideChangeBinModalAction());
+}
+
+export const changeHolderBin = (binBarcode, holderId, orderNo) => (dispatch, getState) => {
+  return api.pick.changeHolderBin(binBarcode, holderId, orderNo).then(res => {
+    if (res.data === 1) {
+      return api.pick.getBinInfoAfterHolderTag(binBarcode, holderId)
+    }
+  }).then(res => {
+    if (res.data) {
+      dispatch(addBinInfoToHolder(holderId, res.data));
+      return true;
+    } else {
+      return false;
+    }
+  });
 }
   

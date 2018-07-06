@@ -2,7 +2,8 @@ import {
   DEVICE_LIST_FETCHED,
   SET_HOLDER_SETUP_WAITLIST,
   ADD_BIN_TO_HOLDER,
-  UNASSIGN_BIN_FROM_HOLDER
+  UNASSIGN_BIN_FROM_HOLDER,
+  SHOW_CHANGE_BIN_MODAL
 } from "../types";
 
 const operationDefaultState = {
@@ -11,7 +12,8 @@ const operationDefaultState = {
     deviceId: -1
   },
   holderSetupWaitlist: [],
-  deviceList: []
+  deviceList: [],
+  openChangeBinModal: false
 }
 
 export default function operation(state = operationDefaultState, action = {}) {
@@ -39,7 +41,11 @@ export default function operation(state = operationDefaultState, action = {}) {
           (device.deviceId === action.holderId)
           ? { ...device, bin: {} } : device)
       }
-
+    case SHOW_CHANGE_BIN_MODAL:
+      return {
+        ...state,
+        openChangeBinModal: action.showChangeBinModal
+      }
     default:
       return state;
   }
