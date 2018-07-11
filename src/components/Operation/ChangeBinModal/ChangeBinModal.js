@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Input, Button } from 'semantic-ui-react';
 import BinGroup from 'components/Operation/BinGroup/BinGroup';
+import ETagService from 'services/ETagService';
 import { toast } from "react-toastify";
 import './ChangeBinModal.css';
 
@@ -64,6 +65,7 @@ class ChangeBinModal extends Component {
     if (holder) {
       this.setState({selectedHolder: holder.deviceId, selectedBin: binLocation}, () => {
         setTimeout(() => {
+          ETagService.turnEndLightOnById(binLocation);
           this.focusBinScanInput();
         }, 100);
       });
@@ -81,6 +83,7 @@ class ChangeBinModal extends Component {
         if (holder) {
           this.setState({selectedHolder: holder.deviceId, selectedBin: holder.deviceIndex}, () => {
             setTimeout(function() {
+              ETagService.turnEndLightOnById(holder.deviceIndex);
               console.log(this.state.holderIndex);
               this.focusBinScanInput();
             }.bind(this), 200);
