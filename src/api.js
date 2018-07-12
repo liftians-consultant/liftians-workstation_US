@@ -56,6 +56,14 @@ const station = {
       ]
     }),
 
+  getPodLayoutInfoByTaskID: (taskId) =>
+    axios.post(appConfig.getApiUrl() + '/Common', {
+      name: 'GetPodLayoutInfoByTaskID',
+      parameter: [
+        String(taskId),
+      ]
+    }),
+
   atStationTask: (stationId) =>
     axios.get(appConfig.getApiUrl() + '/atStation/CurrentTask?stationID=' + stationId),
 
@@ -91,6 +99,14 @@ const station = {
   getStationDeviceList: (stationId) =>
     axios.post(appConfig.getApiUrl() + '/Pick', {
       name: 'GetDeviceListByStationId',
+      parameter: [
+        String(stationId),
+      ]
+    }),
+  
+  checkNumberOfStationTasks: (stationId) =>
+    axios.post(appConfig.getApiUrl() + '/Common', {
+      name: 'CheckNumberOfStationTasks',
       parameter: [
         String(stationId),
       ]

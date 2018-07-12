@@ -233,7 +233,7 @@ class ReplenishOperationPage extends Component {
 
     this.getProductBarcodeList(); // SIMULATION: GET BARCODE
 
-    api.station.atStationPodLayoutInfo(this.props.stationId).then(res => {
+    api.station.getPodLayoutInfoByTaskID(this.state.taskId).then(res => {
       // console.log(res.data);
       if (res.data.length) {
         const podInfo = {

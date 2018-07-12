@@ -161,22 +161,33 @@ class PickOperationPage extends Component {
   }
 
   getUpcomingPod() {
-    let isRecieve = false;
-
-    this.checkPodInterval = setInterval( () => {
-      if (!isRecieve) {
-        api.station.atStationTask(this.props.stationId).then( res => {
-          if (res.data > 0) {
-            console.log('[GET UPCOMING POD] Pod arrive station');
-            this.setState({ orderProductList: res.data, taskId: res.data }, () => isRecieve = true);
+    // check if all task is finished
+    api.station.checkNumberOfStationTasks(this.props.stationId).then( res => {
+      if (res.data) {
+        // continue to call until next task arrive
+        let isRecieve = false;
+        this.checkPodInterval = setInterval( () => {
+          if (!isRecieve) {
+            api.station.atStationTask(this.props.stationId).then( res => {
+              if (res.data > 0) {
+                console.log('[GET UPCOMING POD] Pod arrive station');
+                this.setState({ orderProductList: res.data, taskId: res.data }, () => isRecieve = true);
+              }
+            });
+          } else {
+            console.log('[GET UPCOMING POD] Stop interval');
+            clearInterval(this.checkPodInterval);
+            this.retrieveNextOrder();
           }
-        });
+        }, 1000);
       } else {
-        console.log('[GET UPCOMING POD] Stop interval');
-        clearInterval(this.checkPodInterval);
-        this.retrieveNextOrder();
+        toast.success('All the task is finished!');
+        this.props.history.push('/pick-task');
       }
-    }, 1000);
+    }).catch(err => {
+      toast.error(`[SERVER ERROR] CheckNumberOfStationTasks, ${err.message}`);
+    })
+
   }
 
   validateAfterPickData(data) {
@@ -283,7 +294,7 @@ class PickOperationPage extends Component {
   }
 
   getPodInfo() {
-    api.station.atStationPodLayoutInfo(this.props.stationId).then(res => {
+    api.station.getPodLayoutInfoByTaskID(this.state.taskId).then(res => {
       if (res.data.length) {
         console.log(`[POD LAYOUT] Pod height: ${res.data.length}`)
         const podInfo = {
@@ -615,6 +626,9 @@ class PickOperationPage extends Component {
 }
 
 PickOperationPage.propTypes = {
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired
+  }).isRequired,
   stationId: PropTypes.string.isRequired,
 };
 
