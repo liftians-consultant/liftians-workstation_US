@@ -1,9 +1,9 @@
 {
   "name": "liftians-workstation",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Kevin Hong",
   "private": true,
-  "proxy": "http://localhost:8060",
+  "proxy": "http://192.168.1.150:8060",
   "dependencies": {
     "axios": "^0.18.0",
     "classnames": "^2.2.5",
@@ -45,7 +45,7 @@
     "build": "npm-run-all build-css build-js",
     "test": "NODE_PATH=src react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "electron-pack": "electron-builder -mlw -c.extraMetadata.main=build/electron.js",
+    "electron-pack": "electron-builder -mw -c.extraMetadata.main=build/electron.js",
     "preelectron-pack": "yarn build"
   },
   "main": "public/electron.js",

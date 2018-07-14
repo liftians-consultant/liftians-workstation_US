@@ -45,7 +45,7 @@ class BinSetupModal extends Component {
         size="fullscreen"
         open={open}
         onOpen={ this.handleOnOpen }
-        style={{ marginTop: '15%', marginLeft: 'auto', marginRight: 'auto' }}
+        style={{ marginTop: '10%', marginLeft: 'auto', marginRight: 'auto' }}
         >
         <Modal.Header>Bin Setup</Modal.Header>
         <Modal.Content>

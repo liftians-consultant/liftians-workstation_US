@@ -44,7 +44,6 @@ class PickOperationPage extends Component {
     loading: true,
     barcode: '',
     showBox: false,
-
     binSetupWaitlist: [],
     currentSetupHolder: {
       deviceIndex: 0,
@@ -52,10 +51,12 @@ class PickOperationPage extends Component {
     openOrderFinishModal: false,
     openWrongProductModal: false,
     openBinSetupModal: false,
-    warningMessage: ''
+    warningMessage: '',
+    isTagPressed: false,
   };
 
   checkPodInterval = {};
+  checkETagResondInterval = {};
 
   businessMode = process.env.REACT_APP_BUSINESS_MODE;
 
@@ -109,7 +110,9 @@ class PickOperationPage extends Component {
   }
 
   componentWillUnmount() {
+    ETagService.turnEndLightOffById(0);
     clearInterval(this.checkPodInterval);
+    clearInterval(this.checkETagResondInterval);
   }
 
   componentDidMount() {
@@ -142,20 +145,32 @@ class PickOperationPage extends Component {
         toast.warn('Please try again') ;
       }
     }).catch(err => {
-      // TODO: Error toast
       toast.error('SERVER ERROR: Link bin to order failed')
     });
   }
 
+  initPickLight() {
+    this.setWaitForETagInterval();
+    ETagService.turnPickLightOnById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity - this.state.pickedAmount);
+  }
+
   selectPickedAmount(num) {
+    if (this.state.isTagPressed === false) {
+      toast.warn('Please press the highlighted ETag to confirm picking');
+      return;
+    }
+
     this.setState({ pickedAmount: this.state.pickedAmount + num }, () => {
 
       // if all item are being placed in bin
       if (this.state.pickedAmount === parseInt(this.state.currentPickProduct.quantity, 10)) {
+        
         ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
         this.finishPick();
       } else {
-        ETagService.turnPickLightOnById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity - this.state.pickedAmount);
+        this.setState({isTagPressed: false}, () => {
+          this.initPickLight();
+        });
       }
     });
   }
@@ -327,7 +342,8 @@ class PickOperationPage extends Component {
           },
           barcode: '',
           pickedAmount: 0,
-          showBox: false }, () => {
+          showBox: false,
+          isTagPressed: false }, () => {
             this.getPodInfo();
             this.setFocusToScanInput();
           });
@@ -377,6 +393,32 @@ class PickOperationPage extends Component {
     this.setState({ warningMessage: '' });
   }
 
+  setWaitForETagInterval() {
+    let isRecieve = false;
+    this.checkETagResondInterval = setInterval( function() {
+      if (!isRecieve) {
+        ETagService.checkRespond(parseInt(this.state.currentPickProduct.binPosition, 10)).then( res => {
+          if (res) {
+            console.log('[WAIT FOR ETAG RESPOND] Etag respond');
+            this.setState({isTagPressed: true}, () => {
+              isRecieve = true;
+            });
+          }
+        });
+      } else {
+        console.log('[WAIT FOR ETAG RESPOND] Stop interval');
+        clearInterval(this.checkETagResondInterval);
+
+        // auto trigger pick procedure when there's only one unit required
+        if (this.state.currentPickProduct.quantity === 1) {
+          this.selectPickedAmount(1);
+        }
+        ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition));
+
+      }
+    }.bind(this), 500);
+  }
+
   handleScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
@@ -405,8 +447,8 @@ class PickOperationPage extends Component {
         } else if (this.businessMode === 'ecommerce') {
           if (this.scanValidation(scannedValue)) {
             console.log(`[SCANNED] New Barcode: ${scannedValue}`);
-            this.setState({ showBox: !this.state.showBox, barcode: scannedValue });
-            ETagService.turnPickLightOnById(parseInt(this.state.currentPickProduct.binPosition, 10), this.state.currentPickProduct.quantity);
+            this.setState({ showBox: true, barcode: scannedValue });
+            this.initPickLight();
           } else {
             this.setState({ barcode: scannedValue } , () => {
               this.setState({ openWrongProductModal: true })
@@ -528,6 +570,10 @@ class PickOperationPage extends Component {
     this.props.hideChangeBinModal();
   }
 
+  showNumPad() {
+
+  }
+
   render() {
     const { warningMessage, podInfo, currentPickProduct, pickedAmount, showBox,
       orderList, openOrderFinishModal, openWrongProductModal, barcode, openBinSetupModal } = this.state;
@@ -583,9 +629,9 @@ class PickOperationPage extends Component {
                   { this.businessMode === 'pharmacy' ? (
                     <Button className="ok-btn" size="massive" primary onClick={() => this.finishPick(currentPickProduct.quantity)}>OK</Button>
                   ) : (
-                    <NumPad highlightAmount={ currentPickProduct.quantity - pickedAmount }
+                    currentPickProduct.quantity > 1 && (<NumPad highlightAmount={ currentPickProduct.quantity - pickedAmount }
                       callback={this.selectPickedAmount}
-                    ></NumPad>
+                    ></NumPad>)
                   )}
                 </div>
               ) }

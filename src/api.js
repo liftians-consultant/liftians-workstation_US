@@ -396,6 +396,11 @@ const eTag = {
     axios.post(appConfig.getApiUrl() + '/eTag/end/off', {
       labelId
     }),
+
+  checkRespond: (labelId) =>
+    axios.post(appConfig.getApiUrl() + '/eTag/checkRespond', {
+      labelId
+    }),
 };
 
 export default {

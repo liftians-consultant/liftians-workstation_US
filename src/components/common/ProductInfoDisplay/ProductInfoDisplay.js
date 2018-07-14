@@ -10,7 +10,6 @@ class ProductInfoDisplay extends Component {
   render() {
     const { product, pickedAmount, quantity } = this.props;
     const imageUrl = productImgBaseUrl + product.productID + '.png';
-    //http://via.placeholder.com/400x300
 
     return (
       <div className="product-info-block">
@@ -19,6 +18,7 @@ class ProductInfoDisplay extends Component {
         </div>
         <div className="product-remain-container">
           <span className="remain-amount">{ quantity - pickedAmount }</span>
+          <div className="remain-unit">{quantity - pickedAmount > 1 ? "items" : "item"}</div>
         </div>
         <div className="product-image-container">
           <Image className="product-image" src={ imageUrl } onError={(e) => { e.target.src = ImageNotFound }}></Image>
