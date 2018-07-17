@@ -11,7 +11,7 @@ import ProductInfoDisplay from 'components/common/ProductInfoDisplay/ProductInfo
 import NumPad from 'components/common/NumPad/NumPad';
 import WarningModal from "components/common/WarningModal/WarningModal";
 import BinSetupModal from 'components/common/BinSetupModal/BinSetupModal';
-
+import ChangeBinModal from 'components/Operation/ChangeBinModal/ChangeBinModal';
 import BinGroup from 'components/Operation/BinGroup/BinGroup';
 import OrderFinishModal from 'components/Operation/OrderFinishModal/OrderFinishModal';
 import WrongProductModal from 'components/Operation/WrongProductModal/WrongProductModal';
@@ -26,7 +26,6 @@ import {
 } from 'redux/actions/operationAction';
 
 import './PickOperationPage.css';
-import ChangeBinModal from '../../components/Operation/ChangeBinModal/ChangeBinModal';
 
 class PickOperationPage extends Component {
   state = {
@@ -53,6 +52,7 @@ class PickOperationPage extends Component {
     openBinSetupModal: false,
     warningMessage: '',
     isTagPressed: false,
+    isKeyPadPressed: false
   };
 
   checkPodInterval = {};
@@ -91,7 +91,8 @@ class PickOperationPage extends Component {
 
   componentWillMount() {
     this.getUpcomingPod();
-
+    ETagService.turnEndLightOffById(0);
+    
     if (this.props.deviceList.length === 0) {
       console.log('[GET STATION DEVICE LIST]');
       this.props.getStationDeviceList(this.props.stationId).then(res => {
@@ -155,24 +156,25 @@ class PickOperationPage extends Component {
   }
 
   selectPickedAmount(num) {
-    if (this.state.isTagPressed === false) {
-      toast.warn('Please press the highlighted ETag to confirm picking');
-      return;
-    }
-
-    this.setState({ pickedAmount: this.state.pickedAmount + num }, () => {
-
-      // if all item are being placed in bin
-      if (this.state.pickedAmount === parseInt(this.state.currentPickProduct.quantity, 10)) {
-        
-        ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
-        this.finishPick();
+    this.setState({ pickedAmount: this.state.pickedAmount + num, isKeyPadPressed: true }, () => {
+      if (this.state.isTagPressed === false) {
+        toast.warn('Please press the highlighted ETag to confirm picking');
       } else {
-        this.setState({isTagPressed: false}, () => {
-          this.initPickLight();
-        });
+        this.checkIsPickFinished();
       }
     });
+  }
+
+  checkIsPickFinished() {
+    // if all item are being placed in bin
+    if (this.state.pickedAmount === parseInt(this.state.currentPickProduct.quantity, 10)) {
+      ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
+      this.finishPick();
+    } else {
+      this.setState({isTagPressed: false, isKeyPadPressed: false}, () => {
+        this.initPickLight();
+      });
+    }
   }
 
   getUpcomingPod() {
@@ -343,7 +345,8 @@ class PickOperationPage extends Component {
           barcode: '',
           pickedAmount: 0,
           showBox: false,
-          isTagPressed: false }, () => {
+          isTagPressed: false,
+          isKeyPadPressed: false }, () => {
             this.getPodInfo();
             this.setFocusToScanInput();
           });
@@ -395,6 +398,7 @@ class PickOperationPage extends Component {
 
   setWaitForETagInterval() {
     let isRecieve = false;
+    // constantly check for respond from eTag
     this.checkETagResondInterval = setInterval( function() {
       if (!isRecieve) {
         ETagService.checkRespond(parseInt(this.state.currentPickProduct.binPosition, 10)).then( res => {
@@ -409,12 +413,17 @@ class PickOperationPage extends Component {
         console.log('[WAIT FOR ETAG RESPOND] Stop interval');
         clearInterval(this.checkETagResondInterval);
 
+        ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition));
+
         // auto trigger pick procedure when there's only one unit required
         if (this.state.currentPickProduct.quantity === 1) {
           this.selectPickedAmount(1);
-        }
-        ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition));
+          return;
+        } 
 
+        if (this.state.isKeyPadPressed === true) {
+          this.checkIsPickFinished();
+        }
       }
     }.bind(this), 500);
   }

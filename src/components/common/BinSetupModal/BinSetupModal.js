@@ -23,7 +23,9 @@ class BinSetupModal extends Component {
     }
 
     if (prevProps.location !== this.props.location && this.props.location) {
-      ETagService.turnEndLightOnById(this.props.location); 
+      setTimeout(function() {
+        ETagService.turnEndLightOnById(this.props.location); 
+      }.bind(this), 300);
     }
   }
 

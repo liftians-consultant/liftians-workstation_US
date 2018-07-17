@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { Grid, Dimmer, Loader } from 'semantic-ui-react';
 
+import ETagService from 'services/ETagService';
 import MenuButton from 'components/common/MenuButton/MenuButton';
 import * as actions from "redux/actions/authAction";
 import { getUserInfoById } from 'redux/actions/userAction';
@@ -22,9 +23,11 @@ class HomePage extends Component {
     this.props.getUserInfoById(this.props.username).then(() => {
       this.props.activateStation(this.props.stationId, this.props.username);
       this.checkCurrentUnFinishTaskCall();
-    });    
+    });
+
+    ETagService.turnEndLightOffById(0);
   }
-  
+
   goToPage = name => {
     console.log(name);
     this.props.history.push(name);
