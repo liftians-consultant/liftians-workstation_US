@@ -56,7 +56,7 @@ class PickOperationPage extends Component {
   };
 
   checkPodInterval = {};
-  checkETagResondInterval = {};
+  checkETagResondInterval = false;
 
   businessMode = process.env.REACT_APP_BUSINESS_MODE;
 
@@ -86,13 +86,14 @@ class PickOperationPage extends Component {
     this.handleBinSetupInputEnter = this.handleBinSetupInputEnter.bind(this);
     this.closeChangeBinModal = this.closeChangeBinModal.bind(this);
     this.handleChangeBinCallback = this.handleChangeBinCallback.bind(this);
+    this.handlePharmacyOkBtnClick = this.handlePharmacyOkBtnClick.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
   componentWillMount() {
     this.getUpcomingPod();
     ETagService.turnEndLightOffById(0);
-    
+
     if (this.props.deviceList.length === 0) {
       console.log('[GET STATION DEVICE LIST]');
       this.props.getStationDeviceList(this.props.stationId).then(res => {
@@ -211,7 +212,7 @@ class PickOperationPage extends Component {
     return true; // need to work on
   }
 
-  finishPick() {
+  finishPick(isShortage=true) {
     const product = this.state.currentPickProduct;
     const data = {
       stationId: this.props.stationId,
@@ -224,7 +225,7 @@ class PickOperationPage extends Component {
       packageBarcode: this.state.barcode,
       pickQuantity: this.state.pickedAmount,
       taskSubtype: product.locate_act_type,
-      shortQty: parseInt(product.quantity, 10) - this.state.pickedAmount,
+      shortQty: isShortage ? parseInt(product.quantity, 10) - this.state.pickedAmount : 0,
     }
 
     console.log(`[PICK OPERATION] AtStationAfterPickProduct data:`, data);
@@ -428,6 +429,29 @@ class PickOperationPage extends Component {
     }.bind(this), 500);
   }
 
+  /* Just for pharmacy pick use only */
+  setPharmacyWaitForEtagInterval() {
+    let isRecieve = false;
+    // constantly check for respond from eTag
+    this.checkETagResondInterval = setInterval( function() {
+      if (!isRecieve) {
+        ETagService.checkRespond(parseInt(this.state.currentPickProduct.binPosition, 10)).then( res => {
+          if (res) {
+            console.log('[WAIT FOR ETAG RESPOND][Pharmacy] Etag respond');
+            isRecieve = true;            
+          }
+        });
+      } else {
+        console.log('[WAIT FOR ETAG RESPOND][Pharmacy] Stop interval');
+        clearInterval(this.checkETagResondInterval);
+        this.checkETagResondInterval = false;
+
+        ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition));
+        this.finishPick(false);
+      }
+    }.bind(this), 500);
+  }
+
   handleScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
@@ -440,6 +464,13 @@ class PickOperationPage extends Component {
             if (result.valid) {
               const barcode = this.state.pickedAmount === 0 ? scannedValue : `${this.state.barcode},${scannedValue}`;
               const pickedAmount = this.state.pickedAmount + 1;
+
+              ETagService.turnPickLightOnById(this.state.currentPickProduct.binPosition, pickedAmount);
+              console.log(this.checkETagResondInterval);
+              if (!this.checkETagResondInterval) {
+                this.setPharmacyWaitForEtagInterval();
+              }
+              
               if (pickedAmount === this.state.currentPickProduct.quantity) {
                 this.setState({ showBox: true, barcode, pickedAmount });
               } else {
@@ -483,6 +514,13 @@ class PickOperationPage extends Component {
         if (this.businessMode === 'pharmacy') {
           const barcode = this.state.pickedAmount === 0 ? res.data[barCodeIndex].barcode : `${this.state.barcode},${res.data[barCodeIndex].barcode}`;
           const pickedAmount = this.state.pickedAmount + 1;
+
+          ETagService.turnPickLightOnById(this.state.currentPickProduct.binPosition, pickedAmount);
+          console.log(this.checkETagResondInterval);
+          if (!this.checkETagResondInterval) {
+            this.setPharmacyWaitForEtagInterval();
+          }
+
           if (pickedAmount === this.state.currentPickProduct.quantity) {
             this.setState({showBox: true, barcode, pickedAmount});
           } else {
@@ -579,6 +617,11 @@ class PickOperationPage extends Component {
     this.props.hideChangeBinModal();
   }
 
+  handlePharmacyOkBtnClick() {
+    ETagService.turnPickLightOffById();
+    this.finishPick();
+  }
+
   showNumPad() {
 
   }
@@ -636,7 +679,7 @@ class PickOperationPage extends Component {
                 <div>
                   <BinGroup openedBinNum={ parseInt(currentPickProduct.binPosition, 10) }></BinGroup>
                   { this.businessMode === 'pharmacy' ? (
-                    <Button className="ok-btn" size="massive" primary onClick={() => this.finishPick(currentPickProduct.quantity)}>OK</Button>
+                    <Button className="ok-btn" size="massive" primary onClick={() => this.handlePharmacyOkBtnClick()}>OK</Button>
                   ) : (
                     currentPickProduct.quantity > 1 && (<NumPad highlightAmount={ currentPickProduct.quantity - pickedAmount }
                       callback={this.selectPickedAmount}

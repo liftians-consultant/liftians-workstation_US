@@ -68,7 +68,9 @@ let ETagService = {
   // },
 
   // checkRespond: (labelId) => {
-  //   return Promise.resolve(true);
+  //   setTimeout(function() {
+  //     return Promise.resolve(true);
+  //   }.bind(this), 3000)
   // }
 
 }
