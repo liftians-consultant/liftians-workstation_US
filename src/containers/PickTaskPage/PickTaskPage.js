@@ -21,6 +21,8 @@ class PickTaskPage extends Component {
     errors: {}
   }
 
+  locale = process.env.REACT_APP_LOCALE;
+
   // Dummy data, will retrieve from server
   billTypeOptions = [
     { key: 1, text: 'Regular Picking', index: 1, value: '11' },
@@ -95,13 +97,13 @@ class PickTaskPage extends Component {
         this.processOptions[0] = res.data.map((processType, index) => {
           return {
             key: index,
-            text: processType.processStatus,
+            text: this.locale === 'CHN' ? processType.processStatusCHN : processType.processStatus,
             index: index,
             value: processType.processStatusID
           }
-        })
+        });
       }
-    })
+    });
   }
 
   retrievePickOrderReocrds = () => {

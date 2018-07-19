@@ -29,6 +29,8 @@ class ReplenishTaskPage extends Component {
     searchedList: []
   }
 
+  locale = process.env.REACT_APP_LOCALE;
+
   // Dummy data, will retrieve from server
   billTypeOptions = [
     { key: 1, text: 'Regular Replenish', index: 1, value: '01' },
@@ -84,7 +86,7 @@ class ReplenishTaskPage extends Component {
         this.processOptions[0] = res.data.map((processType, index) => {
           return {
             key: index,
-            text: processType.processStatus,
+            text: this.locale === 'CHN' ? processType.processStatusCHN : processType.processStatus,
             index: index,
             value: processType.processStatusID
           }
