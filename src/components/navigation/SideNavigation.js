@@ -122,6 +122,9 @@ class SideNavigation extends Component {
 };
 
 SideNavigation.propTypes = {
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired
+  }).isRequired,
   logout: PropTypes.func.isRequired,
   stationId: PropTypes.string.isRequired,
   taskType: PropTypes.oneOf(['R', 'P', 'U']),

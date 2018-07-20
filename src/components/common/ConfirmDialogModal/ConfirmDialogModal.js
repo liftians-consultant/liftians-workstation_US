@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Confirm } from 'semantic-ui-react';
 
 class ConfirmDialogModal extends Component {
-  
+
   clickHandler(confirm) {
     this.props.close(confirm);
   }
@@ -20,7 +20,7 @@ class ConfirmDialogModal extends Component {
         header={ header || 'Confirm' }
         content={ content || 'Are you sure?'}
         style={{ marginTop: '20%', marginLeft: 'auto', marginRight: 'auto' }} />
-    )
+    );
   }
 }
 
@@ -32,4 +32,4 @@ ConfirmDialogModal.propTypes = {
   content: PropTypes.string,
 }
 
-export default ConfirmDialogModal
+export default ConfirmDialogModal;

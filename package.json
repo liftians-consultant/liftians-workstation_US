@@ -1,9 +1,9 @@
 {
   "name": "liftians-workstation",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "Kevin Hong",
   "private": true,
-  "proxy": "http://192.168.1.150:8060",
+  "proxy": "http://localhost:8060",
   "dependencies": {
     "axios": "^0.18.0",
     "classnames": "^2.2.5",
@@ -53,6 +53,10 @@
   "devDependencies": {
     "electron": "^1.8.3",
     "electron-builder": "^20.8.1",
+    "eslint-config-airbnb": "^17.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-react": "^7.10.0",
     "foreman": "^2.0.0",
     "node-sass-chokidar": "^0.0.3",
     "npm-run-all": "^4.1.2",

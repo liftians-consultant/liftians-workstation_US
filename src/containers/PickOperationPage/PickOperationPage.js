@@ -15,7 +15,8 @@ import ChangeBinModal from 'components/Operation/ChangeBinModal/ChangeBinModal';
 import BinGroup from 'components/Operation/BinGroup/BinGroup';
 import OrderFinishModal from 'components/Operation/OrderFinishModal/OrderFinishModal';
 import WrongProductModal from 'components/Operation/WrongProductModal/WrongProductModal';
-import PodShelfInfo from '../../components/Operation/PodShelfInfo/PodShelfInfo';
+import PodShelfInfo from 'components/Operation/PodShelfInfo/PodShelfInfo';
+import ConfirmDialogModal from 'components/common/ConfirmDialogModal/ConfirmDialogModal';
 import { 
   getStationDeviceList,
   addHoldersToSetupWaitlist,
@@ -50,6 +51,7 @@ class PickOperationPage extends Component {
     openOrderFinishModal: false,
     openWrongProductModal: false,
     openBinSetupModal: false,
+    openShortageConfirmModal: false,
     warningMessage: '',
     isTagPressed: false,
     isKeyPadPressed: false
@@ -87,6 +89,7 @@ class PickOperationPage extends Component {
     this.closeChangeBinModal = this.closeChangeBinModal.bind(this);
     this.handleChangeBinCallback = this.handleChangeBinCallback.bind(this);
     this.handlePharmacyOkBtnClick = this.handlePharmacyOkBtnClick.bind(this);
+    this.handleShortageModalConfirmed = this.handleShortageModalConfirmed.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
@@ -335,6 +338,7 @@ class PickOperationPage extends Component {
     api.pick.getPickInfoByTaskId(this.state.taskId).then(res => {
       if (res.data.length) {
         console.log("[GET PRODUCT LIST] Pick info retrevied", res.data[0].productID);
+        toast.info(`Product Retrieved: ${res.data[0].productID}`);
         this.setState({
           currentPickProduct: res.data[0],
           orderList: res.data,
@@ -470,7 +474,7 @@ class PickOperationPage extends Component {
               if (!this.checkETagResondInterval) {
                 this.setPharmacyWaitForEtagInterval();
               }
-              
+
               if (pickedAmount === this.state.currentPickProduct.quantity) {
                 this.setState({ showBox: true, barcode, pickedAmount });
               } else {
@@ -537,7 +541,16 @@ class PickOperationPage extends Component {
 
   handleShortageClick() {
     console.log('[PICK OPERATION] Shortage Clicked!');
-    this.finishPick();
+    this.setState({openShortageConfirmModal: true});
+  }
+  
+  handleShortageModalConfirmed(result) {
+    if (result) {
+      this.finishPick();
+      toast.success('Shortage Confirmed');
+    }
+
+    this.setState({ openShortageConfirmModal: false });
   }
 
   handleWrongProductBtnClick() {
@@ -718,6 +731,13 @@ class PickOperationPage extends Component {
           deviceList={ this.props.deviceList }
           onChangeBinCallback={ this.handleChangeBinCallback }
         />
+
+        <ConfirmDialogModal size={'mini'} 
+          open={ this.state.openShortageConfirmModal }
+          close={ this.handleShortageModalConfirmed }
+          header={ 'Shortage' }
+          content={ 'Are you sure you want to report a shortage?' }
+           />
       </div>
     );
   }
