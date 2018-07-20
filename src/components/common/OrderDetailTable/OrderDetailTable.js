@@ -14,6 +14,8 @@ class OrderDetailTable extends Component {
     loading: false
   }
 
+  locale = process.env.REACT_APP_LOCALE;
+
   componentWillMount() {
     this.getRecords();
   }
@@ -26,6 +28,7 @@ class OrderDetailTable extends Component {
         console.log(`[PICK ORDER DETAIL] RecordId: ${this.props.recordId}`, res.data);
         res.data.map((object) => {
           object.pick_DATE = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
+          object.processStatus = this.locale === 'CHN' ? object.processStatusCHN : object.processStatus;
           return object;
         });
         this.setState({ recordDetails: res.data, loading: false});
@@ -35,6 +38,7 @@ class OrderDetailTable extends Component {
         console.log(`[REPLENISH ORDER DETAIL] RecordId: ${this.props.recordId}`, res.data);
         res.data.map((object) => {
           object.pick_DATE = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
+          object.processStatus = this.locale === 'CHN' ? object.processStatusCHN : object.processStatus;
           return object;
         });
         this.setState({ recordDetails: res.data, loading: false });

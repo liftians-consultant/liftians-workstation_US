@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ReactTable from 'react-table';
-import OrderDetailTable from '../../common/OrderDetailTable/OrderDetailTable';
+import OrderDetailTable from 'components/common/OrderDetailTable/OrderDetailTable';
 import 'react-table/react-table.css';
 
 

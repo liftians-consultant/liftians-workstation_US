@@ -112,6 +112,7 @@ class PickTaskPage extends Component {
     api.pick.retrievePickOrderReocrdsByTypeAndState(1, this.state.activeBillType, this.state.activeProcessType).then( res => {
       res.data.map((object) => {
         object.pick_DATE = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
+        object.processStatus = this.locale === 'CHN' ? object.processStatusCHN : object.processStatus;
         return object;
       });
       this.setState({ ordersList: res.data, loading: false });

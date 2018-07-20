@@ -102,6 +102,7 @@ class ReplenishTaskPage extends Component {
       console.log('[RETRIEVE REPLENISH TASK] Record Retrieved', res.data);
       res.data.map((object) => {
         object.replenishDate = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
+        object.processStatus = this.locale === 'CHN' ? object.processStatusCHN : object.processStatus;
         return object;
       });
       this.setState({ ordersList: res.data, loading: false }, this.filterOrderListBySourceId);
