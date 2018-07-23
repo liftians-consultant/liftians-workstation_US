@@ -1,55 +1,56 @@
 import api from 'api';
+import { toast } from "react-toastify";
 
-let ETagService = {
+const ETagService = {
   turnPickLightOnById: (labelId, num) => {
-    api.eTag.turnPickLightOnById(labelId, num).then( res => {
+    api.eTag.turnPickLightOnById(labelId, num).then((res) => {
       if (res.data) {
         console.log(`[E-TAG] Turn on pick light #${labelId} with ${num}`);
       } else {
         console.log(`[E-TAG] Pick light turn on failed #${labelId} with ${num}`);
       }
-    })
+    });
   },
 
   turnPickLightOffById: (labelId) => {
-    api.eTag.turnPickLightOffById(labelId).then(res => {
+    api.eTag.turnPickLightOffById(labelId).then((res) => {
       if (res.data) {
         console.log(`[E-TAG] Turn off pick light #${labelId}`);
       } else {
         console.log(`[E-TAG] Pick light turn off failed #${labelId}`);
       }
-    })
+    });
   },
 
   turnEndLightOnById: (labelId) => {
-    api.eTag.turnEndLightOnById(labelId).then( res => {
+    api.eTag.turnEndLightOnById(labelId).then((res) => {
       if (res.data) {
         console.log(`[E-TAG] Turn on End light #${labelId}`);
       } else {
         console.log(`[E-TAG] End light turn on failed #${labelId}`);
       }
-    })
+    });
   },
 
   turnEndLightOffById: (labelId) => {
-    api.eTag.turnEndLightOffById(labelId).then(res => {
+    api.eTag.turnEndLightOffById(labelId).then((res) => {
       if (res.data) {
         console.log(`[ELECTRONIC LABEL] Turn off End light #${labelId}`);
       } else {
         console.log(`[ELECTRONIC LABEL] End light turn off failed #${labelId}`);
       }
-    })
+    });
   },
 
   checkRespond: (labelId) => {
-    return api.eTag.checkRespond(labelId).then(res => {
+    return api.eTag.checkRespond(labelId).then((res) => {
       if (res.data) {
         return res.data;
-      } else {
-        return false;
       }
-    })
+      return false;
+    });
   },
+
 
   // turnPickLightOnById: (labelId, num) => {
   //   return Promise.resolve(true);
@@ -64,15 +65,13 @@ let ETagService = {
   // },
 
   // turnEndLightOffById: (labelId) => {
-  //     return Promise.resolve(true);
+  //   return Promise.resolve(true);
   // },
 
   // checkRespond: (labelId) => {
-  //   setTimeout(function() {
-  //     return Promise.resolve(true);
-  //   }.bind(this), 3000)
-  // }
+  //   return Promise.resolve(false);
+  // },
 
-}
+};
 
 export default ETagService;

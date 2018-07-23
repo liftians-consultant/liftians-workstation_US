@@ -18,17 +18,6 @@ import './ReplenishTaskPage.css';
 const CheckboxTable = checkboxHOC(ReactTable);
 
 class ReplenishTaskPage extends Component {
-  state = {
-    activeBillType: '01',
-    activeProcessType: 0,
-    ordersList: [],
-    loading: false,
-    errors: {},
-    selection: [], // select react table
-    selectAll: false, // select react table
-    searchedList: []
-  }
-
   locale = process.env.REACT_APP_LOCALE;
 
   // Dummy data, will retrieve from server
@@ -53,6 +42,17 @@ class ReplenishTaskPage extends Component {
       { key: 2, text: 'Canceled', index: 2, value: 100 },
     ],
   ];
+
+  state = {
+    activeBillType: '01',
+    activeProcessType: 0,
+    ordersList: [],
+    loading: false,
+    errors: {},
+    selection: [], // select react table
+    selectAll: false, // select react table
+    searchedList: []
+  }
 
   componentWillMount() {
     this.setStationTaskType();
@@ -310,7 +310,7 @@ function mapStateToProps(state) {
   return {
     username: state.user.username,
     stationId: state.station.id,
-    taskCount: state.station.info.taskCount
+    taskCount: state.station.info.taskCount,
   }
 }
 

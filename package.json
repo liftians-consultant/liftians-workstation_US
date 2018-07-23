@@ -6,6 +6,7 @@
   "proxy": "http://localhost:8060",
   "dependencies": {
     "axios": "^0.18.0",
+    "babel-eslint": "^8.2.6",
     "classnames": "^2.2.5",
     "concurrently": "^3.5.1",
     "electron-is-dev": "^0.3.0",

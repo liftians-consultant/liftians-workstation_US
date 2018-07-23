@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ReactTable from 'react-table';
-import moment from "moment";
+import moment from 'moment';
 import api from 'api';
-import { OrderDetailsTableColumn } from "models/OrderDetailsTableColumn";
-import { ReplenishDetailTableColumns } from "models/ReplenishDetailTableColumns";
+import { OrderDetailsTableColumn } from 'models/OrderDetailsTableColumn';
+import { ReplenishDetailTableColumns } from 'models/ReplenishDetailTableColumns';
 import './OrderDetailTable.css';
 
 class OrderDetailTable extends Component {
-
   state = {
     recordDetails: [],
     loading: false

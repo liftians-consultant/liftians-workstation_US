@@ -1,46 +1,46 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { Route, HashRouter } from "react-router-dom";
-import "semantic-ui-css/semantic.min.css";
-import { createStore, applyMiddleware } from "redux";
-import { Provider } from "react-redux";
-import thunk from "redux-thunk";
-import decode from "jwt-decode";
-import { composeWithDevTools } from "redux-devtools-extension";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Route, HashRouter } from 'react-router-dom';
+import 'semantic-ui-css/semantic.min.css';
+import { createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import thunk from 'redux-thunk';
+import decode from 'jwt-decode';
+import { composeWithDevTools } from 'redux-devtools-extension';
 
-import App from "containers/App";
-import registerServiceWorker from "./registerServiceWorker";
-import rootReducer from "redux/reducers/rootReducer";
-import { userLoggedIn, userLoggedOut } from "redux/actions/authAction";
-import setAuthorizationHeader from "utils/setAuthorizationHeader";
+import App from 'containers/App';
+import registerServiceWorker from './registerServiceWorker';
+import rootReducer from 'redux/reducers/rootReducer';
+import { userLoggedIn, userLoggedOut } from 'redux/actions/authAction';
+import setAuthorizationHeader from 'utils/setAuthorizationHeader';
 import appConfig from 'services/AppConfig';
 import './index.css';
 
-let store = createStore(
+const store = createStore(
   rootReducer,
-  composeWithDevTools(applyMiddleware(thunk))
+  composeWithDevTools(applyMiddleware(thunk)),
 );
 
 if (localStorage.liftiansJWT) {
-  const payload = decode(localStorage.liftiansJWT); // {sub: "10001", exp: 1519504053}
-
-  // localStorage.removeItem("liftiansJWT");
-  // setAuthorizationHeader();
+  localStorage.removeItem('liftiansJWT');
+  setAuthorizationHeader();
 
   // check if expired
-  const nowDate = new Date(), tokenDate = new Date(payload.exp);
-  if ( nowDate.getTime() < tokenDate.getTime() ) {
-    localStorage.removeItem("liftiansJWT");
-    setAuthorizationHeader();
-    store.dispatch(userLoggedOut());
-  } else {
-    const user = {
-      token: localStorage.liftiansJWT,
-      username: payload.sub,
-    };
-    setAuthorizationHeader(localStorage.liftiansJWT);
-    store.dispatch(userLoggedIn(user));
-  }
+  // const payload = decode(localStorage.liftiansJWT); // {sub: "10001", exp: 1519504053}
+  // const nowDate = new Date();
+  // const tokenDate = new Date(payload.exp);
+  // if (nowDate.getTime() < tokenDate.getTime()) {
+  //   localStorage.removeItem('liftiansJWT');
+  //   setAuthorizationHeader();
+  //   store.dispatch(userLoggedOut());
+  // } else {
+  //   const user = {
+  //     token: localStorage.liftiansJWT,
+  //     username: payload.sub,
+  //   };
+  //   setAuthorizationHeader(localStorage.liftiansJWT);
+  //   store.dispatch(userLoggedIn(user));
+  // }
 }
 
 if (localStorage.apiHost && localStorage.apiPort) {
@@ -57,6 +57,6 @@ ReactDOM.render(
       <Route component={App} />
     </Provider>
   </HashRouter>,
-  document.getElementById("root")
+  document.getElementById('root')
 );
 registerServiceWorker();
