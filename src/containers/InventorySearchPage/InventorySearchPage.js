@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 // import PropTypes from 'prop-types';
-import moment from "moment";
-import ReactTable from "react-table";
+import moment from 'moment';
+import ReactTable from 'react-table';
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
 import { Form, Input, Select, Button } from 'semantic-ui-react';
 import api from 'api';
@@ -51,7 +51,7 @@ class InventorySearchPage extends Component {
 
   constructor(props) {
     super(props);
-    
+
     this.handleDateChange = this.handleDateChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.resetForm = this.resetForm.bind(this);
@@ -64,46 +64,46 @@ class InventorySearchPage extends Component {
   }
 
   getProductCategory() {
-    api.inventory.getProductCategory().then(res => {
+    api.inventory.getProductCategory().then((res) => {
       if (res.data) {
         const productCategoryOptions = res.data.map((option, index) => {
           return {
             key: index,
             text: option.categoryName,
-            value: option.categoryID
+            value: option.categoryID,
           }
-        })
-        this.setState({productCategoryOptions});
+        });
+        this.setState({ productCategoryOptions });
       }
     });
   }
 
   getProductType() {
-    api.inventory.getProductType().then(res => {
+    api.inventory.getProductType().then((res) => {
       if (res.data) {
         const productTypeOptions = res.data.map((option, index) => {
           return {
             key: index,
             text: option.productTypeName,
-            value: option.productTypeID
+            value: option.productTypeID,
           }
         });
-        this.setState({productTypeOptions});
+        this.setState({ productTypeOptions });
       }
     });
   }
 
   getExpirationMonthRange() {
-    api.inventory.getExpirationMonthRange().then(res => {
+    api.inventory.getExpirationMonthRange().then((res) => {
       if (res.data) {
         const expirationDateOptions = res.data.map((option, index) => {
           return {
             key: index,
             text: option.displayValue,
-            value: option.monthID
+            value: option.monthID,
           }
         });
-        this.setState({expirationDateOptions});
+        this.setState({ expirationDateOptions });
       }
     })
   }
@@ -118,7 +118,7 @@ class InventorySearchPage extends Component {
       expireDate: '9999',
       searchedList: [],
       selection: [],
-      selectAll: false
+      selectAll: false,
     });
   }
 
@@ -128,11 +128,11 @@ class InventorySearchPage extends Component {
       category: this.state.category || '',
       productId: this.state.productId || '',
       productName: this.state.productName || '',
-      expireDate: this.state.expireDate || 9999
+      expireDate: this.state.expireDate || 9999,
     };
 
     console.log('Search Submit Data:', data);
-    api.inventory.getInventorySummaryByProduct(data).then(res => {
+    api.inventory.getInventorySummaryByProduct(data).then((res) => {
       if (res.data) {
         res.data.map((object) => {
           object.pick_DATE = moment(object.expirDate).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
@@ -166,8 +166,8 @@ class InventorySearchPage extends Component {
       // it does exist so we will remove it using destructing
       selection = [
         ...selection.slice(0, keyIndex),
-        ...selection.slice(keyIndex + 1)
-      ]
+        ...selection.slice(keyIndex + 1),
+      ];
     } else {
       // it does not exist so add it
       selection.push(key);
@@ -188,15 +188,13 @@ class InventorySearchPage extends Component {
       // we just push all the IDs onto the selection array
       currentRecords.forEach((item) => {
         selection.push(item._original.sourceID);
-      })
+      });
     }
-    this.setState({ selectAll, selection })
+    this.setState({ selectAll, selection });
   }
 
   // For Select React Table
-  isSelected = (key) => {
-    return this.state.selection.includes(key);
-  }
+  isSelected = key => this.state.selection.includes(key);
 
 
   render() {
@@ -210,23 +208,23 @@ class InventorySearchPage extends Component {
       toggleSelection,
       toggleAll,
       selectType: 'checkbox',
-      keyField: 'productID'
+      keyField: 'productID',
     };
 
     return (
       <div className="inventory-search-page">
         <Form inverted widths="equal" size="small" onSubmit={ this.handleSubmit }>
           <Form.Group>
-            <Form.Field control={ Select } label='Type' name="type" value={ type } options={ productTypeOptions } onChange={ this.handleFormChange } />
-            <Form.Field control={ Select } label='Catalog' name="category" value={ category } options={ productCategoryOptions } onChange={ this.handleFormChange } />
-            {/* <Form.Field control={ Input } label='Code' name="code" value={ code } onChange={ this.handleFormChange } /> */}
+            <Form.Field control={ Select } label="Type" name="type" value={ type } options={ productTypeOptions } onChange={ this.handleFormChange } />
+            <Form.Field control={ Select } label="Catalog" name="category" value={ category } options={ productCategoryOptions } onChange={ this.handleFormChange } />
+            {/* <Form.Field control={ Input } label="Code" name="code" value={ code } onChange={ this.handleFormChange } /> */}
           </Form.Group>
           <Form.Group>
-            <Form.Field control={ Input } label='Product ID' name="productId" value={ productId } onChange={ this.handleFormChange } />
-            <Form.Field control={ Input } label='Product Name' name="productName" value={ productName } onChange={ this.handleFormChange } />
-            {/* <Form.Field control={ Input } label='Lot' value={ lot } onChange={ this.handleFormChange } /> */}
-            {/* <Form.Field control={ DatePicker } label='Expire Date' value={ String(expireDate) } onChange={this.handleDateChange} /> */}
-            <Form.Field control={ Select } label='Expire Date' name="expireDate" value={ expireDate } options={ expirationDateOptions } onChange={ this.handleFormChange } />
+            <Form.Field control={ Input } label="Product ID" name="productId" value={ productId } onChange={ this.handleFormChange } />
+            <Form.Field control={ Input } label="Product Name" name="productName" value={ productName } onChange={ this.handleFormChange } />
+            {/* <Form.Field control={ Input } label="Lot" value={ lot } onChange={ this.handleFormChange } /> */}
+            {/* <Form.Field control={ DatePicker } label="Expire Date" value={ String(expireDate) } onChange={this.handleDateChange} /> */}
+            <Form.Field control={ Select } label="Expire Date" name="expireDate" value={ expireDate } options={ expirationDateOptions } onChange={ this.handleFormChange } />
             <Form.Field control={ Button } primary className="submit-btn">Submit</Form.Field>
             <Button type="button" className="reset-btn" onClick={this.resetForm}>Reset</Button>
           </Form.Group>
@@ -234,12 +232,11 @@ class InventorySearchPage extends Component {
 
         <div className="search-result-table-container">
           <CheckboxTable
-            ref={ (r) => this.checkboxTable = r }
-            data={ searchedList }
-            columns={ InventorySearchTableColumns }
+            ref={(r) => this.checkboxTable = r}
+            data={searchedList}
+            columns={InventorySearchTableColumns}
             className="-striped -highlight search-result-table"
-            // SubComponent={ (row) => <OrderDetailTable taskType="R" recordId={ row.original.sourceID } /> }
-            defaultPageSize={ 15 }
+            defaultPageSize={15}
             manual
             resizable={false}
             filterable={false}
@@ -262,7 +259,7 @@ class InventorySearchPage extends Component {
  */
 
 InventorySearchPage.propTypes = {
-  
+
 };
 
 function mapStateToProps(state) {

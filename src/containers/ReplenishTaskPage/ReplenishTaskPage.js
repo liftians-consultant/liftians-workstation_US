@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 import { Grid, Loader, Button, Input } from 'semantic-ui-react';
-import ReactTable from "react-table";
+import ReactTable from 'react-table';
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
-import moment from "moment";
-import { toast } from "react-toastify";
+import moment from 'moment';
+import { toast } from 'react-toastify';
 
 import api from 'api';
 import { setStationTaskType } from 'redux/actions/stationAction';
@@ -51,7 +51,7 @@ class ReplenishTaskPage extends Component {
     errors: {},
     selection: [], // select react table
     selectAll: false, // select react table
-    searchedList: []
+    searchedList: [],
   }
 
   componentWillMount() {
@@ -66,39 +66,35 @@ class ReplenishTaskPage extends Component {
   }
 
   getBillTypeName() {
-    api.menu.getBillTypeName('R').then(res => {
+    api.menu.getBillTypeName('R').then((res) => {
       if (res.data && res.data.length) {
-        this.billTypeOptions = res.data.map((billType, index) => {
-          return {
-            key: index + 1,
-            text: billType.billTypeName,
-            index: index + 1,
-            value: billType.billType
-          }
-        })
+        this.billTypeOptions = res.data.map((billType, index) => ({
+          key: index + 1,
+          text: billType.billTypeName,
+          index: index + 1,
+          value: billType.billType,
+        }));
       }
-    })
+    });
   }
 
   getProcessStatusName() {
-    api.menu.getProcessStatusName('R').then(res => {
+    api.menu.getProcessStatusName('R').then((res) => {
       if (res.data && res.data.length) {
-        this.processOptions[0] = res.data.map((processType, index) => {
-          return {
-            key: index,
-            text: this.locale === 'CHN' ? processType.processStatusCHN : processType.processStatus,
-            index: index,
-            value: processType.processStatusID
-          }
-        })
+        this.processOptions[0] = res.data.map((processType, index) => ({
+          key: index,
+          text: this.locale === 'CHN' ? processType.processStatusCHN : processType.processStatus,
+          index,
+          value: processType.processStatusID,
+        }));
       }
-    })
+    });
   }
 
   retrieveReplenishRecords = () => {
-    this.setState({loading: true});
+    this.setState({ loading: true });
     console.log(`[RETRIEVE REPLENISH TASK] BillType: ${this.state.activeBillType}, ProcessType: ${this.state.activeProcessType}`);
-    api.replenish.retrieveReplenishRecords(this.props.stationId, this.state.activeBillType, this.state.activeProcessType).then( res => {
+    api.replenish.retrieveReplenishRecords(this.props.stationId, this.state.activeBillType, this.state.activeProcessType).then((res) => {
       console.log('[RETRIEVE REPLENISH TASK] Record Retrieved', res.data);
       res.data.map((object) => {
         object.replenishDate = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
@@ -106,7 +102,7 @@ class ReplenishTaskPage extends Component {
         return object;
       });
       this.setState({ ordersList: res.data, loading: false }, this.filterOrderListBySourceId);
-    })
+    });
   }
 
   handleTaskChange = (e, { value }) => {
@@ -119,10 +115,10 @@ class ReplenishTaskPage extends Component {
 
   handleRequestPodBtn() {
     const sourceIdList = this.state.selection.join(',');
-    api.replenish.replenishBySourceId(this.props.stationId, this.props.username, sourceIdList, 1).then(res => {
+    api.replenish.replenishBySourceId(this.props.stationId, this.props.username, sourceIdList, 1).then((res) => {
       console.log('Going into replenish operation page~~~~');
       this.props.history.push('/replenish-operation');
-    })
+    });
   }
 
   handleContinueBtn() {
@@ -130,12 +126,12 @@ class ReplenishTaskPage extends Component {
   }
 
   handleSearchChange = (e, { value }) => {
-    this.filterOrderListBySourceId(value)
+    this.filterOrderListBySourceId(value);
   };
 
   filterOrderListBySourceId(keyword = '') {
-    const  filteredList = this.state.ordersList.filter((order) => {
-      return String(order.sourceID).indexOf(keyword) !== -1
+    const filteredList = this.state.ordersList.filter((order) => {
+      return String(order.sourceID).indexOf(keyword) !== -1;
     });
 
     this.setState({ searchedList: filteredList });
@@ -143,18 +139,17 @@ class ReplenishTaskPage extends Component {
 
 
   startStationOperationCall() {
-    this.setState({loading: true});
-    api.station.startStationOperation(this.props.stationId, this.props.username, 'R').then(res => {
+    this.setState({ loading: true });
+    api.station.startStationOperation(this.props.stationId, this.props.username, 'R').then((res) => {
       // return 1 if success, 0 if failed
-      let newState = { loading: false };
       if (!res.data) {
         toast.error('Cannot start station. Please contact your system admin');
       }
       console.log('[REPLENISH PICK TASK] Station Started with R');
-      this.setState(newState, this.retrieveReplenishRecords);
+      this.setState({ loading: false }, this.retrieveReplenishRecords);
     }).catch((e) => {
       toast.error('Server Error. Please contact your system admin');
-      this.setState({ loading: false })
+      this.setState({ loading: false });
       console.error(e);
     })
   }
@@ -193,9 +188,9 @@ class ReplenishTaskPage extends Component {
       // we just push all the IDs onto the selection array
       currentRecords.forEach((item) => {
         selection.push(item._original.sourceID);
-      })
+      });
     }
-    this.setState({ selectAll, selection })
+    this.setState({ selectAll, selection });
   }
 
   // For Select React Table
@@ -214,17 +209,18 @@ class ReplenishTaskPage extends Component {
       toggleSelection,
       toggleAll,
       selectType: 'checkbox',
-      keyField: 'sourceID'
+      keyField: 'sourceID',
     };
 
     return (
       <div className="ui replenish-task-page-container">
-        <Loader content='Loading' active={ this.state.loading } />
+        <Loader content="Loading" active={this.state.loading} />
 
         <Grid>
           <Grid.Row>
             <Grid.Column width={16}>
-              <OperationTaskMenu activeBillType={activeBillType}
+              <OperationTaskMenu
+                activeBillType={activeBillType}
                 processOptions={this.processOptions}
                 billTypeOptions={this.billTypeOptions}
                 onTaskChange={this.handleTaskChange}
@@ -235,33 +231,34 @@ class ReplenishTaskPage extends Component {
           <Grid.Row>
             <Grid.Column>
               <div className="orderlist-table-container">
-              { String(activeProcessType) === '0' &&
+                { String(activeProcessType) === '0' && (
                 <CheckboxTable
-                  ref={ (r) => this.checkboxTable = r }
-                  data={ searchedList }
-                  columns={ ReplenishOrderTableColumns }
+                  ref={(r) => { this.checkboxTable = r; }}
+                  data={searchedList}
+                  columns={ReplenishOrderTableColumns}
                   className="-striped -highlight replenish-task-table"
-                  SubComponent={ (row) => <OrderDetailTable taskType="R" recordId={ row.original.sourceID } /> }
-                  defaultPageSize={ 15 }
+                  SubComponent={row => <OrderDetailTable taskType="R" recordId={row.original.sourceID} />}
+                  defaultPageSize={15}
                   manual
                   resizable={false}
                   filterable={false}
                   {...checkboxProps}
                 />
-              }
+                )}
 
-              { String(activeProcessType) !== '0' && 
-                <ReactTable
-                  columns={ ReplenishOrderTableColumns }
-                  data={ searchedList }
-                  defaultPageSize={15}
-                  SubComponent={(row) => <OrderDetailTable taskType="R" recordId={ row.original.sourceID } /> }
-                  loading={ loading }
-                  manual
-                  resizable={false}
-                  filterable={false}
-                  className="-striped -highlight replenish-task-table"
-                /> }
+                { String(activeProcessType) !== '0' && (
+                  <ReactTable
+                    columns={ ReplenishOrderTableColumns }
+                    data={ searchedList }
+                    defaultPageSize={15}
+                    SubComponent={row => <OrderDetailTable taskType="R" recordId={row.original.sourceID} /> }
+                    loading={loading}
+                    manual
+                    resizable={false}
+                    filterable={false}
+                    className="-striped -highlight replenish-task-table"
+                  />
+                )}
                 {/* <OrderListTable listData={ ordersList } loading={ loading } columns={ ReplenishOrderTableColumns } /> */}
               </div>
             </Grid.Column>
@@ -269,23 +266,32 @@ class ReplenishTaskPage extends Component {
           <Grid.Row>
             <Grid.Column width={16}>
               <div className="search-input-group">
-                <Input onChange={ this.handleSearchChange }
-                size="big"
-                icon='search'
-                iconPosition='left'
-                placeholder='Enter Source ID...' />
+                <Input
+                  onChange={ this.handleSearchChange }
+                  size="big"
+                  icon="search"
+                  iconPosition="left"
+                  placeholder="Enter Source ID..." />
               </div>
               <div className="order-list-btn-group">
-                { String(activeProcessType) !== '100' && 
-                  <Button size="huge" primary
+                { String(activeProcessType) !== '100' && (
+                  <Button
+                    size="huge"
+                    primary
                     disabled={ selection.length === 0 }
-                    onClick={() => this.handleRequestPodBtn() }>Request POD</Button> }
-                { String(activeProcessType) === '100' &&
-                  <Button size="huge"
-                    disabled={ ordersList.length === 0 }
-                    onClick={() => this.handleContinueBtn() }>Continue Replenish</Button>
-                }
-                
+                    onClick={() => this.handleRequestPodBtn()}>
+                    Request POD
+                  </Button>
+                )}
+                { String(activeProcessType) === '100' && (
+                  <Button
+                    size="huge"
+                    disabled={ordersList.length === 0}
+                    onClick={() => this.handleContinueBtn()}>
+                    Continue Replenish
+                  </Button>
+                )}
+
                 {/* <Button size="huge" secondary>Pause</Button> */}
               </div>
             </Grid.Column>
@@ -296,6 +302,9 @@ class ReplenishTaskPage extends Component {
   }
 }
 
+ReplenishTaskPage.defaultProps = {
+  taskCount: 0,
+};
 
 ReplenishTaskPage.propTypes = {
   history: PropTypes.shape({
@@ -311,7 +320,7 @@ function mapStateToProps(state) {
     username: state.user.username,
     stationId: state.station.id,
     taskCount: state.station.info.taskCount,
-  }
+  };
 }
 
-export default connect(mapStateToProps, { setStationTaskType } )(ReplenishTaskPage);
+export default connect(mapStateToProps, { setStationTaskType })(ReplenishTaskPage);

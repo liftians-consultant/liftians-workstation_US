@@ -1,26 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from "react-redux";
-import moment from "moment";
+import { connect } from 'react-redux';
+import moment from 'moment';
 import { Grid, Loader, Button } from 'semantic-ui-react';
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 import api from 'api';
 import OrderListTable from 'components/common/OrderListTable/OrderListTable';
-import { PickOrderTableColumns } from 'models/PickOrderTableModel';
+import PickOrderTableColumns from 'models/PickOrderTableModel';
 import { setStationTaskType } from 'redux/actions/stationAction';
 import './PickTaskPage.css';
 import OperationTaskMenu from 'components/OperationTaskMenu/OperationTaskMenu';
 
 class PickTaskPage extends Component {
-
-  state = {
-    activeBillType: '11',
-    activeProcessType: 0,
-    ordersList: [],
-    loading: false,
-    errors: {}
-  }
-
   locale = process.env.REACT_APP_LOCALE;
 
   // Dummy data, will retrieve from server
@@ -48,6 +39,13 @@ class PickTaskPage extends Component {
     ],
   ];
 
+  state = {
+    activeBillType: '11',
+    activeProcessType: 0,
+    ordersList: [],
+    loading: false,
+  }
+
   componentWillMount() {
     this.setStationTaskType();
     this.startStationOperationCall();
@@ -60,46 +58,43 @@ class PickTaskPage extends Component {
   }
 
   startStationOperationCall() {
-    this.setState({loading: true});
-    api.station.startStationOperation(this.props.stationId, this.props.username, 'P').then(res => {
+    this.setState({ loading: true });
+    api.station.startStationOperation(this.props.stationId, this.props.username, 'P').then((res) => {
       // return 1 if success, 0 if failed
-      let newState = { loading: false };
       if (!res.data) {
         toast.error('Cannot start station. Please contact your system admin');
       }
       console.log('[REPLENISH PICK TASK] Station Started with P');
-      this.setState(newState, this.retrievePickOrderReocrds);
+      this.setState({ loading: false }, this.retrievePickOrderReocrds);
     }).catch((e) => {
       toast.error('Server Error. Please contact your system admin');
       this.setState({ loading: false });
       console.error(e);
-    })
+    });
   }
 
   getBillTypeName() {
-    api.menu.getBillTypeName('P').then(res => {
+    api.menu.getBillTypeName('P').then((res) => {
       if (res.data && res.data.length) {
-        this.billTypeOptions = res.data.map((billType, index) => {
-          return {
-            key: index + 1,
-            text: billType.billTypeName,
-            index: index + 1,
-            value: billType.billType
-          }
-        })
+        this.billTypeOptions = res.data.map((billType, index) => ({
+          key: index + 1,
+          text: billType.billTypeName,
+          index: index + 1,
+          value: billType.billType,
+        }));
       }
-    })
+    });
   }
 
   getProcessStatusName() {
-    api.menu.getProcessStatusName('P').then(res => {
+    api.menu.getProcessStatusName('P').then((res) => {
       if (res.data && res.data.length) {
         this.processOptions[0] = res.data.map((processType, index) => {
           return {
             key: index,
             text: this.locale === 'CHN' ? processType.processStatusCHN : processType.processStatus,
-            index: index,
-            value: processType.processStatusID
+            index,
+            value: processType.processStatusID,
           }
         });
       }
@@ -107,16 +102,16 @@ class PickTaskPage extends Component {
   }
 
   retrievePickOrderReocrds = () => {
-    this.setState({loading: true});
+    this.setState({ loading: true });
     console.log('task:', this.state.activeBillType, 'process:', this.state.activeProcessType);
-    api.pick.retrievePickOrderReocrdsByTypeAndState(1, this.state.activeBillType, this.state.activeProcessType).then( res => {
+    api.pick.retrievePickOrderReocrdsByTypeAndState(1, this.state.activeBillType, this.state.activeProcessType).then((res) => {
       res.data.map((object) => {
         object.pick_DATE = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
         object.processStatus = this.locale === 'CHN' ? object.processStatusCHN : object.processStatus;
         return object;
       });
       this.setState({ ordersList: res.data, loading: false });
-    })
+    });
   }
 
   handleTaskChange = (e, { value }) => {
@@ -128,32 +123,33 @@ class PickTaskPage extends Component {
   };
 
   handleStartBtn = (e) => {
-    api.pick.callServerGeneratePickTask(this.props.stationId).then( res => {
+    api.pick.callServerGeneratePickTask(this.props.stationId).then((res) => {
       this.props.history.push('/operation');
-    }).catch(error => {
+    }).catch((error) => {
       toast.error('Error while server generate pick task. Please contact system admin.');
-    }) 
+    });
   }
 
   handlePauseBtn = (e) => {
     console.log('[PAUSE PICK OPERATION] Pausing Pick Operation');
-    api.pick.stopPickOperation(this.props.stationId, this.props.username, 'P').then( res => {
+    api.pick.stopPickOperation(this.props.stationId, this.props.username, 'P').then((res) => {
       console.log('[PAUSE PICK OPERATION] Pick Operation Paused');
-    }).catch(err => {
+    }).catch((err) => {
       console.log('[PAUSE PICK OPERATION] Pause Failed:', err);
-    })
+    });
   }
 
   render() {
     const { activeBillType, loading, ordersList } = this.state;
-    
+
     return (
       <div className="ui pick-task-page-container">
-        <Loader content='Loading' active={this.state.loading} />
+        <Loader content="Loading" active={loading} />
         <Grid>
           <Grid.Row>
             <Grid.Column width={16}>
-              <OperationTaskMenu activeBillType={activeBillType}
+              <OperationTaskMenu
+                activeBillType={activeBillType}
                 processOptions={this.processOptions}
                 billTypeOptions={this.billTypeOptions}
                 onTaskChange={this.handleTaskChange}
@@ -164,16 +160,22 @@ class PickTaskPage extends Component {
           <Grid.Row>
             <Grid.Column>
               <div className="orderlist-table-container">
-                <OrderListTable listData={ ordersList } loading={ loading } columns={ PickOrderTableColumns } />
+                <OrderListTable listData={ordersList} loading={loading} columns={PickOrderTableColumns} />
               </div>
             </Grid.Column>
           </Grid.Row>
           <Grid.Row>
             <Grid.Column>
               <div className="order-list-btn-group">
-                <Button size="huge" primary onClick={() => this.handleStartBtn() }>Start</Button>
-                <Button size="huge" secondary onClick={ () => this.handlePauseBtn() }>Pause</Button>
-                <Button size="huge" secondary>Print</Button>
+                <Button size="huge" primary onClick={() => this.handleStartBtn()}>
+                  Start
+                </Button>
+                <Button size="huge" secondary onClick={() => this.handlePauseBtn()}>
+                  Pause
+                </Button>
+                <Button size="huge" secondary>
+                  Print
+                </Button>
               </div>
             </Grid.Column>
           </Grid.Row>
@@ -185,16 +187,17 @@ class PickTaskPage extends Component {
 
 PickTaskPage.propTypes = {
   history: PropTypes.shape({
-    push: PropTypes.func.isRequired
+    push: PropTypes.func.isRequired,
   }).isRequired,
   username: PropTypes.string.isRequired,
   stationId: PropTypes.string.isRequired,
+  setStationTaskType: PropTypes.func.isRequired,
 };
 
 function mapStateToProps(state) {
   return {
     username: state.user.username,
-    stationId: state.station.id
+    stationId: state.station.id,
   };
 }
 

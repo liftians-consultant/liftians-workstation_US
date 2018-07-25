@@ -5,7 +5,10 @@
       "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
       "no-console":"off",
       "object-curly-newline":"off",
-      "import/no-unresolved":"off"
+      "import/no-unresolved":"off",
+      "react/sort-comp": [0],
+      "no-unused-vars": ["error", { "caughtErrors": "none" }],
+      "react/destructuring-assignment": [true, "never"]
     },
     "settings": {
 

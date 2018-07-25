@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 import { Grid } from 'semantic-ui-react';
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
 
 import api from 'api';
 import MenuButton from 'components/common/MenuButton/MenuButton';
@@ -19,12 +19,12 @@ class SystemSettingPage extends Component {
     this.resetSystemModalCloseHandler = this.resetSystemModalCloseHandler.bind(this);
   }
 
-  goToPage = name => {
+  goToPage = (name) => {
     console.log(name);
     this.props.history.push(name);
   }
 
-  goToNowhere = name => {
+  goToNowhere = () => {
     // DO NOTHING~~~
   }
 
@@ -35,14 +35,14 @@ class SystemSettingPage extends Component {
   resetSystemModalCloseHandler(confirm) {
     this.setState({ openSystemResetModal: false });
     if (confirm) {
-      api.pick.resetTestData(this.props.stationId).then(res => {
+      api.pick.resetTestData(this.props.stationId).then((res) => {
         if (res.data) { // server return boolean value
           console.log('Reset Success');
           toast.success('You have successfully reset test data!');
         }
       }).catch((e) => {
         console.error('Reset Failed');
-      })
+      });
     }
   }
 
@@ -82,12 +82,14 @@ class SystemSettingPage extends Component {
           </Grid.Row>
         </Grid>
 
-        { this.state.openSystemResetModal && <ConfirmDialogModal size={'mini'} 
-          open={ this.state.openSystemResetModal }
-          close={ this.resetSystemModalCloseHandler }
-          header={ 'Reset System' }
-          content={ 'Are you sure you want to reset the system?' }
-           /> }
+        { this.state.openSystemResetModal && (
+        <ConfirmDialogModal
+          size="mini"
+          open={this.state.openSystemResetModal}
+          close={this.resetSystemModalCloseHandler}
+          header="Reset System"
+          content="Are you sure you want to reset the system?"
+        />) }
       </div>
     );
   }
@@ -96,15 +98,16 @@ class SystemSettingPage extends Component {
 
 SystemSettingPage.propTypes = {
   history: PropTypes.shape({
-    push: PropTypes.func.isRequired
+    push: PropTypes.func.isRequired,
+    goBack: PropTypes.func.isRequired,
   }).isRequired,
   stationId: PropTypes.string.isRequired,
 };
 
 function mapStateToProps(state) {
   return {
-    stationId: state.station.id
-  }
+    stationId: state.station.id,
+  };
 }
 
-export default connect(mapStateToProps, {} )(SystemSettingPage);
+export default connect(mapStateToProps, {})(SystemSettingPage);

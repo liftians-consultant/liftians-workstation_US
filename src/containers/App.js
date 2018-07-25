@@ -1,29 +1,30 @@
-import React from "react";
+import React from 'react';
 import { Switch } from 'react-router';
-import { connect } from "react-redux";
-import PropTypes from "prop-types";
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { ToastContainer } from 'react-toastify';
 
-import GuestRoute from "components/routes/GuestRoute";
-import UserRoute from "components/routes/UserRoute";
+import GuestRoute from 'components/routes/GuestRoute';
+import UserRoute from 'components/routes/UserRoute';
 
-import HomePage from "containers/HomePage";
-import LoginPage from "containers/LoginPage";
-import PickTaskPage from "containers/PickTaskPage/PickTaskPage";
+import HomePage from 'containers/HomePage';
+import LoginPage from 'containers/LoginPage';
+import PickTaskPage from 'containers/PickTaskPage/PickTaskPage';
 import PickOperationPage from 'containers/PickOperationPage/PickOperationPage';
 import SystemSettingPage from 'containers/SystemSettingPage/SystemSettingPage';
 import ReplenishTaskPage from 'containers/ReplenishTaskPage/ReplenishTaskPage';
 import ReplenishOperationPage from 'containers/ReplenishOperationPage/ReplenishOperationPage';
-import InventorySearchPage from "containers/InventorySearchPage/InventorySearchPage";
-import TaskListPage from "containers/TaskListPage/TaskListPage";
-import BusinessRulesPage from "containers/BusinessRulesPage/BusinessRulesPage";
-import ExpireRuleConfigPage from "containers/ExpireRuleConfigPage/ExpireRuleConfigPage";
+import InventorySearchPage from 'containers/InventorySearchPage/InventorySearchPage';
+import TaskListPage from 'containers/TaskListPage/TaskListPage';
+import BusinessRulesPage from 'containers/BusinessRulesPage/BusinessRulesPage';
+import ExpireRuleConfigPage from 'containers/ExpireRuleConfigPage/ExpireRuleConfigPage';
 import 'react-toastify/dist/ReactToastify.css';
-import "./App.css";
+import './App.css';
 
 const App = ({ location, isAuthenticated }) => (
   <div className="app-comp-container">
-    <ToastContainer position="top-center"
+    <ToastContainer
+      position="top-center"
       autoClose={3000}
       hideProgressBar={false}
       newestOnTop={false}
@@ -52,14 +53,14 @@ const App = ({ location, isAuthenticated }) => (
 
 App.propTypes = {
   location: PropTypes.shape({
-    pathname: PropTypes.string.isRequired
+    pathname: PropTypes.string.isRequired,
   }).isRequired,
-  isAuthenticated: PropTypes.bool.isRequired
+  isAuthenticated: PropTypes.bool.isRequired,
 };
 
 function mapStateToProps(state) {
   return {
-    isAuthenticated: !!state.user.username
+    isAuthenticated: !!state.user.username,
   };
 }
 
