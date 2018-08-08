@@ -9,11 +9,11 @@ import decode from 'jwt-decode';
 import { composeWithDevTools } from 'redux-devtools-extension';
 
 import App from 'containers/App';
-import registerServiceWorker from './registerServiceWorker';
 import rootReducer from 'redux/reducers/rootReducer';
 import { userLoggedIn, userLoggedOut } from 'redux/actions/authAction';
 import setAuthorizationHeader from 'utils/setAuthorizationHeader';
 import appConfig from 'services/AppConfig';
+import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 
 const store = createStore(

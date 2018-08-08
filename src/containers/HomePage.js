@@ -47,31 +47,31 @@ class HomePage extends Component {
     return (
       <div className="workstation-menu ui container menu-page">
         <Dimmer active={this.state.isLoading}>
-          <Loader content='Loading' />
+          <Loader content="Loading" />
         </Dimmer>
 
         <Grid columns={3} centered>
           <Grid.Row>
             <Grid.Column>
-              <MenuButton title="Replenish" name="replenish-task" clickHandler={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'R' ? true : false }/>
+              <MenuButton title="Replenish" name="replenish-task" clickHandler={this.goToPage} isDisabled={stationTaskType !== 'U' && stationTaskType !== 'R' ? true : false} />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Pick" name="pick-task" clickHandler={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'P' ? true : false }/>
+              <MenuButton title="Pick" name="pick-task" clickHandler={this.goToPage} isDisabled={stationTaskType !== 'U' && stationTaskType !== 'P' ? true : false} />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Inventory Check" name="inventory-check" clickHandler={ this.goToPage } isDisabled={ stationTaskType !== 'U' && stationTaskType !== 'C' ? true : false }/>
+              <MenuButton title="Inventory Check" name="" clickHandler={this.goToPage} isDisabled={stationTaskType !== 'U' && stationTaskType !== 'C' ? true : false} />
             </Grid.Column>
           </Grid.Row>
 
           <Grid.Row>
             <Grid.Column>
-              <MenuButton title="System Setting" name="system-setting" clickHandler={ this.goToPage } />
+              <MenuButton title="System Setting" name="system-setting" clickHandler={this.goToPage} />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Inventory Search" name="inventory-search" clickHandler={ this.goToPage } />
+              <MenuButton title="Inventory Search" name="inventory-search" clickHandler={this.goToPage} />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Generate Inventory" name="generate-inventory" clickHandler={ this.goToPage } />
+              <MenuButton title="Generate Inventory" name="" clickHandler={this.goToPage} />
             </Grid.Column>
           </Grid.Row>
         </Grid>
@@ -82,7 +82,7 @@ class HomePage extends Component {
 
 HomePage.propTypes = {
   history: PropTypes.shape({
-    push: PropTypes.func.isRequired
+    push: PropTypes.func.isRequired,
   }).isRequired,
   isAuthenticated: PropTypes.bool.isRequired,
   logout: PropTypes.func.isRequired,
@@ -95,7 +95,7 @@ function mapStateToProps(state) {
     isAuthenticated: !!state.user.token,
     username: state.user.username,
     stationInfo: state.station.info,
-    stationId: state.station.id
+    stationId: state.station.id,
   };
 }
 
@@ -103,5 +103,5 @@ export default connect(mapStateToProps, {
   logout: actions.logout,
   getUserInfoById,
   activateStation,
-  checkCurrentUnFinishTask
+  checkCurrentUnFinishTask,
 })(HomePage);

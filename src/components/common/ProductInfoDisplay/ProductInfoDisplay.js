@@ -6,8 +6,7 @@ import ImageNotFound from '../../../assets/images/no_photo_available.jpg';
 
 const productImgBaseUrl = process.env.REACT_APP_IMAGE_BASE_URL;
 
-class ProductInfoDisplay extends Component {
-  render() {
+const ProductInfoDisplay = () => {
     const { product, pickedAmount, quantity } = this.props;
     const imageUrl = productImgBaseUrl + product.productID + '.png';
 
