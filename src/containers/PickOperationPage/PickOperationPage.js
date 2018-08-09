@@ -44,10 +44,6 @@ class PickOperationPage extends Component {
     loading: true,
     barcode: '',
     showBox: false,
-    binSetupWaitlist: [],
-    currentSetupHolder: {
-      deviceIndex: 0,
-    },
     openOrderFinishModal: false,
     openWrongProductModal: false,
     openBinSetupModal: false,
@@ -100,7 +96,7 @@ class PickOperationPage extends Component {
 
     if (this.props.deviceList.length === 0) {
       console.log('[GET STATION DEVICE LIST]');
-      this.props.getStationDeviceList(this.props.stationId).then((res) => {
+      this.props.getStationDeviceList(this.props.stationId).then(() => {
         console.log('[GET STATION DEVICE] device list get on CWM');
       });
     }
@@ -131,26 +127,16 @@ class PickOperationPage extends Component {
     }
   }
 
-  initialBinSetup() {
-    // refresh device list first
-    this.props.getStationDeviceList(this.props.stationId).then((deviceList) => {
-      const binSetupWaitlist = this.state.binSetupWaitlist.concat(deviceList);
-      const currentSetupHolder = binSetupWaitlist.shift();
-      this.setState({ binSetupWaitlist, currentSetupHolder, openBinSetupModal: true });
-    });
-
-  }
-
   linkBinToOrder(deviceId, binId) {
     api.station.linkBinToOrder(binId, deviceId, this.props.username).then((res) => {
       if (res.data) {
         console.log('[LINK BIN TO ORDER] Success');
         toast.success(`Bin ${binId} has successfully linked`);
       } else {
-        toast.warn('Please try again') ;
+        toast.warn('Please try again');
       }
-    }).catch((err) => {
-      toast.error('SERVER ERROR: Link bin to order failed')
+    }).catch(() => {
+      toast.error('SERVER ERROR: Link bin to order failed');
     });
   }
 
@@ -160,7 +146,15 @@ class PickOperationPage extends Component {
   }
 
   selectPickedAmount(num) {
-    this.setState({ pickedAmount: this.state.pickedAmount + num, isKeyPadPressed: true }, () => {
+    this.setState(prevState => ({ pickedAmount: prevState.pickedAmount + num, isKeyPadPressed: true }), () => {
+      if (this.state.isTagPressed === false) {
+        toast.warn('Please press the highlighted ETag to confirm picking');
+      } else {
+        this.checkIsPickFinished();
+      }
+    });
+
+    this.setState(prevState => ({ pickedAmount: prevState.pickedAmount + num, isKeyPadPressed: true }), () => {
       if (this.state.isTagPressed === false) {
         toast.warn('Please press the highlighted ETag to confirm picking');
       } else {
@@ -175,7 +169,7 @@ class PickOperationPage extends Component {
       ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
       this.finishPick();
     } else {
-      this.setState({isTagPressed: false, isKeyPadPressed: false}, () => {
+      this.setState({ isTagPressed: false, isKeyPadPressed: false }, () => {
         this.initPickLight();
       });
     }
@@ -192,7 +186,7 @@ class PickOperationPage extends Component {
             api.station.atStationTask(this.props.stationId).then((res) => {
               if (res.data > 0) {
                 console.log('[GET UPCOMING POD] Pod arrive station');
-                this.setState({ orderProductList: res.data, taskId: res.data }, () => { isRecieve = true; });
+                this.setState({ taskId: res.data }, () => { isRecieve = true; });
               }
             });
           } else {
@@ -214,7 +208,7 @@ class PickOperationPage extends Component {
     return true; // need to work on
   }
 
-  finishPick(isShortage=true) {
+  finishPick(isShortage = true) {
     const product = this.state.currentPickProduct;
     const data = {
       stationId: this.props.stationId,
@@ -230,12 +224,12 @@ class PickOperationPage extends Component {
       shortQty: isShortage ? parseInt(product.quantity, 10) - this.state.pickedAmount : 0,
     };
 
-    console.log(`[PICK OPERATION] AtStationAfterPickProduct data:`, data);
+    console.log('[PICK OPERATION] AtStationAfterPickProduct data:', data);
 
     if (this.validateAfterPickData(data)) {
       api.pick.atStationAfterPickProduct(data).then((res) => {
         if (res.data) { // return 1 if success
-          console.log(`[PICK OPERATION] AtStationAfterPickProduct Success`);
+          console.log('[PICK OPERATION] AtStationAfterPickProduct Success');
           // this.setState({ showBox: false }, () => this.retrieveNextOrder());
           data.holderId = this.state.currentPickProduct.holderID;
 
@@ -253,16 +247,16 @@ class PickOperationPage extends Component {
         toast.error('ERROR: atStationAfterPickProduct');
       });
     } else {
-      console.log('[PICK OPERATION] Validation error')
+      console.log('[PICK OPERATION] Validation error');
       toast.warn('Barcode did not psas validation. Please try again.');
     }
   }
 
   atHolderAfterPickProduct(data, retry = false) {
     api.pick.atHolderAfterPickProduct(data).then((res) => {
-      if ( res.data > 0 ) {
+      if (res.data > 0) {
         // set here because avoid data changed after async call
-        console.log(`[PICK OPERATION] AtHolderAfterPickProduct Success:`, res.data);
+        console.log('[PICK OPERATION] AtHolderAfterPickProduct Success:', res.data);
         this.finishedOrder = {
           orderNo: this.state.currentPickProduct.order_no,
           binNum: parseInt(this.state.currentPickProduct.binPosition, 10)
@@ -301,7 +295,7 @@ class PickOperationPage extends Component {
   checkIsOrderFinished() {
     api.pick.checkIsOrderFinished(this.state.currentPickProduct.order_no).then((res) => {
       if (res.data) { // return 1 or 0
-        console.log("[CHECK ORDER FINISHED] Order finished", res.data);
+        console.log('[CHECK ORDER FINISHED] Order finished', res.data);
         // TOOD: unassign
         ETagService.turnEndLightOnById(this.finishedOrder.binNum);
         this.setState({ openOrderFinishModal: true }, () => {
@@ -316,14 +310,22 @@ class PickOperationPage extends Component {
   getPodInfo() {
     api.station.getPodLayoutInfoByTaskID(this.state.taskId).then((res) => {
       if (res.data.length) {
-        console.log(`[POD LAYOUT] Pod height: ${res.data.length}`)
-        const podInfo = {
-          ...this.state.podInfo,
-          shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxBox, 10) }).reverse().value()
-        }
-        this.setState({ podInfo, loading: false });
+        console.log(`[POD LAYOUT] Pod height: ${res.data.length}`);
+
+        this.setState(prevState => ({
+          podInfo: {
+            ...prevState.podInfo,
+            shelfBoxes: _.chain(res.data)
+              .sortBy('shelfID')
+              .map(elmt => parseInt(elmt.maxBox, 10))
+              .reverse()
+              .value(),
+          },
+          loading: false,
+        }));
+        // this.setState({ podInfo, loading: false });
       } else {
-        console.log('[POD LAYOUT] NO GOOD. Empty array returned..')
+        console.log('[POD LAYOUT] NO GOOD. Empty array returned..');
         setTimeout(() => {
           this.getPodInfo();
         }, 1000);
@@ -336,7 +338,7 @@ class PickOperationPage extends Component {
   getProductList() {
     api.pick.getPickInfoByTaskId(this.state.taskId).then((res) => {
       if (res.data.length) {
-        console.log("[GET PRODUCT LIST] Pick info retrevied", res.data[0].productID);
+        console.log('[GET PRODUCT LIST] Pick info retrevied', res.data[0].productID);
         toast.info(`Product Retrieved: ${res.data[0].productID}`);
         this.setState({
           currentPickProduct: res.data[0],
@@ -358,7 +360,7 @@ class PickOperationPage extends Component {
       } else {
         // when nothing return, that means the pod is finished
         // and need to wait for the next pod come in to station
-        console.log("[GET PRODUCT LIST] No order return from the server");
+        console.log('[GET PRODUCT LIST] No order return from the server');
         this.getUpcomingPod();
       }
     }).catch((err) => {
@@ -369,13 +371,13 @@ class PickOperationPage extends Component {
   scanValidation(barcode) {
     if (barcode === this.state.currentPickProduct.productID) {
       return true;
-    } else {
-      return false;
     }
+
+    return false;
   }
 
   validatePharmacyBarcode(barcode) {
-    return new Promise( (resolve, reject) => {
+    return new Promise( (resolve) => {
       // check for duplicate
       if (this.state.barcode.indexOf(barcode) !== -1) {
         resolve({ valid: false, message: 'Duplicate barcode!' });
@@ -388,10 +390,10 @@ class PickOperationPage extends Component {
         if (res.data.length > 0) { // barcode is on the shelf
           resolve({ valid: true });
         } else {
-          resolve({ valid: false, message: 'Wrong Product (this barcode is not on the shelf)'});
+          resolve({ valid: false, message: 'Wrong Product (this barcode is not on the shelf)' });
         }
-      }).catch((err) => {
-        resolve({ valid: false, message: 'Something went wrong while validating the barcode.'});
+      }).catch(() => {
+        resolve({ valid: false, message: 'Something went wrong while validating the barcode.' });
       });
     });
   }
@@ -493,12 +495,12 @@ class PickOperationPage extends Component {
             this.setState({ showBox: true, barcode: scannedValue });
             this.initPickLight();
           } else {
-            this.setState({ barcode: scannedValue } , () => {
-              this.setState({ openWrongProductModal: true })
+            this.setState({ barcode: scannedValue }, () => {
+              this.setState({ openWrongProductModal: true });
             });
           }
         }
-      }, 1500);
+      }, 500);
     }
   }
 
@@ -525,12 +527,14 @@ class PickOperationPage extends Component {
           }
 
           if (pickedAmount === this.state.currentPickProduct.quantity) {
-            this.setState({showBox: true, barcode, pickedAmount });
+            this.setState({ showBox: true, barcode, pickedAmount });
           } else {
             this.setState({ barcode, pickedAmount });
           }
         } else if (this.businessMode === 'ecommerce') {
-          this.setState({ showBox: !this.state.showBox, barcode: res.data[barCodeIndex].barcode });
+          this.setState(prevState => (
+            { showBox: !prevState.showBox, barcode: res.data[barCodeIndex].barcode }
+          ));
         }
       });
     } else {
@@ -574,15 +578,15 @@ class PickOperationPage extends Component {
     const holder = this.props.deviceList.find(device => device.deviceIndex === binLocation);
 
     if (holder.bin && holder.bin.binBarcode === binBarcode) {
-      toast.warn("DO NOT SCAN THE SAME BIN");
+      toast.warn('DO NOT SCAN THE SAME BIN');
       return;
     }
 
     const holderId = holder.deviceId;
     this.props.unassignBinFromHolder(holderId).then((res) => {
       if (res) {
-        this.props.addBinToHolder(binBarcode, holderId).then((res) => {
-          if (res) {
+        this.props.addBinToHolder(binBarcode, holderId).then((response) => {
+          if (response) {
             ETagService.turnEndLightOffById(this.finishedOrder.binNum);
             this.setState({ showBox: false, openOrderFinishModal: false }, () => {
               this.setFocusToScanInput();
@@ -598,7 +602,7 @@ class PickOperationPage extends Component {
     this.setFocusToScanInput();
   }
 
-  handleBinSetupInputEnter(binBarcode, binLocation) {
+  handleBinSetupInputEnter(binBarcode) {
     this.props.addBinToHolder(binBarcode, this.props.currentSetupHolder.deviceId);
   }
 
@@ -669,7 +673,13 @@ class PickOperationPage extends Component {
                   <div className="action-group-container">
                     <div className="scan-input-group">
                       { this.businessMode === 'pharmacy' && (
-                        <h4>[ {this.state.barcode} ]</h4>
+                        <h4>
+                          [
+                          {' '}
+                          {this.state.barcode}
+                          {' '}
+                          ]
+                        </h4>
                       )}
                       <br />
                       <div className="scan-input-holder">
@@ -677,26 +687,31 @@ class PickOperationPage extends Component {
                           type="text"
                           placeholder="Enter or Scan Box Barcode"
                           ref={this.scanInputRef}
-                          onKeyPress={this.handleScanKeyPress}/>
+                          onKeyPress={this.handleScanKeyPress}
+                        />
                       </div>
                     </div>
-                    <div className="action-btn-group">
-
-                    </div>
+                    <div className="action-btn-group" />
                   </div>
                   { process.env.REACT_APP_ENV === 'DEV' && (
-                    <Button primary size="medium" onClick={ () => this.handleScanBtnClick() }>Scan</Button>
+                    <Button primary size="medium" onClick={() => this.handleScanBtnClick()}>
+                      Scan
+                    </Button>
                   )}
                 </div>
               ) : (
                 <div>
-                  <BinGroup openedBinNum={ parseInt(currentPickProduct.binPosition, 10) }></BinGroup>
+                  <BinGroup openedBinNum={parseInt(currentPickProduct.binPosition, 10)} />
                   { this.businessMode === 'pharmacy' ? (
-                    <Button className="ok-btn" size="massive" primary onClick={() => this.handlePharmacyOkBtnClick()}>OK</Button>
+                    <Button className="ok-btn" size="massive" primary onClick={() => this.handlePharmacyOkBtnClick()}>
+                      OK
+                    </Button>
                   ) : (
-                    currentPickProduct.quantity > 1 && (<NumPad highlightAmount={ currentPickProduct.quantity - pickedAmount }
+                    currentPickProduct.quantity > 1 && (
+                    <NumPad
+                      highlightAmount={currentPickProduct.quantity - pickedAmount}
                       callback={this.selectPickedAmount}
-                    ></NumPad>)
+                    />)
                   )}
                 </div>
               ) }
@@ -727,7 +742,7 @@ class PickOperationPage extends Component {
 
         { warningMessage && (
           <WarningModal
-            open={true}
+            open
             onClose={this.closeWarningModal}
             headerText="Warning"
             contentText={warningMessage} 
@@ -758,6 +773,7 @@ PickOperationPage.propTypes = {
     push: PropTypes.func.isRequired,
   }).isRequired,
   stationId: PropTypes.string.isRequired,
+  username: PropTypes.string.isRequired,
 };
 
 function mapStateToProps(state) {

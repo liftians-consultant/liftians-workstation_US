@@ -8,7 +8,10 @@
       "import/no-unresolved":"off",
       "react/sort-comp": [0],
       "no-unused-vars": ["error", { "caughtErrors": "none" }],
-      "react/destructuring-assignment": [true, "never"]
+      "react/destructuring-assignment": [true, "never"],
+      "react/prop-types": [1],
+      "max-len": [1, 180, 2],
+      "react/forbid-prop-types": [1]
     },
     "settings": {
 
