@@ -6,7 +6,7 @@ import appConfig from 'services/AppConfig';
  */
 
 const user = {
-  login: credentials => axios.post(`${appConfig.getApiUrl()}/login`, { ...credentials },{ timeout: 6000 }).then(res => res.headers.authorization),
+  login: credentials => axios.post(`${appConfig.getApiUrl()}/login`, { ...credentials }, { timeout: 6000 }).then(res => res.headers.authorization),
 
   logout: () => axios.post(`${appConfig.getApiUrl()}/logout`).then(res => res),
 
@@ -17,7 +17,7 @@ const user = {
 };
 
 const menu = {
-  getBillTypeName: operationType => axios.post( `${appConfig.getApiUrl()}/Common`, {
+  getBillTypeName: operationType => axios.post(`${appConfig.getApiUrl()}/Common`, {
     name: 'BillType',
     parameter: [operationType],
   }),
@@ -51,7 +51,7 @@ const station = {
     ],
   }),
 
-  getPodLayoutInfoByTaskID: taskId => axios.post(`${appConfig.getApiUrl()}/Common`,{
+  getPodLayoutInfoByTaskID: taskId => axios.post(`${appConfig.getApiUrl()}/Common`, {
     name: 'GetPodLayoutInfoByTaskID',
     parameter: [
       String(taskId),
@@ -236,7 +236,7 @@ const replenish = {
 
   getReplenishDetailBySourceId: sourceId => axios.post(`${appConfig.getApiUrl()}/Replenish`, {
     name: 'GetReplenishDetailBySourceID',
-    parameter: [ String(sourceId) ]
+    parameter: [String(sourceId)],
   }),
 
   replenishBySourceId: (stationId, userId, sourceIdList, jobPriority) => axios.post(`${appConfig.getApiUrl()}/Replenish`, {

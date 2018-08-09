@@ -183,8 +183,8 @@ class PickOperationPage extends Component {
         let isRecieve = false;
         this.checkPodInterval = setInterval(() => {
           if (!isRecieve) {
-            api.station.atStationTask(this.props.stationId).then((res) => {
-              if (res.data > 0) {
+            api.station.atStationTask(this.props.stationId).then((response) => {
+              if (response.data > 0) {
                 console.log('[GET UPCOMING POD] Pod arrive station');
                 this.setState({ taskId: res.data }, () => { isRecieve = true; });
               }
@@ -259,7 +259,7 @@ class PickOperationPage extends Component {
         console.log('[PICK OPERATION] AtHolderAfterPickProduct Success:', res.data);
         this.finishedOrder = {
           orderNo: this.state.currentPickProduct.order_no,
-          binNum: parseInt(this.state.currentPickProduct.binPosition, 10)
+          binNum: parseInt(this.state.currentPickProduct.binPosition, 10),
         };
         this.checkIsOrderFinished();
         this.retrieveNextOrder();
@@ -281,7 +281,7 @@ class PickOperationPage extends Component {
   }
 
   callGenStationTask() {
-    api.station.genStationTask(this.props.stationId).then((res) => {
+    api.station.genStationTask(this.props.stationId).then(() => {
       console.log('[GEN STATION TASK] Called');
     });
   }
@@ -377,7 +377,7 @@ class PickOperationPage extends Component {
   }
 
   validatePharmacyBarcode(barcode) {
-    return new Promise( (resolve) => {
+    return new Promise((resolve) => {
       // check for duplicate
       if (this.state.barcode.indexOf(barcode) !== -1) {
         resolve({ valid: false, message: 'Duplicate barcode!' });
@@ -411,7 +411,7 @@ class PickOperationPage extends Component {
         ETagService.checkRespond(parseInt(this.state.currentPickProduct.binPosition, 10)).then((res) => {
           if (res) {
             console.log('[WAIT FOR ETAG RESPOND] Etag respond');
-            this.setState({isTagPressed: true}, () => {
+            this.setState({ isTagPressed: true }, () => {
               isRecieve = true;
             });
           }
@@ -420,7 +420,7 @@ class PickOperationPage extends Component {
         console.log('[WAIT FOR ETAG RESPOND] Stop interval');
         clearInterval(this.checkETagResondInterval);
 
-        ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition));
+        ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
 
         // auto trigger pick procedure when there's only one unit required
         if (this.state.currentPickProduct.quantity === 1) {
@@ -452,7 +452,7 @@ class PickOperationPage extends Component {
         clearInterval(this.checkETagResondInterval);
         this.checkETagResondInterval = false;
 
-        ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition));
+        ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
         this.finishPick(false);
       }
     }.bind(this), 500);
@@ -669,7 +669,8 @@ class PickOperationPage extends Component {
                   <ProductInfoDisplay
                     product={currentPickProduct}
                     quantity={currentPickProduct.quantity}
-                    pickedAmount={pickedAmount} />
+                    pickedAmount={pickedAmount}
+                  />
                   <div className="action-group-container">
                     <div className="scan-input-group">
                       { this.businessMode === 'pharmacy' && (
@@ -745,7 +746,7 @@ class PickOperationPage extends Component {
             open
             onClose={this.closeWarningModal}
             headerText="Warning"
-            contentText={warningMessage} 
+            contentText={warningMessage}
           />)
         }
 
