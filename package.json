@@ -3,8 +3,9 @@
   "version": "0.2.3",
   "author": "Kevin Hong",
   "private": true,
-  "proxy": "http://localhost:8060",
+  "proxy": "http://l1.liftians.com:8060",
   "dependencies": {
+    "@norauto/log4js2-ajax-appender": "^1.1.9",
     "axios": "^0.18.0",
     "babel-eslint": "^8.2.6",
     "classnames": "^2.2.5",
@@ -15,6 +16,7 @@
     "history": "^4.7.2",
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.5",
+    "log4js2": "^1.0.2",
     "moment": "^2.22.2",
     "prop-types": "^15.6.0",
     "react": "^16.3.2",

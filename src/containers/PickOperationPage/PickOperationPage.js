@@ -28,7 +28,10 @@ import {
 
 import './PickOperationPage.css';
 
+import * as log4js from 'log4js2';
+
 class PickOperationPage extends Component {
+
   state = {
     podInfo: {
       podId: 0,
@@ -52,6 +55,8 @@ class PickOperationPage extends Component {
     isTagPressed: false,
     isKeyPadPressed: false,
   };
+
+  log = log4js.getLogger('PickOperationPage');
 
   checkPodInterval = {};
 
@@ -95,15 +100,15 @@ class PickOperationPage extends Component {
     ETagService.turnEndLightOffById(0);
 
     if (this.props.deviceList.length === 0) {
-      console.log('[GET STATION DEVICE LIST]');
+      this.logInfo('[GET STATION DEVICE LIST]');
       this.props.getStationDeviceList(this.props.stationId).then(() => {
-        console.log('[GET STATION DEVICE] device list get on CWM');
+        this.log.info('[GET STATION DEVICE] device list get on CWM');
       });
     }
 
     // Register bin when first init
     api.pick.getUnassignedHolderByStation(this.props.stationId).then((res) => {
-      console.log('[UNASSINGED HOLDER]', res.data);
+      this.log.info('[UNASSINGED HOLDER]', res.data);
       if (res.data.length > 0) {
         this.props.addHoldersToSetupWaitlist(res.data);
       }
@@ -120,6 +125,11 @@ class PickOperationPage extends Component {
     this.setFocusToScanInput();
   }
 
+  logInfo(msg) {
+    console.log(msg);
+    this.log.info(msg);
+  }
+
   setFocusToScanInput() {
     if (!this.state.openOrderFinishModal && !this.state.openBinSetupModal) {
       this.scanInputRef.current.inputRef.value = '';
@@ -130,12 +140,13 @@ class PickOperationPage extends Component {
   linkBinToOrder(deviceId, binId) {
     api.station.linkBinToOrder(binId, deviceId, this.props.username).then((res) => {
       if (res.data) {
-        console.log('[LINK BIN TO ORDER] Success');
+        this.log.info('[LINK BIN TO ORDER] Success');
         toast.success(`Bin ${binId} has successfully linked`);
       } else {
         toast.warn('Please try again');
       }
     }).catch(() => {
+      this.log.error('SERVER ERROR: Link bin to order failed');
       toast.error('SERVER ERROR: Link bin to order failed');
     });
   }
@@ -185,8 +196,8 @@ class PickOperationPage extends Component {
           if (!isRecieve) {
             api.station.atStationTask(this.props.stationId).then((response) => {
               if (response.data > 0) {
-                console.log('[GET UPCOMING POD] Pod arrive station');
-                this.setState({ taskId: res.data }, () => { isRecieve = true; });
+                this.logInfo('[GET UPCOMING POD] Pod arrive station');
+                this.setState({ taskId: response.data }, () => { isRecieve = true; });
               }
             });
           } else {
@@ -200,7 +211,8 @@ class PickOperationPage extends Component {
         this.props.history.push('/pick-task');
       }
     }).catch((err) => {
-      toast.error(`[SERVER ERROR] CheckNumberOfStationTasks, ${err.message}`);
+      this.log.error(`[GET UPCOMING POD] CheckNumberOfStationTasks, ${err.message}`);
+      toast.error(`[GET UPCOMING POD] CheckNumberOfStationTasks, ${err.message}`);
     });
   }
 
@@ -224,12 +236,12 @@ class PickOperationPage extends Component {
       shortQty: isShortage ? parseInt(product.quantity, 10) - this.state.pickedAmount : 0,
     };
 
-    console.log('[PICK OPERATION] AtStationAfterPickProduct data:', data);
+    this.logInfo('[PICK OPERATION] AtStationAfterPickProduct data:', data);
 
     if (this.validateAfterPickData(data)) {
       api.pick.atStationAfterPickProduct(data).then((res) => {
         if (res.data) { // return 1 if success
-          console.log('[PICK OPERATION] AtStationAfterPickProduct Success');
+          this.logInfo('[PICK OPERATION] AtStationAfterPickProduct Success');
           // this.setState({ showBox: false }, () => this.retrieveNextOrder());
           data.holderId = this.state.currentPickProduct.holderID;
 
@@ -240,14 +252,15 @@ class PickOperationPage extends Component {
           this.atHolderAfterPickProduct(data);
         } else {
           // TODO: ERROR MESSAGE
+          this.log.error('ERROR: atStationAfterPickProduct did not succuss in server');
           toast.error('ERROR: atStationAfterPickProduct did not succuss in server');
         }
       }).catch((err) => {
-        console.error('[ERROR] for atStationAfterPickProduct', err);
+        this.log.error('[ERROR] for atStationAfterPickProduct', err);
         toast.error('ERROR: atStationAfterPickProduct');
       });
     } else {
-      console.log('[PICK OPERATION] Validation error');
+      this.logInfo('[PICK OPERATION] Validation error');
       toast.warn('Barcode did not psas validation. Please try again.');
     }
   }
@@ -256,7 +269,7 @@ class PickOperationPage extends Component {
     api.pick.atHolderAfterPickProduct(data).then((res) => {
       if (res.data > 0) {
         // set here because avoid data changed after async call
-        console.log('[PICK OPERATION] AtHolderAfterPickProduct Success:', res.data);
+        this.logInfo('[PICK OPERATION] AtHolderAfterPickProduct Success:', res.data);
         this.finishedOrder = {
           orderNo: this.state.currentPickProduct.order_no,
           binNum: parseInt(this.state.currentPickProduct.binPosition, 10),
@@ -264,16 +277,16 @@ class PickOperationPage extends Component {
         this.checkIsOrderFinished();
         this.retrieveNextOrder();
       } else {
-        console.log(`[ERROR] AtHolderAfterPickProduct FAILED: ${res.data}`);
+        this.logInfo(`[ERROR] AtHolderAfterPickProduct FAILED: ${res.data}`);
         if (!retry) { // first time retry
-          console.log('[ERROR - RETRY] Retry AtHolderAfterPickProduct...');
+          this.logInfo('[ERROR - RETRY] Retry AtHolderAfterPickProduct...');
           toast.error('ERROR: AtHolderAfterPickProduct: Will retry in 2 sec');
           setTimeout(() => { // set timeout just to let database buffer
             this.atHolderAfterPickProduct(data, true);
           }, 2000);
         } else {
           // retry also failed
-          console.log(`[ERROR - RETRY] AtHolderAfterPickProduct Failed after retry: ${res.data}`);
+          this.logInfo(`[ERROR - RETRY] AtHolderAfterPickProduct Failed after retry: ${res.data}`);
           toast.error('ERROR: AtHolderAfterPickProduct. Retry failed as well');
         }
       }
@@ -282,7 +295,7 @@ class PickOperationPage extends Component {
 
   callGenStationTask() {
     api.station.genStationTask(this.props.stationId).then(() => {
-      console.log('[GEN STATION TASK] Called');
+      this.logInfo('[GEN STATION TASK] Called');
     });
   }
 
@@ -295,7 +308,7 @@ class PickOperationPage extends Component {
   checkIsOrderFinished() {
     api.pick.checkIsOrderFinished(this.state.currentPickProduct.order_no).then((res) => {
       if (res.data) { // return 1 or 0
-        console.log('[CHECK ORDER FINISHED] Order finished', res.data);
+        this.logInfo('[CHECK ORDER FINISHED] Order finished', res.data);
         // TOOD: unassign
         ETagService.turnEndLightOnById(this.finishedOrder.binNum);
         this.setState({ openOrderFinishModal: true }, () => {
@@ -310,7 +323,7 @@ class PickOperationPage extends Component {
   getPodInfo() {
     api.station.getPodLayoutInfoByTaskID(this.state.taskId).then((res) => {
       if (res.data.length) {
-        console.log(`[POD LAYOUT] Pod height: ${res.data.length}`);
+        this.logInfo(`[POD LAYOUT] Pod height: ${res.data.length}`);
 
         this.setState(prevState => ({
           podInfo: {
@@ -325,20 +338,20 @@ class PickOperationPage extends Component {
         }));
         // this.setState({ podInfo, loading: false });
       } else {
-        console.log('[POD LAYOUT] NO GOOD. Empty array returned..');
+        this.logInfo('[POD LAYOUT] NO GOOD. Empty array returned..');
         setTimeout(() => {
           this.getPodInfo();
         }, 1000);
       }
     }).catch((err) => {
-      console.log('[ERROR] getting pod info', err);
+      this.logInfo('[ERROR] getting pod info', err);
     });
   }
 
   getProductList() {
     api.pick.getPickInfoByTaskId(this.state.taskId).then((res) => {
       if (res.data.length) {
-        console.log('[GET PRODUCT LIST] Pick info retrevied', res.data[0].productID);
+        this.logInfo('[GET PRODUCT LIST] Pick info retrevied', res.data[0].productID);
         toast.info(`Product Retrieved: ${res.data[0].productID}`);
         this.setState({
           currentPickProduct: res.data[0],
@@ -364,6 +377,7 @@ class PickOperationPage extends Component {
         this.getUpcomingPod();
       }
     }).catch((err) => {
+      this.log.error(`[ERROR] getting products list ${err}`);
       console.error('[ERROR] getting products list', err);
     });
   }
@@ -386,7 +400,7 @@ class PickOperationPage extends Component {
       // check if barcode on shelf
       api.pick.getInventoryByProductBarcode(barcode, this.state.podInfo.podId, this.state.podInfo.podSide).then((res) => {
         // api.pick.getInventoryByProductBarcode('T168000', 33 , 0).then( res => {
-        console.log('[VALIDATE BARCODE]', res);
+        this.logInfo('[VALIDATE BARCODE]', res);
         if (res.data.length > 0) { // barcode is on the shelf
           resolve({ valid: true });
         } else {
@@ -410,14 +424,14 @@ class PickOperationPage extends Component {
       if (!isRecieve) {
         ETagService.checkRespond(parseInt(this.state.currentPickProduct.binPosition, 10)).then((res) => {
           if (res) {
-            console.log('[WAIT FOR ETAG RESPOND] Etag respond');
+            this.logInfo('[WAIT FOR ETAG RESPOND] Etag respond');
             this.setState({ isTagPressed: true }, () => {
               isRecieve = true;
             });
           }
         });
       } else {
-        console.log('[WAIT FOR ETAG RESPOND] Stop interval');
+        this.logInfo('[WAIT FOR ETAG RESPOND] Stop interval');
         clearInterval(this.checkETagResondInterval);
 
         ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
@@ -443,12 +457,12 @@ class PickOperationPage extends Component {
       if (!isRecieve) {
         ETagService.checkRespond(parseInt(this.state.currentPickProduct.binPosition, 10)).then((res) => {
           if (res) {
-            console.log('[WAIT FOR ETAG RESPOND][Pharmacy] Etag respond');
+            this.logInfo('[WAIT FOR ETAG RESPOND][Pharmacy] Etag respond');
             isRecieve = true;
           }
         });
       } else {
-        console.log('[WAIT FOR ETAG RESPOND][Pharmacy] Stop interval');
+        this.logInfo('[WAIT FOR ETAG RESPOND][Pharmacy] Stop interval');
         clearInterval(this.checkETagResondInterval);
         this.checkETagResondInterval = false;
 
@@ -462,7 +476,7 @@ class PickOperationPage extends Component {
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
       setTimeout(() => {
-        console.log('[SCANNED]', e.target.value);
+        this.logInfo('[SCANNED]', e.target.value);
         const scannedValue = e.target.value;
         if (this.businessMode === 'pharmacy') {
           // validate barcode
@@ -472,7 +486,7 @@ class PickOperationPage extends Component {
               const pickedAmount = this.state.pickedAmount + 1;
 
               ETagService.turnPickLightOnById(this.state.currentPickProduct.binPosition, pickedAmount);
-              console.log(this.checkETagResondInterval);
+              this.logInfo(this.checkETagResondInterval);
               if (!this.checkETagResondInterval) {
                 this.setPharmacyWaitForEtagInterval();
               }
@@ -483,15 +497,15 @@ class PickOperationPage extends Component {
                 this.setFocusToScanInput();
                 this.setState({ barcode, pickedAmount });
               }
-              console.log(`[SCANNED] New Barcode: ${barcode}`);
+              this.logInfo(`[SCANNED] New Barcode: ${barcode}`);
             } else {
-              console.log('[SCANNED] Invalid Barcode');
+              this.logInfo('[SCANNED] Invalid Barcode');
               this.setState({ warningMessage: result.message });
             }
           });
         } else if (this.businessMode === 'ecommerce') {
           if (this.scanValidation(scannedValue)) {
-            console.log(`[SCANNED] New Barcode: ${scannedValue}`);
+            this.logInfo(`[SCANNED] New Barcode: ${scannedValue}`);
             this.setState({ showBox: true, barcode: scannedValue });
             this.initPickLight();
           } else {
@@ -515,13 +529,13 @@ class PickOperationPage extends Component {
       };
       api.pick.getProductSerialNum(data).then((res) => {
         const barCodeIndex = res.data[0].barcode ? 0 : 1; // sometimes there will have empty barcode data return...
-        console.log(`[SCANNED][SIMULATE] Get barcode ${res.data[barCodeIndex].barcode}`);
+        this.logInfo(`[SCANNED][SIMULATE] Get barcode ${res.data[barCodeIndex].barcode}`);
         if (this.businessMode === 'pharmacy') {
           const barcode = this.state.pickedAmount === 0 ? res.data[barCodeIndex].barcode : `${this.state.barcode},${res.data[barCodeIndex].barcode}`;
           const pickedAmount = this.state.pickedAmount + 1;
 
           ETagService.turnPickLightOnById(this.state.currentPickProduct.binPosition, pickedAmount);
-          console.log(this.checkETagResondInterval);
+          this.logInfo(this.checkETagResondInterval);
           if (!this.checkETagResondInterval) {
             this.setPharmacyWaitForEtagInterval();
           }
@@ -543,7 +557,7 @@ class PickOperationPage extends Component {
   }
 
   handleShortageClick() {
-    console.log('[PICK OPERATION] Shortage Clicked!');
+    this.logInfo('[PICK OPERATION] Shortage Clicked!');
     this.setState({ openShortageConfirmModal: true });
   }
 
@@ -612,7 +626,7 @@ class PickOperationPage extends Component {
   }
 
   handleChangeBinCallback(holderId, binBarcode) {
-    console.log(`[CHANGE BIN] holder: ${holderId}, binBarcode: ${binBarcode}`);
+    this.logInfo(`[CHANGE BIN] holder: ${holderId}, binBarcode: ${binBarcode}`);
     this.props.changeHolderBin(binBarcode, holderId).then((res) => {
       if (res === 1) {
         toast.success('Successfully change bin');

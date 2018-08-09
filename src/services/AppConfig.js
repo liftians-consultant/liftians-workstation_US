@@ -1,4 +1,4 @@
-let appConfig = {
+const appConfig = {
   apiHost: 'http://localhost',
   apiPort: '3000',
   apiUrl: 'http://localhost:3000',
@@ -6,7 +6,7 @@ let appConfig = {
 
 
   getApiHost() {
-    return this.apiHost
+    return this.apiHost;
   },
 
   setApiHost(host) {
@@ -36,8 +36,8 @@ let appConfig = {
   setStationId(id) {
     this.stationId = id;
     localStorage.stationId = id;
-  }
-}
+  },
+};
 
 function generateApiUrl() {
   let url = '';
