@@ -32,7 +32,8 @@ log4js.addAppender(AjaxAppenderProvider({
 
 log4js.configure({
   layout: '%d{yyyy-MM-dd HH:mm:ss} [%level] %logger - %message',
-  appenders: ['ajaxAppender'],
+  // appenders: ['ajaxAppender'],
+  appenders: ['consoleAppender'],
   loggers: [{
     logLevel: log4js.LogLevel.INFO,
   }],
