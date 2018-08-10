@@ -164,14 +164,6 @@ class PickOperationPage extends Component {
         this.checkIsPickFinished();
       }
     });
-
-    this.setState(prevState => ({ pickedAmount: prevState.pickedAmount + num, isKeyPadPressed: true }), () => {
-      if (this.state.isTagPressed === false) {
-        toast.warn('Please press the highlighted ETag to confirm picking');
-      } else {
-        this.checkIsPickFinished();
-      }
-    });
   }
 
   checkIsPickFinished() {
@@ -301,7 +293,9 @@ class PickOperationPage extends Component {
 
   retrieveNextOrder() {
     this.setState({ loading: true });
-    this.getProductList();
+    setTimeout(() => {
+      this.getProductList();
+    }, 500);
     // this.getPodInfo();
   }
 
@@ -351,7 +345,7 @@ class PickOperationPage extends Component {
   getProductList() {
     api.pick.getPickInfoByTaskId(this.state.taskId).then((res) => {
       if (res.data.length) {
-        this.logInfo('[GET PRODUCT LIST] Pick info retrevied', res.data[0].productID);
+        this.logInfo(`[GET PRODUCT LIST] Pick info retrevied: ${res.data[0].productID}`);
         toast.info(`Product Retrieved: ${res.data[0].productID}`);
         this.setState({
           currentPickProduct: res.data[0],
@@ -750,7 +744,7 @@ class PickOperationPage extends Component {
         }
 
         <BinSetupModal
-          open={this.props.currentSetupHolder.deviceIndex > 0}
+          open={this.props.currentSetupHolderIndex > 0}
           location={this.props.currentSetupHolder.deviceIndex}
           onInputEnter={this.handleBinSetupInputEnter}
         />
@@ -799,6 +793,7 @@ function mapStateToProps(state) {
     deviceList: state.operation.deviceList,
     binSetupWaitlist: state.operation.binSetupWaitlist,
     currentSetupHolder: state.operation.currentSetupHolder,
+    currentSetupHolderIndex: state.operation.currentSetupHolder.deviceIndex,
     openChangeBinModal: state.operation.openChangeBinModal,
   };
 }
