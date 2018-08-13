@@ -10,7 +10,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 import { AjaxAppenderProvider } from '@norauto/log4js2-ajax-appender';
 
-
+import * as log4js from 'log4js2';
 import App from 'containers/App';
 import rootReducer from 'redux/reducers/rootReducer';
 import { userLoggedIn, userLoggedOut } from 'redux/actions/authAction';
@@ -18,9 +18,6 @@ import setAuthorizationHeader from 'utils/setAuthorizationHeader';
 import appConfig from 'services/AppConfig';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
-
-const log4js = require('log4js2');
-
 
 log4js.addAppender(AjaxAppenderProvider({
   method: 'POST',
