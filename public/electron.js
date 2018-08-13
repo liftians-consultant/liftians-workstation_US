@@ -1,32 +1,34 @@
-const electron = require('electron')
-const {webFrame} = require('electron')
+const electron = require('electron');
+const {webFrame} = require('electron');
 
 // Module to control application life.
-const app = electron.app
+const app = electron.app;
 // Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow
+const BrowserWindow = electron.BrowserWindow;
 
-const path = require('path')
-const url = require('url')
+const path = require('path');
+const url = require('url');
 const isDev = require('electron-is-dev');
 
 const { default: installExtension, REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } = require('electron-devtools-installer');
 
-installExtension(REACT_DEVELOPER_TOOLS)
-  .then(name => console.log(`Added Extension: ${name}`))
-  .catch(err => console.log('An error occurred: ', err));
-
-installExtension(REDUX_DEVTOOLS)
-  .then(name => console.log(`Added Extension: ${name}`))
-  .catch(err => console.log('An error occurred: ', err));
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
+let mainWindow;
 
-function createWindow () {
+if (isDev) {
+  installExtension(REACT_DEVELOPER_TOOLS)
+    .then(name => console.log(`Added Extension: ${name}`))
+    .catch(err => console.log('An error occurred: ', err));
+
+  installExtension(REDUX_DEVTOOLS)
+    .then(name => console.log(`Added Extension: ${name}`))
+    .catch(err => console.log('An error occurred: ', err));
+}
+
+function createWindow() {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 1200, height: 900 })
+  mainWindow = new BrowserWindow({ width: 1200, height: 900 });
 
   // and load the index.html of the app.
   // mainWindow.loadURL(url.format({
@@ -43,6 +45,7 @@ function createWindow () {
   // });
   // mainWindow.webContents.session.setProxy({proxyRules: "http://localhost:8060"}, function() {
     // mainWindow.loadURL(startUrl);
+    
   // });
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
   // Open the DevTools.

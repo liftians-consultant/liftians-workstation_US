@@ -26,13 +26,13 @@ class SideNavigation extends Component {
 
   onUnload(event) { // the method that will be used for both add and remove event
     console.log('[WINDOW CLOSE EVENT] Triggered');
-    
+
     if (this.props.taskType !== 'U' && this.props.taskCount > 0) {
       toast.error('Please finish all the tasks first! \nPlease go to menu to refresh if you think you finished all tasks');
       event.returnValue = false;
       return false;
     } else {
-        this.props.logout();
+      this.props.logout();
     }
     return false;
   }

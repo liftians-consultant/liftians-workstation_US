@@ -19,13 +19,13 @@ class BinSetupModal extends Component {
       setTimeout(function(){
         this.setupInputRef.current.inputRef.value = '';
         this.setupInputRef.current.focus();
-      }.bind(this), 0)
+      }.bind(this), 0);
     }
 
     if (prevProps.location !== this.props.location && this.props.location) {
       setTimeout(function() {
         ETagService.turnEndLightOnById(this.props.location); 
-      }.bind(this), 300);
+      }.bind(this), 100);
     }
   }
 
@@ -36,25 +36,28 @@ class BinSetupModal extends Component {
         this.props.onInputEnter(e.target.value, this.props.location);
         this.setupInputRef.current.inputRef.value = '';
         this.setupInputRef.current.focus();
-      }.bind(this), 300)
+      }.bind(this), 100);
     }
   }
 
   render() {
     const { open, location } = this.props;
     return (
-      <Modal className="bin-setup-modal-container"
+      <Modal
+        className="bin-setup-modal-container"
         size="fullscreen"
         open={open}
         onOpen={ this.handleOnOpen }
         style={{ marginTop: '10%', marginLeft: 'auto', marginRight: 'auto' }}
-        >
+      >
         <Modal.Header>Bin Setup</Modal.Header>
         <Modal.Content>
           <div className="info-text">Please place an empty bin on correspond location and scan the barcode on it.</div>
-          <BinGroup openedBinNum={location} highlighColor='orange' size="150" />
-          <Input onKeyPress={this.handleInputChange}
-                 ref={this.setupInputRef} />
+          <BinGroup openedBinNum={location} highlighColor="orange" size="150" />
+          <Input
+            onKeyPress={this.handleInputChange}
+            ref={this.setupInputRef}
+          />
         </Modal.Content>
       </Modal>
     );

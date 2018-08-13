@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import decode from 'jwt-decode';
 import { composeWithDevTools } from 'redux-devtools-extension';
-
+import * as log4js from 'log4js2';
 import { AjaxAppenderProvider } from '@norauto/log4js2-ajax-appender';
 
 
@@ -18,9 +18,6 @@ import setAuthorizationHeader from 'utils/setAuthorizationHeader';
 import appConfig from 'services/AppConfig';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
-
-const log4js = require('log4js2');
-
 
 log4js.addAppender(AjaxAppenderProvider({
   method: 'POST',
