@@ -1,17 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 import { Grid, Dimmer, Loader } from 'semantic-ui-react';
 
 import ETagService from 'services/ETagService';
 import MenuButton from 'components/common/MenuButton/MenuButton';
-import * as actions from "redux/actions/authAction";
+import * as actions from 'redux/actions/authAction';
 import { getUserInfoById } from 'redux/actions/userAction';
-import { activateStation, checkCurrentUnFinishTask } from "redux/actions/stationAction";
+import { activateStation, checkCurrentUnFinishTask } from 'redux/actions/stationAction';
 
 class HomePage extends Component {
   state = {
-    isLoading: true
+    isLoading: true,
   }
 
   constructor(props) {
@@ -28,16 +28,16 @@ class HomePage extends Component {
     ETagService.turnEndLightOffById(0);
   }
 
-  goToPage = name => {
+  goToPage = (name) => {
     console.log(name);
     this.props.history.push(name);
   }
 
   checkCurrentUnFinishTaskCall() {
-    this.props.checkCurrentUnFinishTask(this.props.stationId).then(res => {
-      console.log("currentUnfinishedTask", res);
+    this.props.checkCurrentUnFinishTask(this.props.stationId).then((res) => {
+      console.log('currentUnfinishedTask', res);
       this.setState({ isLoading: false });
-    })
+    });
   }
 
   render() {
@@ -71,7 +71,7 @@ class HomePage extends Component {
               <MenuButton title="Inventory Search" name="inventory-search" clickHandler={this.goToPage} />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Generate Inventory" name="" clickHandler={this.goToPage} />
+              <MenuButton title="Generate Data" name="generate-data" clickHandler={this.goToPage} />
             </Grid.Column>
           </Grid.Row>
         </Grid>
@@ -84,8 +84,6 @@ HomePage.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }).isRequired,
-  isAuthenticated: PropTypes.bool.isRequired,
-  logout: PropTypes.func.isRequired,
   stationInfo: PropTypes.object,
   stationId: PropTypes.string.isRequired,
 };

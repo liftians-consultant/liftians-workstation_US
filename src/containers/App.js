@@ -18,6 +18,11 @@ import InventorySearchPage from 'containers/InventorySearchPage/InventorySearchP
 import TaskListPage from 'containers/TaskListPage/TaskListPage';
 import BusinessRulesPage from 'containers/BusinessRulesPage/BusinessRulesPage';
 import ExpireRuleConfigPage from 'containers/ExpireRuleConfigPage/ExpireRuleConfigPage';
+import GenerateDataPage from 'containers/GenerateDataPage/GenerateDataPage';
+import GenerateAccountPage from 'containers/GenerateAccountPage/GenerateAccountPage';
+import GenerateProductPage from 'containers/GenerateProductPage/GenerateProductPage';
+import GenerateDeliveryPage from 'containers/GenerateDeliveryPage/GenerateDeliveryPage';
+import GenerateReplenishmentPage from 'containers/GenerateReplenishmentPage/GenerateReplenishmentPage';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
@@ -45,6 +50,11 @@ const App = ({ location, isAuthenticated }) => (
       <UserRoute path="/task-list" exact component={TaskListPage} />
       <UserRoute path="/business-rules" exact component={BusinessRulesPage} />
       <UserRoute path="/expire-rule-config" exact component={ExpireRuleConfigPage} />
+      <UserRoute path="/generate-data" exact component={GenerateDataPage} />
+      <UserRoute path="/generate-account" exact component={GenerateAccountPage} />
+      <UserRoute path="/generate-product" exact component={GenerateProductPage} />
+      <UserRoute path="/generate-delivery" exact component={GenerateDeliveryPage} />
+      <UserRoute path="/generate-replenishment" exact component={GenerateReplenishmentPage} />
       <GuestRoute path="/login" component={LoginPage} />
       <UserRoute path="/" exact component={HomePage} />
     </Switch>
