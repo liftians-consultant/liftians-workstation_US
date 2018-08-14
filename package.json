@@ -2,8 +2,20 @@
   "name": "liftians-workstation",
   "version": "0.2.3",
   "author": "Kevin Hong",
+  "proxy": {
+    "/v1": { "target": "http://localhost:8070" },
+    "/login": { "target": "http://localhost:8060" },
+    "/logout": { "target": "http://localhost:8060" },
+    "/Common": { "target": "http://localhost:8060" },
+    "/Setup": { "target": "http://localhost:8060" },
+    "/Pick": { "target": "http://localhost:8060" },
+    "/Replenish": { "target": "http://localhost:8060" },
+    "/Inventory": { "target": "http://localhost:8060" },
+    "/eTag": { "target": "http://localhost:8060" },
+    "/Info": { "target": "http://localhost:8060" },
+    "/atStation": { "target": "http://localhost:8060" }
+  },
   "private": true,
-  "proxy": "http://l1.liftians.com:8060",
   "dependencies": {
     "@norauto/log4js2-ajax-appender": "^1.1.9",
     "axios": "^0.18.0",

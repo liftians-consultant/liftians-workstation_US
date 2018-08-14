@@ -1,9 +1,10 @@
 const appConfig = {
   apiHost: 'http://localhost',
-  apiPort: '3000',
-  apiUrl: 'http://localhost:3000',
+  apiPort: '8060',
+  apiUrl: 'http://localhost:8060',
+  erpUrl: 'http://localhost:8070',
+  erpPort: '3000',
   stationId: '1',
-
 
   getApiHost() {
     return this.apiHost;
@@ -21,12 +22,19 @@ const appConfig = {
     return this.apiUrl;
   },
 
+  getErpUrl() {
+    return this.erpUrl;
+  },
+
   setApiUrl(host, port) {
     this.apiHost = host;
     this.apiPort = port;
-    this.apiUrl = generateApiUrl(host, port);
+    this.apiUrl = this.generateApiUrl(host, port);
+    this.erpUrl = this.generateApiUrl(host, this.erpPort);
     localStorage.apiHost = host;
     localStorage.apiPort = port;
+    console.log(`[SET URL] API Url: ${this.apiUrl}`);
+    console.log(`[SET URL] ERP Url: ${this.erpUrl}`);
   },
 
   getStationId() {
@@ -37,15 +45,14 @@ const appConfig = {
     this.stationId = id;
     localStorage.stationId = id;
   },
-};
 
-function generateApiUrl() {
-  let url = '';
-  url += appConfig.apiHost;
-  if (appConfig.apiPort) {
-    url = url + ':' + appConfig.apiPort;
-  }
-  return url;
-}
+  generateApiUrl(host, port) {
+    let url = '';
+    if (port) {
+      url = `${host}:${port}`;
+    }
+    return url;
+  },
+};
 
 export default appConfig;

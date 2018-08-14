@@ -1,14 +1,14 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Form, Button, Message } from "semantic-ui-react";
-// import Validator from "validator";
-import InlineError from "../messages/InlineError";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Form, Button, Message } from 'semantic-ui-react';
+// import Validator from 'validator';
+import InlineError from '../messages/InlineError';
 
 class LoginForm extends React.Component {
   state = {
     data: {
-      username: "",
-      password: ""
+      username: '',
+      password: ''
     },
     loading: false,
     errors: {}

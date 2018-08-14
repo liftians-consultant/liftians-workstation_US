@@ -6,7 +6,10 @@ import appConfig from 'services/AppConfig';
  */
 
 const user = {
-  login: credentials => axios.post(`${appConfig.getApiUrl()}/login`, { ...credentials }, { timeout: 6000 }).then(res => res.headers.authorization),
+  login: credentials => axios.post(`${appConfig.getApiUrl()}/login`, { ...credentials }, { timeout: 6000, headers: { 'content-type': 'application/json' } })
+    .then((res) => {
+      return res.headers.authorization;
+    }),
 
   logout: () => axios.post(`${appConfig.getApiUrl()}/logout`).then(res => res),
 
