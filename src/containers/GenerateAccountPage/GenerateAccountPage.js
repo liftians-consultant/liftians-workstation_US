@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import erpApi from 'erpApi';
 import PropTypes from 'prop-types';
+import erpApi from 'erpApi';
 import { toast } from 'react-toastify';
 
 import SubPageContainer from 'components/common/SubPageContainer/SubPageContainer';

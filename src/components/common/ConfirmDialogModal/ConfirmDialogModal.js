@@ -24,6 +24,12 @@ class ConfirmDialogModal extends Component {
   }
 }
 
+ConfirmDialogModal.defaultProps = {
+  size: 'mini',
+  header: 'Confirm',
+  content: 'Are you sure?',
+}
+
 ConfirmDialogModal.propTypes = {
   size: PropTypes.string,
   open: PropTypes.bool.isRequired,

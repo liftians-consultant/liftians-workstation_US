@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Form, Input, Button, Checkbox } from 'semantic-ui-react';
-import moment from 'moment';
 
 class CreateAccountForm extends Component {
   state = {
