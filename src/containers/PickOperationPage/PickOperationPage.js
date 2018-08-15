@@ -126,7 +126,7 @@ class PickOperationPage extends Component {
   }
 
   logInfo(msg) {
-    console.log(msg);
+    // console.log(msg);
     this.log.info(msg);
   }
 

@@ -13,6 +13,7 @@
     "/Inventory": { "target": "http://localhost:8060" },
     "/eTag": { "target": "http://localhost:8060" },
     "/Info": { "target": "http://localhost:8060" },
+    "/logs": { "target": "http://localhost:8060" },
     "/atStation": { "target": "http://localhost:8060" }
   },
   "private": true,
