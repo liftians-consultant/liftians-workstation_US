@@ -19,23 +19,6 @@ import appConfig from 'services/AppConfig';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 
-log4js.addAppender(AjaxAppenderProvider({
-  method: 'POST',
-  url: `${appConfig.getApiUrl()}/logs`,
-  headers: {
-    'Content-Type': 'text/plain',
-  },
-}));
-
-log4js.configure({
-  layout: '%d{yyyy-MM-dd HH:mm:ss} [%level] %logger - %message',
-  appenders: ['ajaxAppender'],
-  loggers: [{
-    logLevel: log4js.LogLevel.ERROR,
-  }],
-  allowAppenderInjection: true,
-});
-
 const store = createStore(
   rootReducer,
   composeWithDevTools(applyMiddleware(thunk)),

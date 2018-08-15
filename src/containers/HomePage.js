@@ -3,12 +3,14 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Grid, Dimmer, Loader } from 'semantic-ui-react';
 
+import * as log4js from 'log4js2';
+import { AjaxAppenderProvider } from '@norauto/log4js2-ajax-appender';
+import appConfig from 'services/AppConfig';
 import ETagService from 'services/ETagService';
 import MenuButton from 'components/common/MenuButton/MenuButton';
 import * as actions from 'redux/actions/authAction';
 import { getUserInfoById } from 'redux/actions/userAction';
 import { activateStation, checkCurrentUnFinishTask } from 'redux/actions/stationAction';
-
 class HomePage extends Component {
   state = {
     isLoading: true,
@@ -26,6 +28,23 @@ class HomePage extends Component {
     });
 
     ETagService.turnEndLightOffById(0);
+
+    log4js.addAppender(AjaxAppenderProvider({
+      method: 'POST',
+      url: `${appConfig.getApiUrl()}/logs`,
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    }));
+
+    log4js.configure({
+      layout: '%d{yyyy-MM-dd HH:mm:ss} [%level] %logger - %message',
+      appenders: ['ajaxAppender'],
+      loggers: [{
+        logLevel: log4js.LogLevel.ERROR,
+      }],
+      allowAppenderInjection: true,
+    });
   }
 
   goToPage = (name) => {
