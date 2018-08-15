@@ -35,6 +35,9 @@
     },
     "/atStation": {
       "target": "http://localhost:8060"
+    },
+    "/logs": {
+      "target": "http://localhost:8060"
     }
   },
   "private": true,

@@ -24,25 +24,29 @@ const store = createStore(
 );
 
 if (localStorage.liftiansJWT) {
-  localStorage.removeItem('liftiansJWT');
-  setAuthorizationHeader();
-
-  // check if expired
-  // const payload = decode(localStorage.liftiansJWT); // {sub: "10001", exp: 1519504053}
-  // const nowDate = new Date();
-  // const tokenDate = new Date(payload.exp);
-  // if (nowDate.getTime() < tokenDate.getTime()) {
-  //   localStorage.removeItem('liftiansJWT');
-  //   setAuthorizationHeader();
-  //   store.dispatch(userLoggedOut());
-  // } else {
-  //   const user = {
-  //     token: localStorage.liftiansJWT,
-  //     username: payload.sub,
-  //   };
-  //   setAuthorizationHeader(localStorage.liftiansJWT);
-  //   store.dispatch(userLoggedIn(user));
-  // }
+  if (process.env.REACT_APP_ENV === 'PRODUCTION') {
+    // production
+    localStorage.removeItem('liftiansJWT');
+    setAuthorizationHeader();
+  } else {
+    // check if expired
+    const payload = decode(localStorage.liftiansJWT); // {sub: "10001", exp: 1519504053}
+    const nowDate = new Date();
+    const tokenDate = new Date(payload.exp);
+    if (nowDate.getTime() < tokenDate.getTime()) {
+      localStorage.removeItem('liftiansJWT');
+      setAuthorizationHeader();
+      store.dispatch(userLoggedOut());
+      
+    } else {
+      const user = {
+        token: localStorage.liftiansJWT,
+        username: payload.sub,
+      };
+      setAuthorizationHeader(localStorage.liftiansJWT);
+      store.dispatch(userLoggedIn(user));
+    }
+  }
 }
 
 if (localStorage.apiHost && localStorage.apiPort) {

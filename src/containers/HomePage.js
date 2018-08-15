@@ -13,6 +13,7 @@ import * as actions from 'redux/actions/authAction';
 import { getUserInfoById } from 'redux/actions/userAction';
 import { activateStation, checkCurrentUnFinishTask } from 'redux/actions/stationAction';
 
+let logSetFlag = false;
 class HomePage extends Component {
   state = {
     isLoading: true,
@@ -31,22 +32,27 @@ class HomePage extends Component {
 
     ETagService.turnEndLightOffById(0);
 
-    log4js.addAppender(AjaxAppenderProvider({
-      method: 'POST',
-      url: `${appConfig.getApiUrl()}/logs`,
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-    }));
+    if (!logSetFlag) {
+      log4js.addAppender(AjaxAppenderProvider({
+        method: 'POST',
+        url: `${appConfig.getApiUrl()}/logs`,
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      }));
 
-    log4js.configure({
-      layout: '%d{yyyy-MM-dd HH:mm:ss} [%level] %logger - %message',
-      appenders: ['ajaxAppender'],
-      loggers: [{
-        logLevel: log4js.LogLevel.INFO,
-      }],
-      allowAppenderInjection: true,
-    });
+      log4js.configure({
+        layout: '%d{yyyy-MM-dd HH:mm:ss} [%level] %logger - %message',
+        appenders: ['ajaxAppender'],
+        loggers: [{
+          logLevel: log4js.LogLevel.INFO,
+        }],
+        allowAppenderInjection: true,
+      });
+
+      logSetFlag = true;
+      console.log('[log4js] configuration set');
+    }
   }
 
   goToPage = (name) => {

@@ -38,11 +38,15 @@ class SideNavigation extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener('beforeunload', this.onUnload);
+    if (process.env.REACT_APP_ENV === 'PRODUCTION') {
+      window.addEventListener('beforeunload', this.onUnload);
+    }
   }
 
   componentWillUnmount() {
-    window.removeEventListener('beforeunload', this.onUnload);
+    if (process.env.REACT_APP_ENV === 'PRODUCTION') {
+      window.removeEventListener('beforeunload', this.onUnload);
+    }
   }
 
   handleLogoutBtnClicked() {
@@ -95,6 +99,7 @@ class SideNavigation extends Component {
 
   render() {
     const { taskType, location } = this.props;
+    const currentPath = location.pathname;
     const operationUrl = taskType === 'R' ? '/replenish-operation' : '/operation';
     const taskListUrl = taskType === 'R' ? '/replenish-task' : '/pick-task';
 
@@ -106,21 +111,21 @@ class SideNavigation extends Component {
             <span>Station #{this.stationId}</span>
           </div>
           <div className="nav-item-container">
-            <Link to="/">
+            <Link to="/" replace={currentPath === '/'}>
               <Button className="nav-btn">
                 Menu
               </Button>
             </Link>
           </div>
           <div className="nav-item-container">
-            <Link to={operationUrl}>
+            <Link to={operationUrl} replace={currentPath === operationUrl}>
               <Button className="nav-btn">
                 Operation
               </Button>
             </Link>
           </div>
           <div className="nav-item-container">
-            <Link to={taskListUrl}>
+            <Link to={taskListUrl} replace={currentPath === taskListUrl}>
               <Button className="nav-btn">
                 {taskType === 'R' ? 'Replenishment List' : 'Picking List'}
               </Button>

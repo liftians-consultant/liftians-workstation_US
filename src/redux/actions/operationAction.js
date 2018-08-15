@@ -7,6 +7,9 @@ import {
 } from 'redux/types';
 import api from 'api';
 import ETagService from 'services/ETagService';
+import * as log4js from 'log4js2';
+
+const opActionLog = log4js.getLogger('OperationAction');
 
 function addBinInfoToHolder(holderId, binInfo) {
   return {
@@ -46,15 +49,15 @@ function hideChangeBinModalAction() {
 }
 
 export const getStationDeviceList = stationId => (dispatch, getState) => {
-  return api.station.getStationDeviceList(stationId).then(res => {
-    const deviceList = res.data.map(device => { return { 
+  return api.station.getStationDeviceList(stationId).then((res) => {
+    const deviceList = res.data.map(device => ({
       deviceId: device.deviceID,
       deviceIndex: device.holderSequence,
-      bin: {} 
-    }});
+      bin: {},
+    }));
     dispatch({ type: DEVICE_LIST_FETCHED, deviceList });
     return deviceList;
-  })
+  });
 };
 
 export const addHoldersToSetupWaitlist = holderSetupWaitlist => (dispatch, getState) => {
@@ -68,23 +71,24 @@ export const addHoldersToSetupWaitlist = holderSetupWaitlist => (dispatch, getSt
 };
 
 export const addBinToHolder = (binBarcode, holderId) => (dispatch, getState) => {
-  return api.pick.linkBinToHolder(binBarcode, holderId).then(res => {
+  return api.pick.linkBinToHolder(binBarcode, holderId).then((res) => {
     if (res.data) {
+      opActionLog.info(`Linked ${binBarcode} to ${holderId} success`);
       ETagService.turnEndLightOffById(getState().operation.currentSetupHolder.deviceIndex);
       return api.pick.getBinInfoAfterHolderTag(binBarcode, holderId);
     } else {
       return false;
     }
-  }).then(res => {
+  }).then((res) => {
     if (!res) return false;
     if (res.data) {
+      opActionLog.info(`Retrieve ${binBarcode}'s info. Added to holder.`);
       dispatch(addBinInfoToHolder(holderId, res.data));
       return true;
     } else {
       return false;
     }
-  
-  }).then(res => {
+  }).then((res) => {
     const holderSetupWaitlist = getState().operation.holderSetupWaitlist;
 
     if (!res) return false;
@@ -94,36 +98,37 @@ export const addBinToHolder = (binBarcode, holderId) => (dispatch, getState) => 
       const currentSetupHolder = getState().operation.deviceList.find(device => device.deviceId === holderId);
       dispatch(setHolderSetupWaitlist(holderSetupWaitlist, currentSetupHolder));
     } else {
-      dispatch(setHolderSetupWaitlist([], {deviceIndex: 0}));
+      dispatch(setHolderSetupWaitlist([], { deviceIndex: 0 }));
     }
 
     return Promise.resolve(true);
   });
-}
+};
 
 export const unassignBinFromHolder = (holderId) => (dispatch, getState) => {
-  return api.pick.unassignBinFromHolder(holderId).then(res => {
+  return api.pick.unassignBinFromHolder(holderId).then((res) => {
+    opActionLog.info(`Unassigned bin from ${holderId}`);
     dispatch(removeBinFromHolder(holderId));
     return Promise.resolve(true);
-  })
-}
+  });
+};
 
 export const showChangeBinModal = () => (dispatch, getState) => {
   dispatch(showChangeBinModalAction());
-}
+};
 
 export const hideChangeBinModal = () => (dispatch, getState) => {
   dispatch(hideChangeBinModalAction());
-}
+};
 
 export const changeHolderBin = (binBarcode, holderId) => (dispatch, getState) => {
-  return api.pick.changeHolderBin(binBarcode, holderId).then(res => {
+  return api.pick.changeHolderBin(binBarcode, holderId).then((res) => {
     if (res.data === 1) {
       return api.pick.getBinInfoAfterHolderTag(binBarcode, holderId)
     } else {
       return res.data;
     }
-  }).then(res => {
+  }).then((res) => {
     if (res && res.data) {
       dispatch(addBinInfoToHolder(holderId, res.data));
       return 1;
@@ -131,5 +136,4 @@ export const changeHolderBin = (binBarcode, holderId) => (dispatch, getState) =>
       return res;
     }
   });
-}
-  
+};

@@ -137,10 +137,11 @@ class PickOperationPage extends Component {
     }
   }
 
+  // Deprecated
   linkBinToOrder(deviceId, binId) {
     api.station.linkBinToOrder(binId, deviceId, this.props.username).then((res) => {
       if (res.data) {
-        this.log.info('[LINK BIN TO ORDER] Success');
+        // this.log.info(`[LINK BIN TO ORDER] `);
         toast.success(`Bin ${binId} has successfully linked`);
       } else {
         toast.warn('Please try again');
@@ -181,6 +182,7 @@ class PickOperationPage extends Component {
   getUpcomingPod() {
     // check if all task is finished
     api.station.checkNumberOfStationTasks(this.props.stationId).then((res) => {
+      this.logInfo(`[GET UPCOMING POD] checkNumberOfStationTasks: ${res.data}`);
       if (res.data) {
         // continue to call until next task arrive
         let isRecieve = false;
@@ -388,6 +390,7 @@ class PickOperationPage extends Component {
     return new Promise((resolve) => {
       // check for duplicate
       if (this.state.barcode.indexOf(barcode) !== -1) {
+        this.logInfo('[VALIDATE BARCODE] Duplicate barcode!');
         resolve({ valid: false, message: 'Duplicate barcode!' });
       }
 
@@ -396,11 +399,14 @@ class PickOperationPage extends Component {
         // api.pick.getInventoryByProductBarcode('T168000', 33 , 0).then( res => {
         this.logInfo(`[VALIDATE BARCODE] ${res}`);
         if (res.data.length > 0) { // barcode is on the shelf
+          this.logInfo('[VALIDATE BARCODE] Correct');
           resolve({ valid: true });
         } else {
+          this.logInfo('[VALIDATE BARCODE] Wrong Product (this barcode is not on the shelf)');
           resolve({ valid: false, message: 'Wrong Product (this barcode is not on the shelf)' });
         }
       }).catch(() => {
+        this.logInfo('Something went wrong while validating the barcode.');
         resolve({ valid: false, message: 'Something went wrong while validating the barcode.' });
       });
     });
@@ -470,7 +476,7 @@ class PickOperationPage extends Component {
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
       setTimeout(() => {
-        this.logInfo('[SCANNED]', e.target.value);
+        this.logInfo(`[SCANNED] ${e.target.value}`);
         const scannedValue = e.target.value;
         if (this.businessMode === 'pharmacy') {
           // validate barcode
@@ -700,13 +706,14 @@ class PickOperationPage extends Component {
                         />
                       </div>
                     </div>
-                    <div className="action-btn-group" />
+                    <div className="action-btn-group">
+                      { process.env.REACT_APP_ENV === 'DEV' && (
+                        <Button primary size="medium" onClick={() => this.handleScanBtnClick()}>
+                          Scan
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  { process.env.REACT_APP_ENV === 'DEV' && (
-                    <Button primary size="medium" onClick={() => this.handleScanBtnClick()}>
-                      Scan
-                    </Button>
-                  )}
                 </div>
               ) : (
                 <div>
@@ -723,7 +730,7 @@ class PickOperationPage extends Component {
                     />)
                   )}
                 </div>
-              ) }
+              )}
             </Grid.Column>
           </Grid.Row>
         </Grid>
