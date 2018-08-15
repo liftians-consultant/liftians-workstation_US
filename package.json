@@ -1,19 +1,41 @@
 {
   "name": "liftians-workstation",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "author": "Kevin Hong",
   "proxy": {
-    "/v1": { "target": "http://localhost:8070" },
-    "/login": { "target": "http://localhost:8060" },
-    "/logout": { "target": "http://localhost:8060" },
-    "/Common": { "target": "http://localhost:8060" },
-    "/Setup": { "target": "http://localhost:8060" },
-    "/Pick": { "target": "http://localhost:8060" },
-    "/Replenish": { "target": "http://localhost:8060" },
-    "/Inventory": { "target": "http://localhost:8060" },
-    "/eTag": { "target": "http://localhost:8060" },
-    "/Info": { "target": "http://localhost:8060" },
-    "/atStation": { "target": "http://localhost:8060" }
+    "/v1": {
+      "target": "http://localhost:8070"
+    },
+    "/login": {
+      "target": "http://localhost:8060"
+    },
+    "/logout": {
+      "target": "http://localhost:8060"
+    },
+    "/Common": {
+      "target": "http://localhost:8060"
+    },
+    "/Setup": {
+      "target": "http://localhost:8060"
+    },
+    "/Pick": {
+      "target": "http://localhost:8060"
+    },
+    "/Replenish": {
+      "target": "http://localhost:8060"
+    },
+    "/Inventory": {
+      "target": "http://localhost:8060"
+    },
+    "/eTag": {
+      "target": "http://localhost:8060"
+    },
+    "/Info": {
+      "target": "http://localhost:8060"
+    },
+    "/atStation": {
+      "target": "http://localhost:8060"
+    }
   },
   "private": true,
   "dependencies": {
@@ -22,7 +44,9 @@
     "babel-eslint": "^8.2.6",
     "classnames": "^2.2.5",
     "concurrently": "^3.5.1",
+    "electron-devtools-installer": "^2.2.4",
     "electron-is-dev": "^0.3.0",
+    "electron-prompt": "^1.1.0-1",
     "electron-renderer-react-scripts-target": "^1.1.1",
     "eslint": "^4.18.1",
     "history": "^4.7.2",
@@ -46,8 +70,7 @@
     "redux-thunk": "^2.2.0",
     "semantic-ui-css": "^2.3.1",
     "semantic-ui-react": "^0.78.2",
-    "sockjs-client": "^1.1.5",
-    "electron-devtools-installer": "^2.2.4"
+    "sockjs-client": "^1.1.5"
   },
   "scripts": {
     "start": "nf start -p 3000",
