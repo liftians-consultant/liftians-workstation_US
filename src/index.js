@@ -31,7 +31,7 @@ log4js.configure({
   layout: '%d{yyyy-MM-dd HH:mm:ss} [%level] %logger - %message',
   appenders: ['ajaxAppender'],
   loggers: [{
-    logLevel: log4js.LogLevel.INFO,
+    logLevel: log4js.LogLevel.ERROR,
   }],
   allowAppenderInjection: true,
 });

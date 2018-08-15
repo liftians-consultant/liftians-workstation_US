@@ -1,6 +1,6 @@
 {
   "name": "liftians-workstation",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "author": "Kevin Hong",
   "proxy": {
     "/v1": { "target": "http://localhost:8070" },

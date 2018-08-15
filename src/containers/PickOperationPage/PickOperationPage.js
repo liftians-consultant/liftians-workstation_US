@@ -108,7 +108,7 @@ class PickOperationPage extends Component {
 
     // Register bin when first init
     api.pick.getUnassignedHolderByStation(this.props.stationId).then((res) => {
-      this.log.info('[UNASSINGED HOLDER]', res.data);
+      this.log.info(`[UNASSINGED HOLDER] ${res.data}`);
       if (res.data.length > 0) {
         this.props.addHoldersToSetupWaitlist(res.data);
       }
@@ -228,7 +228,7 @@ class PickOperationPage extends Component {
       shortQty: isShortage ? parseInt(product.quantity, 10) - this.state.pickedAmount : 0,
     };
 
-    this.logInfo('[PICK OPERATION] AtStationAfterPickProduct data:', data);
+    this.logInfo(`[PICK OPERATION] AtStationAfterPickProduct data: ${data}`);
 
     if (this.validateAfterPickData(data)) {
       api.pick.atStationAfterPickProduct(data).then((res) => {
@@ -261,7 +261,7 @@ class PickOperationPage extends Component {
     api.pick.atHolderAfterPickProduct(data).then((res) => {
       if (res.data > 0) {
         // set here because avoid data changed after async call
-        this.logInfo('[PICK OPERATION] AtHolderAfterPickProduct Success:', res.data);
+        this.logInfo(`[PICK OPERATION] AtHolderAfterPickProduct Success: ${res.data}`);
         this.finishedOrder = {
           orderNo: this.state.currentPickProduct.order_no,
           binNum: parseInt(this.state.currentPickProduct.binPosition, 10),
@@ -302,7 +302,7 @@ class PickOperationPage extends Component {
   checkIsOrderFinished() {
     api.pick.checkIsOrderFinished(this.state.currentPickProduct.order_no).then((res) => {
       if (res.data) { // return 1 or 0
-        this.logInfo('[CHECK ORDER FINISHED] Order finished', res.data);
+        this.logInfo(`[CHECK ORDER FINISHED] Order finished: ${res.data}`);
         // TOOD: unassign
         ETagService.turnEndLightOnById(this.finishedOrder.binNum);
         this.setState({ openOrderFinishModal: true }, () => {
@@ -338,7 +338,7 @@ class PickOperationPage extends Component {
         }, 1000);
       }
     }).catch((err) => {
-      this.logInfo('[ERROR] getting pod info', err);
+      this.logInfo(`[ERROR] getting pod info. ${err}`);
     });
   }
 
@@ -394,7 +394,7 @@ class PickOperationPage extends Component {
       // check if barcode on shelf
       api.pick.getInventoryByProductBarcode(barcode, this.state.podInfo.podId, this.state.podInfo.podSide).then((res) => {
         // api.pick.getInventoryByProductBarcode('T168000', 33 , 0).then( res => {
-        this.logInfo('[VALIDATE BARCODE]', res);
+        this.logInfo(`[VALIDATE BARCODE] ${res}`);
         if (res.data.length > 0) { // barcode is on the shelf
           resolve({ valid: true });
         } else {
