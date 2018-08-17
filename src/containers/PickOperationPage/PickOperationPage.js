@@ -230,7 +230,7 @@ class PickOperationPage extends Component {
       shortQty: isShortage ? parseInt(product.quantity, 10) - this.state.pickedAmount : 0,
     };
 
-    this.logInfo(`[PICK OPERATION] AtStationAfterPickProduct data: ${data}`);
+    this.logInfo(`[PICK OPERATION] AtStationAfterPickProduct data: ${JSON.stringify(data)}`);
 
     if (this.validateAfterPickData(data)) {
       api.pick.atStationAfterPickProduct(data).then((res) => {
@@ -245,12 +245,11 @@ class PickOperationPage extends Component {
           // after placed in bin, inform db
           this.atHolderAfterPickProduct(data);
         } else {
-          // TODO: ERROR MESSAGE
           this.log.error('ERROR: atStationAfterPickProduct did not succuss in server');
           toast.error('ERROR: atStationAfterPickProduct did not succuss in server');
         }
       }).catch((err) => {
-        this.log.error('[ERROR] for atStationAfterPickProduct', err);
+        this.log.error(`atStationAfterPickProduct: ${JSON.stringify(err)}`);
         toast.error('ERROR: atStationAfterPickProduct');
       });
     } else {
@@ -397,7 +396,7 @@ class PickOperationPage extends Component {
       // check if barcode on shelf
       api.pick.getInventoryByProductBarcode(barcode, this.state.podInfo.podId, this.state.podInfo.podSide).then((res) => {
         // api.pick.getInventoryByProductBarcode('T168000', 33 , 0).then( res => {
-        this.logInfo(`[VALIDATE BARCODE] ${res}`);
+        this.logInfo(`[VALIDATE BARCODE] ${JSON.stringify(res.data)}`);
         if (res.data.length > 0) { // barcode is on the shelf
           this.logInfo('[VALIDATE BARCODE] Correct');
           resolve({ valid: true });

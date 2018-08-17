@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 
 import api from 'api';
 import { setStationTaskType } from 'redux/actions/stationAction';
-import { ReplenishOrderTableColumns } from 'models/ReplenishOrderTableColumns';
+import ReplenishOrderTableColumns from 'models/ReplenishOrderTableColumns';
 import OperationTaskMenu from 'components/OperationTaskMenu/OperationTaskMenu';
 import OrderDetailTable from 'components/common/OrderDetailTable/OrderDetailTable';
 
@@ -248,10 +248,10 @@ class ReplenishTaskPage extends Component {
 
                 { String(activeProcessType) !== '0' && (
                   <ReactTable
-                    columns={ ReplenishOrderTableColumns }
-                    data={ searchedList }
+                    columns={ReplenishOrderTableColumns}
+                    data={searchedList}
                     defaultPageSize={15}
-                    SubComponent={row => <OrderDetailTable taskType="R" recordId={row.original.sourceID} /> }
+                    SubComponent={row => <OrderDetailTable taskType="R" recordId={row.original.sourceID} />}
                     loading={loading}
                     manual
                     resizable={false}
@@ -267,7 +267,7 @@ class ReplenishTaskPage extends Component {
             <Grid.Column width={16}>
               <div className="search-input-group">
                 <Input
-                  onChange={ this.handleSearchChange }
+                  onChange={this.handleSearchChange}
                   size="big"
                   icon="search"
                   iconPosition="left"

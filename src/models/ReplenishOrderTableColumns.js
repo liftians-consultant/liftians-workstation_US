@@ -1,26 +1,28 @@
-export const ReplenishOrderTableColumns = [
+const ReplenishOrderTableColumns = [
   {
     Header: 'Billing ID.',
     accessor: 'replenishBillNo',
-    minWidth: 120
+    minWidth: 120,
   }, {
     Header: 'Source ID',
-    accessor: 'sourceID'
+    accessor: 'sourceID',
   }, {
     Header: 'Receiver',
-    accessor: 'receiver'
+    accessor: 'receiver',
   }, {
     Header: 'Receive Date',
     accessor: 'replenishDate',
-    minWidth: 150
+    minWidth: 150,
   }, {
     Header: '# of products',
-    accessor: 'totalDistinctProduct'
+    accessor: 'totalDistinctProduct',
   }, {
     Header: 'Total receive qty.',
-    accessor: 'totalReceiveQty'
+    accessor: 'totalReceiveQty',
   }, {
     Header: 'Status',
-    accessor: 'processStatus'
-  }
-]
+    accessor: 'processStatus',
+  },
+];
+
+export default ReplenishOrderTableColumns;

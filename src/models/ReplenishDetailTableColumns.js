@@ -1,21 +1,23 @@
-export const ReplenishDetailTableColumns = [
+const ReplenishDetailTableColumns = [
   {
     Header: 'Barcode',
-    accessor: 'barCode'
+    accessor: 'barCode',
   }, {
     Header: 'Product',
-    accessor: 'productName'
+    accessor: 'productName',
   }, {
     Header: 'Lot #',
-    accessor: 'lot_no'
+    accessor: 'lot_no',
   }, {
     Header: 'Unit #',
-    accessor: 'unit_num'
+    accessor: 'unit_num',
   }, {
     Header: 'Qty',
-    accessor: 'receiveQty'
+    accessor: 'receiveQty',
   }, {
     Header: 'Status',
-    accessor: 'processStatus'
-  }
-]
+    accessor: 'processStatus',
+  },
+];
+
+export default ReplenishDetailTableColumns;

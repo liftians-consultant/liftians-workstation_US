@@ -1,4 +1,4 @@
-export const OrderDetailsTableColumn = [
+const OrderDetailsTableColumn = [
   {
     Header: 'Lot No.',
     accessor: 'lot_NO'
@@ -11,5 +11,7 @@ export const OrderDetailsTableColumn = [
   }, {
     Header: 'Status',
     accessor: 'processStatus'
-  }
+  },
 ];
+
+export default OrderDetailsTableColumn;

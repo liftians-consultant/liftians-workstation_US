@@ -6,7 +6,7 @@ import ReactTable from 'react-table';
 import checkboxHOC from 'react-table/lib/hoc/selectTable';
 import { Form, Input, Select, Button } from 'semantic-ui-react';
 import api from 'api';
-import { InventorySearchTableColumns } from 'models/InventorySearchTableColumns';
+import InventorySearchTableColumns from 'models/InventorySearchTableColumns';
 import './InventorySearchPage.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
