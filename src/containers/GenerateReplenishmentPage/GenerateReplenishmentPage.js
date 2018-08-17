@@ -164,7 +164,9 @@ class GenerateReplenishmentPage extends Component {
 
   handleSubmitConfirmAction(result) {
     if (result) {
-      this.confirm(this.state.data);
+      let requestData = this.state.data;
+      requestData.creator = this.props.username;
+      this.confirm(requestData);
       this.setState({ data: this.initData, openSubmitConfirm: false });
     }
     this.setState({ openSubmitConfirm: false });
