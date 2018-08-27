@@ -12,7 +12,6 @@ import CreateReplenishForm from 'components/forms/CreateReplenishForm';
 import ConfirmDialogModal from 'components/common/ConfirmDialogModal/ConfirmDialogModal';
 import GenReplenishProductListTable from 'components/tables/GenReplenishProductListTable';
 class GenerateReplenishmentPage extends Component {
-
   initData = {
     items: [],
     accountNo: '',

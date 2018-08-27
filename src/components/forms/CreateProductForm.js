@@ -16,7 +16,7 @@ class CreateProductForm extends Component {
     width: 0,
     height: 0,
     weight: 0,
-    unitVolume: '',
+    unitCount: '',
     active: true,
   };
 
@@ -71,7 +71,10 @@ class CreateProductForm extends Component {
   handleConfirmAction = (result) => {
     this.setState({ openConfirm: false });
     if (result) {
-      this.props.onConfirm(this.state.data).then((res) => {
+      const data = this.state.data;
+      data.unitVolume = (1 / data.unitCount).toFixed(2);
+
+      this.props.onConfirm(data).then((res) => {
         if (res) {
           this.setState({ data: this.initData, loading: false });
         }
@@ -116,7 +119,7 @@ class CreateProductForm extends Component {
           <Form.Field control={Input} width="4" label="Height" name="height" value={data.height} onChange={this.handleFormChange} />
           <Form.Field control={Input} width="4" label="Weight" name="weight" value={data.weight} onChange={this.handleFormChange} />
         </Form.Group>
-        <Form.Field control={Input} width="4" required label="Unit Volume" name="unitVolume" value={data.unitVolume} onChange={this.handleFormChange} />
+        <Form.Field control={Input} width="4" required label="Unit Per Bin" name="unitCount" value={data.unitCount} onChange={this.handleFormChange} />
 
         <Form.Field required control={Checkbox} label="Active" name="active" onChange={this.handleFormChange} checked={data.active} />
 
