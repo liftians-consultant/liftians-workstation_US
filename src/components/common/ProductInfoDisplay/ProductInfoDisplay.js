@@ -11,11 +11,6 @@ const ProductInfoDisplay = ({ product, pickedAmount, quantity }) => {
 
   return (
     <div className="product-info-block">
-      <div className="product-name-container">
-        <span className="product-name">
-          {product.productName}
-        </span>
-      </div>
       <div className="product-remain-container">
         <span className="remain-amount">
           {quantity - pickedAmount}
@@ -24,8 +19,16 @@ const ProductInfoDisplay = ({ product, pickedAmount, quantity }) => {
           {quantity - pickedAmount > 1 ? 'items' : 'item'}
         </div>
       </div>
-      <div className="product-image-container">
-        <Image className="product-image" src={imageUrl} onError={(e) => { e.target.src = ImageNotFound; }} />
+      <div className="product-info-container">
+        <div className="product-image-container">
+          <Image className="product-image" src={imageUrl} onError={(e) => { e.target.src = ImageNotFound; }} />
+        </div>
+
+        <div className="product-name-container">
+          <span className="product-name">
+            {product.productName}
+          </span>
+        </div>
       </div>
     </div>
   );
