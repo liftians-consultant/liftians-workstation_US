@@ -31,7 +31,6 @@ import './PickOperationPage.css';
 import * as log4js from 'log4js2';
 
 class PickOperationPage extends Component {
-
   state = {
     podInfo: {
       podId: 0,
@@ -55,6 +54,8 @@ class PickOperationPage extends Component {
     isTagPressed: false,
     isKeyPadPressed: false,
   };
+
+  idleCounter = 0;
 
   log = log4js.getLogger('PickOperationPage');
 
@@ -96,6 +97,9 @@ class PickOperationPage extends Component {
   }
 
   componentWillMount() {
+
+    this.logInfo('Into Pick Operation Page');
+
     this.getUpcomingPod();
     ETagService.turnEndLightOffById(0);
 
@@ -116,6 +120,7 @@ class PickOperationPage extends Component {
   }
 
   componentWillUnmount() {
+    this.logInfo('Leaving Pick Operation Page');
     ETagService.turnEndLightOffById(0);
     clearInterval(this.checkPodInterval);
     clearInterval(this.checkETagResondInterval);
@@ -139,15 +144,17 @@ class PickOperationPage extends Component {
 
   // Deprecated
   linkBinToOrder(deviceId, binId) {
+    this.logInfo(`[LINK BIN TO ORDER] Attempt to link ${binId} to ${deviceId}`);
     api.station.linkBinToOrder(binId, deviceId, this.props.username).then((res) => {
       if (res.data) {
-        // this.log.info(`[LINK BIN TO ORDER] `);
+        this.logInfo(`Bin ${binId} has successfully linked to ${deviceId}`);
         toast.success(`Bin ${binId} has successfully linked`);
       } else {
+        this.logInfo(`Bin linking failed with return data of ${res.data}`);
         toast.warn('Please try again');
       }
-    }).catch(() => {
-      this.log.error('SERVER ERROR: Link bin to order failed');
+    }).catch((error) => {
+      this.log.error(`SERVER ERROR: Link bin to order failed with message ${JSON.stringify(error)}`);
       toast.error('SERVER ERROR: Link bin to order failed');
     });
   }
@@ -186,20 +193,37 @@ class PickOperationPage extends Component {
       if (res.data) {
         // continue to call until next task arrive
         let isRecieve = false;
+        let counter = 0;
         this.checkPodInterval = setInterval(() => {
           if (!isRecieve) {
-            api.station.atStationTask(this.props.stationId).then((response) => {
-              if (response.data > 0) {
-                this.logInfo('[GET UPCOMING POD] Pod arrive station');
-                this.setState({ taskId: response.data }, () => { isRecieve = true; });
-              }
-            });
+            counter += 1;
+
+            console.log(`counter: ${counter}`);
+
+            // every 30 second check num of tasks agian
+            if (counter > 400) {
+              api.station.checkNumberOfStationTasks(this.props.stationId).then((response) => {
+                if (response.data === 0) {
+                  this.logInfo('[GET UPCOMING POD] Timed out. Jumping back pick-task page');
+                  this.props.history.push('/pick-task');
+                } else {
+                  counter = 0;
+                }
+              });
+            } else {
+              api.station.atStationTask(this.props.stationId).then((response) => {
+                if (response.data > 0) {
+                  this.logInfo(`[GET UPCOMING POD] Pod arrive station with taskID ${response.data}`);
+                  this.setState({ taskId: response.data }, () => { isRecieve = true; });
+                }
+              });
+            }
           } else {
-            console.log('[GET UPCOMING POD] Stop interval');
+            this.logInfo('[GET UPCOMING POD] Stop interval');
             clearInterval(this.checkPodInterval);
             this.retrieveNextOrder();
           }
-        }, 1000);
+        }, 1500);
       } else {
         toast.success('All the task is finished!');
         this.props.history.push('/pick-task');
@@ -230,39 +254,61 @@ class PickOperationPage extends Component {
       shortQty: isShortage ? parseInt(product.quantity, 10) - this.state.pickedAmount : 0,
     };
 
-    this.logInfo(`[PICK OPERATION] AtStationAfterPickProduct data: ${JSON.stringify(data)}`);
+    this.logInfo(`[FINISH PICK] Before AtStationAfterPickProduct data: ${JSON.stringify(data)}`);
 
     if (this.validateAfterPickData(data)) {
-      api.pick.atStationAfterPickProduct(data).then((res) => {
-        if (res.data) { // return 1 if success
-          this.logInfo('[PICK OPERATION] AtStationAfterPickProduct Success');
-          // this.setState({ showBox: false }, () => this.retrieveNextOrder());
-          data.holderId = this.state.currentPickProduct.holderID;
-
-          // call liftman to generate new task
-          this.callGenStationTask();
-
-          // after placed in bin, inform db
-          this.atHolderAfterPickProduct(data);
-        } else {
-          this.log.error('ERROR: atStationAfterPickProduct did not succuss in server');
-          toast.error('ERROR: atStationAfterPickProduct did not succuss in server');
-        }
-      }).catch((err) => {
-        this.log.error(`atStationAfterPickProduct: ${JSON.stringify(err)}`);
-        toast.error('ERROR: atStationAfterPickProduct');
-      });
+      this.atStationAfterPickProduct(data);
     } else {
       this.logInfo('[PICK OPERATION] Validation error');
       toast.warn('Barcode did not psas validation. Please try again.');
     }
   }
 
+  atStationAfterPickProduct(data, retry = false) {
+    api.pick.atStationAfterPickProduct(data).then((res) => {
+      if (res.data) { // return 1 if success
+        if (retry) {
+          this.logInfo('[FINSIH PICK] AtStationAfterPickProduct retry success');
+          toast.success('[FINSIH PICK] AtStationAfterPickProduct retry success');
+        }
+        this.logInfo(`[FINISH PICK] AtStationAfterPickProduct Success with return ${res.data}`);
+        // this.setState({ showBox: false }, () => this.retrieveNextOrder());
+        data.holderId = this.state.currentPickProduct.holderID;
+
+        // call liftman to generate new task
+        // this.callGenStationTask();
+
+        // after placed in bin, inform db
+        this.atHolderAfterPickProduct(data);
+      } else {
+        if (!retry) { // first time retry
+          this.logInfo('[FINISH ORDER - RETRY] Retry AtStationAfterPickProduct...');
+          toast.error('ERROR: AtStationAfterPickProduct: Will retry in 2 sec');
+          setTimeout(() => { // set timeout just to let database buffer
+            this.atStationAfterPickProduct(data, true);
+          }, 2000);
+        } else {
+          // retry also failed
+          this.logInfo(`[FINISH ORDER - RETRY] AtStationAfterPickProduct Failed after retry: ${res.data}`);
+          toast.error('ERROR: AtStationAfterPickProduct. Retry failed as well');
+        }
+
+
+        this.log.error('ERROR: atStationAfterPickProduct did not succuss in server');
+        toast.error('ERROR: atStationAfterPickProduct did not succuss in server');
+      }
+    }).catch((err) => {
+      this.log.error(`atStationAfterPickProduct: ${JSON.stringify(err)}`);
+      toast.error('ERROR: atStationAfterPickProduct');
+    });
+  }
+
   atHolderAfterPickProduct(data, retry = false) {
+    this.logInfo(`[FINISH ORDER] calling atHolderAfterPickProduct with data ${JSON.stringify(data)}`);
     api.pick.atHolderAfterPickProduct(data).then((res) => {
       if (res.data > 0) {
         // set here because avoid data changed after async call
-        this.logInfo(`[PICK OPERATION] AtHolderAfterPickProduct Success: ${res.data}`);
+        this.logInfo(`[FINISH ORDER] AtHolderAfterPickProduct Success: ${res.data}`);
         this.finishedOrder = {
           orderNo: this.state.currentPickProduct.order_no,
           binNum: parseInt(this.state.currentPickProduct.binPosition, 10),
@@ -270,16 +316,16 @@ class PickOperationPage extends Component {
         this.checkIsOrderFinished();
         this.retrieveNextOrder();
       } else {
-        this.logInfo(`[ERROR] AtHolderAfterPickProduct FAILED: ${res.data}`);
+        this.logInfo(`[FINISH ORDER] AtHolderAfterPickProduct FAILED: ${res.data}`);
         if (!retry) { // first time retry
-          this.logInfo('[ERROR - RETRY] Retry AtHolderAfterPickProduct...');
+          this.logInfo('[FINISH ORDER - RETRY] Retry AtHolderAfterPickProduct...');
           toast.error('ERROR: AtHolderAfterPickProduct: Will retry in 2 sec');
           setTimeout(() => { // set timeout just to let database buffer
             this.atHolderAfterPickProduct(data, true);
           }, 2000);
         } else {
           // retry also failed
-          this.logInfo(`[ERROR - RETRY] AtHolderAfterPickProduct Failed after retry: ${res.data}`);
+          this.logInfo(`[FINISH ORDER - RETRY] AtHolderAfterPickProduct Failed after retry: ${res.data}`);
           toast.error('ERROR: AtHolderAfterPickProduct. Retry failed as well');
         }
       }
@@ -287,6 +333,7 @@ class PickOperationPage extends Component {
   }
 
   callGenStationTask() {
+    this.logInfo(`[GEN STATION TASK] Calling with StationId ${this.props.stationId}`);
     api.station.genStationTask(this.props.stationId).then(() => {
       this.logInfo('[GEN STATION TASK] Called');
     });
@@ -301,6 +348,7 @@ class PickOperationPage extends Component {
   }
 
   checkIsOrderFinished() {
+    this.logInfo(`[CHECK IS ORDER FINISHED] Calling with orderNo ${this.state.currentPickProduct.order_no}`);
     api.pick.checkIsOrderFinished(this.state.currentPickProduct.order_no).then((res) => {
       if (res.data) { // return 1 or 0
         this.logInfo(`[CHECK ORDER FINISHED] Order finished: ${res.data}`);
@@ -316,9 +364,10 @@ class PickOperationPage extends Component {
   }
 
   getPodInfo() {
+    this.logInfo(`[GET POD INFO] Calling with ${this.state.taskId}`);
     api.station.getPodLayoutInfoByTaskID(this.state.taskId).then((res) => {
       if (res.data.length) {
-        this.logInfo(`[POD LAYOUT] Pod height: ${res.data.length}`);
+        this.logInfo(`[GET POD INFO] Success: Pod height: ${res.data.length}`);
 
         this.setState(prevState => ({
           podInfo: {
@@ -333,8 +382,9 @@ class PickOperationPage extends Component {
         }));
         // this.setState({ podInfo, loading: false });
       } else {
-        this.logInfo('[POD LAYOUT] NO GOOD. Empty array returned..');
+        this.logInfo('[GET POD INFO] Failed: Empty array returned..');
         setTimeout(() => {
+          this.logInfo('[GET POD INFO] Retrying');
           this.getPodInfo();
         }, 1000);
       }
@@ -344,9 +394,10 @@ class PickOperationPage extends Component {
   }
 
   getProductList() {
+    this.logInfo(`[GET PRODUCT LIST] Calling with ${this.state.taskId}`);
     api.pick.getPickInfoByTaskId(this.state.taskId).then((res) => {
       if (res.data.length) {
-        this.logInfo(`[GET PRODUCT LIST] Pick info retrevied: ${res.data[0].productID}`);
+        this.logInfo(`[GET PRODUCT LIST] Success. ProductId: ${res.data[0].productID}`);
         toast.info(`Product Retrieved: ${res.data[0].productID}`);
         this.setState({
           currentPickProduct: res.data[0],
@@ -368,11 +419,11 @@ class PickOperationPage extends Component {
       } else {
         // when nothing return, that means the pod is finished
         // and need to wait for the next pod come in to station
-        console.log('[GET PRODUCT LIST] No order return from the server');
+        this.logInfo(`[GET PRODUCT LIST] No order return from the server. return data ${res.data}`);
         this.getUpcomingPod();
       }
     }).catch((err) => {
-      this.log.error(`[ERROR] getting products list ${err}`);
+      this.log.error(`[ERROR] getting products list ${JSON.stringify(err)}`);
       console.error('[ERROR] getting products list', err);
     });
   }
@@ -556,12 +607,13 @@ class PickOperationPage extends Component {
   }
 
   handleShortageClick() {
-    this.logInfo('[PICK OPERATION] Shortage Clicked!');
+    this.logInfo('[SHORTAGE] Button Clicked!');
     this.setState({ openShortageConfirmModal: true });
   }
 
   handleShortageModalConfirmed(result) {
     if (result) {
+      this.logInfo('[SHORTAGE] Modal Confirmed');
       this.finishPick();
       toast.success('Shortage Confirmed');
     }
@@ -569,6 +621,7 @@ class PickOperationPage extends Component {
     this.setState({ openShortageConfirmModal: false });
   }
 
+  /* SIMULATION */
   handleWrongProductBtnClick() {
     const data = {
       podId: this.state.currentPickProduct.podID,

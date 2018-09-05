@@ -10,8 +10,11 @@ import PickOrderTableColumns from 'models/PickOrderTableModel';
 import { setStationTaskType } from 'redux/actions/stationAction';
 import './PickTaskPage.css';
 import OperationTaskMenu from 'components/OperationTaskMenu/OperationTaskMenu';
+import * as log4js from 'log4js2';
 
 class PickTaskPage extends Component {
+  log = log4js.getLogger('PickTaskPage');
+
   locale = process.env.REACT_APP_LOCALE;
 
   // Dummy data, will retrieve from server
@@ -46,6 +49,13 @@ class PickTaskPage extends Component {
     loading: false,
   }
 
+  constructor() {
+    super();
+
+    this.handleStartBtn = this.handleStartBtn.bind(this);
+    this.handlePauseBtn = this.handlePauseBtn.bind(this);
+  }
+
   componentWillMount() {
     this.setStationTaskType();
     this.startStationOperationCall();
@@ -64,10 +74,11 @@ class PickTaskPage extends Component {
       if (!res.data) {
         toast.error('Cannot start station. Please contact your system admin');
       }
-      console.log('[REPLENISH PICK TASK] Station Started with P');
+      this.log.info('[PICK TASK] Station Started with P');
       this.setState({ loading: false }, this.retrievePickOrderReocrds);
     }).catch((e) => {
       toast.error('Server Error. Please contact your system admin');
+      this.log.info('[PICK TASK] ERROR');
       this.setState({ loading: false });
       console.error(e);
     });
@@ -103,7 +114,7 @@ class PickTaskPage extends Component {
 
   retrievePickOrderReocrds = () => {
     this.setState({ loading: true });
-    console.log('task:', this.state.activeBillType, 'process:', this.state.activeProcessType);
+    this.log.info(`[RETRIEVE PICK ORDER RECORDS] task: ${this.state.activeBillType}, process:, ${this.state.activeProcessType}`);
     api.pick.retrievePickOrderReocrdsByTypeAndState(1, this.state.activeBillType, this.state.activeProcessType).then((res) => {
       res.data.map((object) => {
         object.pick_DATE = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
@@ -123,19 +134,37 @@ class PickTaskPage extends Component {
   };
 
   handleStartBtn = (e) => {
-    api.pick.callServerGeneratePickTask(this.props.stationId).then((res) => {
-      this.props.history.push('/operation');
-    }).catch((error) => {
-      toast.error('Error while server generate pick task. Please contact system admin.');
+    this.log.info('[HANDLE START BTN] Btn clicked');
+    api.station.startStationOperation(this.props.stationId, this.props.username, 'P').then((res) => {
+      // return 1 if success, 0 if failed
+      if (!res.data) {
+        toast.error('Cannot start station. Please contact your system admin');
+      }
+      this.log.info('[HANDLE START BTN] startStationOperation success. Calling GenPickTask');
+
+      api.pick.callServerGeneratePickTask(this.props.stationId).then(() => {
+        this.log.info('[HANDLE START BTN] GenPickTask success');
+        this.props.history.push('/operation');
+      }).catch((error) => {
+        this.log.info('[HANDLE START BTN] GenPickTask FAILED');
+        toast.error('Error while server generate pick task. Please contact system admin.');
+      });
+    }).catch((e) => {
+      toast.error('Server Error. Please contact your system admin');
+      this.log.info('[HANDLE START BTN] startStationOperation FAILED');
+      this.setState({ loading: false });
+      console.error(e);
     });
+
+
   }
 
   handlePauseBtn = (e) => {
-    console.log('[PAUSE PICK OPERATION] Pausing Pick Operation');
+    this.log.info('[PAUSE BTN] Clicked. Calling stopPickOperation');
     api.pick.stopPickOperation(this.props.stationId, this.props.username, 'P').then((res) => {
-      console.log('[PAUSE PICK OPERATION] Pick Operation Paused');
+      this.log.info('[PAUSE PICK OPERATION] Pick Operation Paused');
     }).catch((err) => {
-      console.log('[PAUSE PICK OPERATION] Pause Failed:', err);
+      this.log.info('[PAUSE PICK OPERATION] Pause Failed:', err);
     });
   }
 
