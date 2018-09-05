@@ -9,6 +9,13 @@ import { login } from "redux/actions/authAction";
 
 import logo from 'assets/images/assembly_logo_trans.png';
 
+const style = {
+  position: 'absolute',
+  right: '30px',
+  bottom: '30px',
+  color: '#ddd',
+};
+
 class LoginPage extends Component {
 
   constructor() {
@@ -41,17 +48,21 @@ class LoginPage extends Component {
         }
         `}</style>
         <Grid
-          textAlign='center'
+          textAlign="center"
           style={{ height: '100%' }}
-          verticalAlign='middle'>
+          verticalAlign="middle"
+        >
           <Grid.Column style={{ maxWidth: 450 }}>
-            <Image src={logo} size='huge' centered />
+            <Image src={logo} size="huge" centered />
             <Segment>
-              <LoginForm submit={this.submit}></LoginForm>
+              <LoginForm submit={this.submit} />
             </Segment>
           </Grid.Column>
         </Grid>
         <ServerSettingModal />
+        <div className="version-block" style={style}>
+          <span>v{ process.env.REACT_APP_VERSION }</span>
+        </div>
       </div>
     );
   }
