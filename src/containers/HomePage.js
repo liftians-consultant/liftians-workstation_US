@@ -42,7 +42,7 @@ class HomePage extends Component {
       }));
 
       log4js.configure({
-        layout: '%d{yyyy-MM-dd HH:mm:ss} [%level] %logger - %message',
+        layout: '[%logger] - %message',
         appenders: ['ajaxAppender'],
         loggers: [{
           logLevel: log4js.LogLevel.INFO,
