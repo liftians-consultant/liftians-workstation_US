@@ -73,9 +73,16 @@ export const addHoldersToSetupWaitlist = holderSetupWaitlist => (dispatch, getSt
 export const addBinToHolder = (binBarcode, holderId) => (dispatch, getState) => {
   return api.pick.linkBinToHolder(binBarcode, holderId).then((res) => {
     if (res.data) {
-      opActionLog.info(`Linked ${binBarcode} to ${holderId} success`);
-      ETagService.turnEndLightOffById(getState().operation.currentSetupHolder.deviceIndex);
-      return api.pick.getBinInfoAfterHolderTag(binBarcode, holderId);
+      switch (res.data) {
+        case -1:
+          return false; // bin linked to holder
+        case -2:
+          return false; // bin linked to order
+        default:
+          opActionLog.info(`Linked ${binBarcode} to ${holderId} success`);
+          ETagService.turnEndLightOffById(getState().operation.currentSetupHolder.deviceIndex);
+          return api.pick.getBinInfoAfterHolderTag(binBarcode, holderId);
+      }
     } else {
       return false;
     }
@@ -91,11 +98,11 @@ export const addBinToHolder = (binBarcode, holderId) => (dispatch, getState) => 
   }).then((res) => {
     const holderSetupWaitlist = getState().operation.holderSetupWaitlist;
 
-    if (!res) return false;
+    if (!res) return Promise.resolve(false);
 
     if (holderSetupWaitlist.length > 0) {
-      const holderId = holderSetupWaitlist.shift();
-      const currentSetupHolder = getState().operation.deviceList.find(device => device.deviceId === holderId);
+      const nextHolderId = holderSetupWaitlist.shift();
+      const currentSetupHolder = getState().operation.deviceList.find(device => device.deviceId === nextHolderId);
       dispatch(setHolderSetupWaitlist(holderSetupWaitlist, currentSetupHolder));
     } else {
       dispatch(setHolderSetupWaitlist([], { deviceIndex: 0 }));

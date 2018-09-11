@@ -203,6 +203,7 @@ class PickOperationPage extends Component {
             // every 30 second check num of tasks agian
             if (counter > 400) {
               api.station.checkNumberOfStationTasks(this.props.stationId).then((response) => {
+                this.logInfo(`[GET UPCOMING PDO] Idle: Check num of task at Station: ${response.data}`);
                 if (response.data === 0) {
                   this.logInfo('[GET UPCOMING POD] Timed out. Jumping back pick-task page');
                   this.props.history.push('/pick-task');
@@ -522,6 +523,7 @@ class PickOperationPage extends Component {
     }.bind(this), 500);
   }
 
+  /* Production */
   handleScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
@@ -554,15 +556,17 @@ class PickOperationPage extends Component {
             }
           });
         } else if (this.businessMode === 'ecommerce') {
-          if (this.scanValidation(scannedValue)) {
-            this.logInfo(`[SCANNED] New Barcode: ${scannedValue}`);
-            this.setState({ showBox: true, barcode: scannedValue });
-            this.initPickLight();
-          } else {
-            this.setState({ barcode: scannedValue }, () => {
-              this.setState({ openWrongProductModal: true });
-            });
-          }
+          this.validatePharmacyBarcode(scannedValue).then((result) => {
+            if (result.valid) {
+              this.logInfo(`[SCANNED] New Barcode: ${scannedValue}`);
+              this.setState({ showBox: true, barcode: scannedValue });
+              this.initPickLight();
+            } else {
+              this.setState({ barcode: scannedValue }, () => {
+                this.setState({ openWrongProductModal: true });
+              });
+            }
+          });
         }
       }, 500);
     }
@@ -596,9 +600,9 @@ class PickOperationPage extends Component {
             this.setState({ barcode, pickedAmount });
           }
         } else if (this.businessMode === 'ecommerce') {
-          this.setState(prevState => (
-            { showBox: !prevState.showBox, barcode: res.data[barCodeIndex].barcode }
-          ));
+          this.logInfo(`[SCANNED] SIMULATE Barcode: ${res.data[barCodeIndex].barcode}`);
+          this.setState({ showBox: true, barcode: res.data[barCodeIndex].barcode });
+          this.initPickLight();
         }
       });
     } else {
@@ -657,6 +661,8 @@ class PickOperationPage extends Component {
             this.setState({ showBox: false, openOrderFinishModal: false }, () => {
               this.setFocusToScanInput();
             });
+          } else {
+            toast.warn(`Failed: Bin ${binBarcode} is currently in used!`);
           }
         });
       }
@@ -669,7 +675,13 @@ class PickOperationPage extends Component {
   }
 
   handleBinSetupInputEnter(binBarcode) {
-    this.props.addBinToHolder(binBarcode, this.props.currentSetupHolder.deviceId);
+    this.props.addBinToHolder(binBarcode, this.props.currentSetupHolder.deviceId).then((res) => {
+      if (res) {
+        toast.success(`Bin ${binBarcode} linked`);
+      } else {
+        toast.warn(`Failed: Bin ${binBarcode} is currently in used!`);
+      }
+    });
   }
 
   closeBinSetupModal() {
