@@ -34,11 +34,11 @@ export const activateStation = (stationId) => (dispatch, getState) => {
 }
 
 export const checkCurrentUnFinishTask = (stationId) => (dispatch, getState) => 
-  api.station.checkCurrentUnFinishTask(stationId).then(res => {
+  api.station.checkCurrentUnFinishTask(stationId).then((res) => {
     let stationInfo = {
       taskType: 'U',
       taskCount: 0
-    }
+    };
     res.forEach(element => {
       if (element.cnt > 0) {
         stationInfo.taskType = element.taskType;
@@ -47,7 +47,7 @@ export const checkCurrentUnFinishTask = (stationId) => (dispatch, getState) =>
     });
     dispatch({type: STATION_CURRENT_UNFINISH_TASK_FETCHED, stationInfo});
     return stationInfo;
-  })
+  });
 
 export const setStationTaskType = (taskType) => (dispatch, getState) => {
   const { station } = getState();
@@ -55,4 +55,3 @@ export const setStationTaskType = (taskType) => (dispatch, getState) => {
   stationInfo.taskType = taskType;
   dispatch({type: SET_STATION_TASK_TYPE, stationInfo});
 }
-

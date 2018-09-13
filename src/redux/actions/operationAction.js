@@ -131,7 +131,7 @@ export const hideChangeBinModal = () => (dispatch, getState) => {
 export const changeHolderBin = (binBarcode, holderId) => (dispatch, getState) => {
   return api.pick.changeHolderBin(binBarcode, holderId).then((res) => {
     if (res.data === 1) {
-      return api.pick.getBinInfoAfterHolderTag(binBarcode, holderId)
+      return api.pick.getBinInfoAfterHolderTag(binBarcode, holderId);
     } else {
       return res.data;
     }

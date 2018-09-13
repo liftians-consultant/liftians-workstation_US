@@ -108,6 +108,7 @@ const pick = {
     name: 'ResetTestData',
     parameter: [stationId],
   }),
+
   retrievePickOrderReocrdsByTypeAndState: (stationId, billTypeId, processId) => axios.post(`${appConfig.getApiUrl()}/Pick`, {
     name: 'DisplayPickMenu',
     parameter: [

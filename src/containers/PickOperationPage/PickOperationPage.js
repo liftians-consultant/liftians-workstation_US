@@ -25,6 +25,7 @@ import {
   hideChangeBinModal,
   changeHolderBin,
 } from 'redux/actions/operationAction';
+import { checkCurrentUnFinishTask } from 'redux/actions/stationAction';
 
 import './PickOperationPage.css';
 
@@ -188,9 +189,9 @@ class PickOperationPage extends Component {
 
   getUpcomingPod() {
     // check if all task is finished
-    api.station.checkNumberOfStationTasks(this.props.stationId).then((res) => {
-      this.logInfo(`[GET UPCOMING POD] checkNumberOfStationTasks: ${res.data}`);
-      if (res.data) {
+    this.props.checkCurrentUnFinishTask(this.props.stationId).then((res) => {
+      this.logInfo(`[GET UPCOMING POD] checkNumberOfStationTasks: ${res.taskCount}`);
+      if (res.taskCount) {
         // continue to call until next task arrive
         let isRecieve = false;
         let counter = 0;
@@ -201,10 +202,10 @@ class PickOperationPage extends Component {
             console.log(`counter: ${counter}`);
 
             // every 30 second check num of tasks agian
-            if (counter > 400) {
-              api.station.checkNumberOfStationTasks(this.props.stationId).then((response) => {
-                this.logInfo(`[GET UPCOMING PDO] Idle: Check num of task at Station: ${response.data}`);
-                if (response.data === 0) {
+            if (counter > 5) {
+              this.props.checkCurrentUnFinishTask(this.props.stationId).then((response) => {
+                this.logInfo(`[GET UPCOMING PDO] Idle: Check num of task at Station: ${response.taskCount}`);
+                if (response.taskCount === 0) {
                   this.logInfo('[GET UPCOMING POD] Timed out. Jumping back pick-task page');
                   this.props.history.push('/pick-task');
                 } else {
@@ -875,4 +876,5 @@ export default connect(mapStateToProps, {
   unassignBinFromHolder,
   hideChangeBinModal,
   changeHolderBin,
+  checkCurrentUnFinishTask,
 })(PickOperationPage);

@@ -1,43 +1,43 @@
 {
   "name": "liftians-workstation",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "author": "Kevin Hong",
   "proxy": {
     "/v1": {
-      "target": "http://l1.liftians.com:8070"
+      "target": "http://localhost:8070"
     },
     "/login": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     },
     "/logout": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     },
     "/Common": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     },
     "/Setup": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     },
     "/Pick": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     },
     "/Replenish": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     },
     "/Inventory": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     },
     "/eTag": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     },
     "/Info": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     },
     "/atStation": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     },
     "/logs": {
-      "target": "http://l1.liftians.com:8060"
+      "target": "http://localhost:8060"
     }
   },
   "private": true,
