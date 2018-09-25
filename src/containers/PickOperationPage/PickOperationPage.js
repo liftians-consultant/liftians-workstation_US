@@ -54,6 +54,7 @@ class PickOperationPage extends Component {
     warningMessage: '',
     isTagPressed: false,
     isKeyPadPressed: false,
+    currentBarcode: '', // just for assembly
   };
 
   idleCounter = 0;
@@ -415,6 +416,13 @@ class PickOperationPage extends Component {
           isTagPressed: false,
           isKeyPadPressed: false,
         }, () => {
+          const data = {
+            podId: this.state.currentPickProduct.podID,
+            podSide: this.state.currentPickProduct.podSide,
+            shelfId: this.state.currentPickProduct.shelfID,
+            boxId: this.state.currentPickProduct.boxID,
+          };
+          this.getBarcode(data);
           this.getPodInfo();
           this.setFocusToScanInput();
         });
@@ -427,6 +435,13 @@ class PickOperationPage extends Component {
     }).catch((err) => {
       this.log.error(`[ERROR] getting products list ${JSON.stringify(err)}`);
       console.error('[ERROR] getting products list', err);
+    });
+  }
+
+  getBarcode(data) {
+    api.pick.getProductSerialNum(data).then((res) => {
+      const barCodeIndex = res.data[0].barcode ? 0 : 1; // sometimes there will have empty barcode data return...
+      this.setState({ currentBarcode: res.data[barCodeIndex].barcode });
     });
   }
 
@@ -447,12 +462,21 @@ class PickOperationPage extends Component {
       }
 
       // check if barcode on shelf
-      api.pick.getInventoryByProductBarcode(barcode, this.state.podInfo.podId, this.state.podInfo.podSide).then((res) => {
+      const { podInfo, currentPickProduct } = this.state;
+      api.pick.getInventoryByProductBarcode(barcode, podInfo.podId, podInfo.podSide).then((res) => {
         // api.pick.getInventoryByProductBarcode('T168000', 33 , 0).then( res => {
         this.logInfo(`[VALIDATE BARCODE] ${JSON.stringify(res.data)}`);
         if (res.data.length > 0) { // barcode is on the shelf
-          this.logInfo('[VALIDATE BARCODE] Correct');
-          resolve({ valid: true });
+          const search = res.data.find((item) => {
+            return (item.shelfID === currentPickProduct.shelfID) && (item.boxID === currentPickProduct.boxID);
+          });
+
+          if (search) {
+            this.logInfo('[VALIDATE BARCODE] Correct');
+            resolve({ valid: true });
+          } else {
+            resolve({ valid: false, message: 'Wrong Product (this barcode not from the right box)' });  
+          }
         } else {
           this.logInfo('[VALIDATE BARCODE] Wrong Product (this barcode is not on the shelf)');
           resolve({ valid: false, message: 'Wrong Product (this barcode is not on the shelf)' });
@@ -719,7 +743,7 @@ class PickOperationPage extends Component {
 
   render() {
     const { warningMessage, podInfo, currentPickProduct, pickedAmount, showBox,
-      orderList, openOrderFinishModal, openWrongProductModal, barcode } = this.state;
+      orderList, openOrderFinishModal, openWrongProductModal, barcode, currentBarcode } = this.state;
     const highlightBox = {
       row: currentPickProduct ? parseInt(currentPickProduct.shelfID, 10) : 0,
       column: currentPickProduct ? parseInt(currentPickProduct.boxID, 10) : 0,
@@ -749,6 +773,7 @@ class PickOperationPage extends Component {
                     product={currentPickProduct}
                     quantity={currentPickProduct.quantity}
                     pickedAmount={pickedAmount}
+                    currentBarcode={currentBarcode}
                   />
                   <div className="action-group-container">
                     <div className="scan-input-group">
@@ -772,11 +797,11 @@ class PickOperationPage extends Component {
                       </div>
                     </div>
                     <div className="action-btn-group">
-                      { process.env.REACT_APP_ENV === 'DEV' && (
+                      {/* { process.env.REACT_APP_ENV === 'DEV' && (
                         <Button primary size="medium" onClick={() => this.handleScanBtnClick()}>
                           Scan
                         </Button>
-                      )}
+                      )} */}
                     </div>
                   </div>
                 </div>

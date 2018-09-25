@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Image } from 'semantic-ui-react';
+import { Image, Label } from 'semantic-ui-react';
 import './ProductInfoDisplay.css';
 import ImageNotFound from '../../../assets/images/no_photo_available.jpg';
 
 const productImgBaseUrl = process.env.REACT_APP_IMAGE_BASE_URL;
 
-const ProductInfoDisplay = ({ product, pickedAmount, quantity }) => {
+const ProductInfoDisplay = ({ product, pickedAmount, quantity, currentBarcode }) => {
   const imageUrl = `${productImgBaseUrl}${product.productID}.png`;
 
   return (
@@ -28,6 +28,11 @@ const ProductInfoDisplay = ({ product, pickedAmount, quantity }) => {
           <span className="product-name">
             {product.productName}
           </span>
+          <br />
+          <br />
+          <Label size="huge">
+            {currentBarcode}
+          </Label>
         </div>
       </div>
     </div>
@@ -38,6 +43,7 @@ ProductInfoDisplay.propTypes = {
   product: PropTypes.object.isRequired,
   quantity: PropTypes.number.isRequired,
   pickedAmount: PropTypes.number.isRequired,
+  currentBarcode: PropTypes.string.isRequired,
 };
 
 export default ProductInfoDisplay;

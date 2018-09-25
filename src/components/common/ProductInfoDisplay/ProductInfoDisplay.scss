@@ -38,8 +38,13 @@
     text-align: left;
 
     .product-name {
-      font-size: 1.5em;
-      line-height: 1.5em;
+      font-size: 2em;
+      line-height: 2em;
+    }
+
+    .barcode-name {
+      font-style: italic;
+      color: #eee
     }
   }
 
