@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Input } from 'semantic-ui-react';
+import { Modal, Input, Dimmer, Loader } from 'semantic-ui-react';
 import BinGroup from 'components/Operation/BinGroup/BinGroup';
 import ETagService from 'services/ETagService';
 import './BinSetupModal.css';
@@ -41,7 +41,7 @@ class BinSetupModal extends Component {
   }
 
   render() {
-    const { open, location } = this.props;
+    const { open, location, loading } = this.props;
     return (
       <Modal
         className="bin-setup-modal-container"
@@ -52,6 +52,7 @@ class BinSetupModal extends Component {
       >
         <Modal.Header>Bin Setup</Modal.Header>
         <Modal.Content>
+          <Loader indeterminate inverted active={loading} size="massive"/>
           <div className="info-text">Please place an empty bin on correspond location and scan the barcode on it.</div>
           <BinGroup openedBinNum={location} highlighColor="orange" size="150" />
           <Input
@@ -68,6 +69,7 @@ BinSetupModal.propTypes = {
   open: PropTypes.bool.isRequired,
   onInputEnter: PropTypes.func.isRequired,
   location: PropTypes.number.isRequired,
+  loading: PropTypes.bool.isRequired,
 };
 
 

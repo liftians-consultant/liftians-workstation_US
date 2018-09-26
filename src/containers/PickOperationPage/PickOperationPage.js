@@ -55,6 +55,7 @@ class PickOperationPage extends Component {
     isTagPressed: false,
     isKeyPadPressed: false,
     currentBarcode: '', // just for assembly
+    binSetupLoading: false,
   };
 
   idleCounter = 0;
@@ -93,7 +94,7 @@ class PickOperationPage extends Component {
     this.handleBinSetupInputEnter = this.handleBinSetupInputEnter.bind(this);
     this.closeChangeBinModal = this.closeChangeBinModal.bind(this);
     this.handleChangeBinCallback = this.handleChangeBinCallback.bind(this);
-    this.handlePharmacyOkBtnClick = this.handlePharmacyOkBtnClick.bind(this);
+    this.handleOkBtnClick = this.handleOkBtnClick.bind(this);
     this.handleShortageModalConfirmed = this.handleShortageModalConfirmed.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
@@ -189,52 +190,41 @@ class PickOperationPage extends Component {
   }
 
   getUpcomingPod() {
-    // check if all task is finished
-    this.props.checkCurrentUnFinishTask(this.props.stationId).then((res) => {
-      this.logInfo(`[GET UPCOMING POD] checkNumberOfStationTasks: ${res.taskCount}`);
-      if (res.taskCount) {
-        // continue to call until next task arrive
-        let isRecieve = false;
-        let counter = 0;
-        this.checkPodInterval = setInterval(() => {
-          if (!isRecieve) {
-            counter += 1;
+    // continue to call until next task arrive
+    let isRecieve = false;
+    let counter = 0;
+    this.checkPodInterval = setInterval(() => {
+      if (!isRecieve) {
+        counter += 1;
 
-            console.log(`counter: ${counter}`);
+        console.log(`counter: ${counter}`);
 
-            // every 30 second check num of tasks agian
-            if (counter > 5) {
-              this.props.checkCurrentUnFinishTask(this.props.stationId).then((response) => {
-                this.logInfo(`[GET UPCOMING PDO] Idle: Check num of task at Station: ${response.taskCount}`);
-                if (response.taskCount === 0) {
-                  this.logInfo('[GET UPCOMING POD] Timed out. Jumping back pick-task page');
-                  this.props.history.push('/pick-task');
-                } else {
-                  counter = 0;
-                }
-              });
+        // every 30 second check num of tasks agian
+        if (counter > process.env.REACT_APP_PICKING_IDLE_TIME && this.state.openOrderFinishModal === false) {
+          this.props.checkCurrentUnFinishTask(this.props.stationId).then((response) => {
+            this.logInfo(`[GET UPCOMING PDO] Idle: Check num of task at Station: ${response.taskCount}`);
+            if (response.taskCount === 0) {
+              this.logInfo('[GET UPCOMING POD] Timed out. Jumping back pick-task page');
+              toast.success('All Task Finished!');
+              this.props.history.push('/pick-task');
             } else {
-              api.station.atStationTask(this.props.stationId).then((response) => {
-                if (response.data > 0) {
-                  this.logInfo(`[GET UPCOMING POD] Pod arrive station with taskID ${response.data}`);
-                  this.setState({ taskId: response.data }, () => { isRecieve = true; });
-                }
-              });
+              counter = 0;
             }
-          } else {
-            this.logInfo('[GET UPCOMING POD] Stop interval');
-            clearInterval(this.checkPodInterval);
-            this.retrieveNextOrder();
-          }
-        }, 1500);
+          });
+        } else {
+          api.station.atStationTask(this.props.stationId).then((response) => {
+            if (response.data > 0) {
+              this.logInfo(`[GET UPCOMING POD] Pod arrive station with taskID ${response.data}`);
+              this.setState({ taskId: response.data }, () => { isRecieve = true; });
+            }
+          });
+        }
       } else {
-        toast.success('All the task is finished!');
-        this.props.history.push('/pick-task');
+        this.logInfo('[GET UPCOMING POD] Stop interval');
+        clearInterval(this.checkPodInterval);
+        this.retrieveNextOrder();
       }
-    }).catch((err) => {
-      this.log.error(`[GET UPCOMING POD] CheckNumberOfStationTasks, ${err.message}`);
-      toast.error(`[GET UPCOMING POD] CheckNumberOfStationTasks, ${err.message}`);
-    });
+    }, 1500);
   }
 
   validateAfterPickData(data) {
@@ -424,7 +414,9 @@ class PickOperationPage extends Component {
           };
           this.getBarcode(data);
           this.getPodInfo();
-          this.setFocusToScanInput();
+          if (!this.state.openBinSetupModal && !this.state.openOrderFinishModal) {
+            this.setFocusToScanInput();
+          }
         });
       } else {
         // when nothing return, that means the pod is finished
@@ -475,7 +467,7 @@ class PickOperationPage extends Component {
             this.logInfo('[VALIDATE BARCODE] Correct');
             resolve({ valid: true });
           } else {
-            resolve({ valid: false, message: 'Wrong Product (this barcode not from the right box)' });  
+            resolve({ valid: false, message: 'Wrong Product (this barcode not from the right box)' });
           }
         } else {
           this.logInfo('[VALIDATE BARCODE] Wrong Product (this barcode is not on the shelf)');
@@ -496,7 +488,7 @@ class PickOperationPage extends Component {
   setWaitForETagInterval() {
     let isRecieve = false;
     // constantly check for respond from eTag
-    this.checkETagResondInterval = setInterval(function() {
+    this.checkETagResondInterval = setInterval(() => {
       if (!isRecieve) {
         ETagService.checkRespond(parseInt(this.state.currentPickProduct.binPosition, 10)).then((res) => {
           if (res) {
@@ -522,14 +514,14 @@ class PickOperationPage extends Component {
           this.checkIsPickFinished();
         }
       }
-    }.bind(this), 500);
+    }, 500);
   }
 
   /* Just for pharmacy pick use only */
   setPharmacyWaitForEtagInterval() {
     let isRecieve = false;
     // constantly check for respond from eTag
-    this.checkETagResondInterval = setInterval(function() {
+    this.checkETagResondInterval = setInterval(() => {
       if (!isRecieve) {
         ETagService.checkRespond(parseInt(this.state.currentPickProduct.binPosition, 10)).then((res) => {
           if (res) {
@@ -545,7 +537,7 @@ class PickOperationPage extends Component {
         ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
         this.finishPick(false);
       }
-    }.bind(this), 500);
+    }, 500);
   }
 
   /* Production */
@@ -700,12 +692,15 @@ class PickOperationPage extends Component {
   }
 
   handleBinSetupInputEnter(binBarcode) {
-    this.props.addBinToHolder(binBarcode, this.props.currentSetupHolder.deviceId).then((res) => {
-      if (res) {
-        toast.success(`Bin ${binBarcode} linked`);
-      } else {
-        toast.warn(`Failed: Bin ${binBarcode} is currently in used!`);
-      }
+    this.setState({ binSetupLoading: true }, () => {
+      this.props.addBinToHolder(binBarcode, this.props.currentSetupHolder.deviceId).then((res) => {
+        if (res) {
+          toast.success(`Bin ${binBarcode} linked`);
+        } else {
+          toast.warn(`Failed: Bin ${binBarcode} is currently in used!`);
+        }
+        this.setState({ binSetupLoading: false });
+      });
     });
   }
 
@@ -736,14 +731,33 @@ class PickOperationPage extends Component {
     this.props.hideChangeBinModal();
   }
 
-  handlePharmacyOkBtnClick() {
-    ETagService.turnPickLightOffById();
-    this.finishPick();
+  handleOkBtnClick() {
+    if (this.businessMode === 'pharmacy') {
+      ETagService.turnPickLightOffById();
+      this.finishPick();
+    } else {
+      clearInterval(this.checkETagResondInterval);
+      ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
+
+      this.setState({ isTagPressed: true }, () => {
+        // auto trigger pick procedure when there's only one unit required
+        if (this.state.currentPickProduct.quantity === 1) {
+          this.selectPickedAmount(1);
+          return;
+        }
+
+        if (this.state.isKeyPadPressed === true) {
+          this.checkIsPickFinished();
+        }
+      });
+    }
   }
 
   render() {
     const { warningMessage, podInfo, currentPickProduct, pickedAmount, showBox,
-      orderList, openOrderFinishModal, openWrongProductModal, barcode, currentBarcode } = this.state;
+      orderList, openOrderFinishModal, openWrongProductModal, barcode, currentBarcode,
+      binSetupLoading,
+    } = this.state;
     const highlightBox = {
       row: currentPickProduct ? parseInt(currentPickProduct.shelfID, 10) : 0,
       column: currentPickProduct ? parseInt(currentPickProduct.boxID, 10) : 0,
@@ -752,7 +766,7 @@ class PickOperationPage extends Component {
     return (
       <div className="pick-operation-page">
         <Dimmer active={this.state.loading}>
-          <Loader content="Waiting for pod..." indeterminate size="massive"/>
+          <Loader content="Waiting for pod..." indeterminate size="massive" />
         </Dimmer>
         <Grid>
           <Grid.Row>
@@ -797,28 +811,26 @@ class PickOperationPage extends Component {
                       </div>
                     </div>
                     <div className="action-btn-group">
-                      {/* { process.env.REACT_APP_ENV === 'DEV' && (
+                      { process.env.REACT_APP_ENV === 'DEV' && (
                         <Button primary size="medium" onClick={() => this.handleScanBtnClick()}>
                           Scan
                         </Button>
-                      )} */}
+                      )}
                     </div>
                   </div>
                 </div>
               ) : (
                 <div>
                   <BinGroup openedBinNum={parseInt(currentPickProduct.binPosition, 10)} />
-                  { this.businessMode === 'pharmacy' ? (
-                    <Button className="ok-btn" size="massive" primary onClick={() => this.handlePharmacyOkBtnClick()}>
-                      OK
-                    </Button>
-                  ) : (
-                    currentPickProduct.quantity > 1 && (
+                  <Button className="ok-btn" size="massive" primary onClick={() => this.handleOkBtnClick()}>
+                    OK
+                  </Button>
+                  { this.businessMode !== 'pharmacy' && currentPickProduct.quantity > 1 && (
                     <NumPad
                       highlightAmount={currentPickProduct.quantity - pickedAmount}
                       callback={this.selectPickedAmount}
                     />)
-                  )}
+                  }
                 </div>
               )}
             </Grid.Column>
@@ -844,6 +856,7 @@ class PickOperationPage extends Component {
           open={this.props.currentSetupHolderIndex > 0}
           location={this.props.currentSetupHolder.deviceIndex}
           onInputEnter={this.handleBinSetupInputEnter}
+          loading={binSetupLoading}
         />
 
         { warningMessage && (

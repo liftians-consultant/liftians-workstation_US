@@ -49,26 +49,36 @@ class SideNavigation extends Component {
     }
   }
 
+  handleOperationBtnClicked(url) {
+    this.props.checkCurrentUnFinishTask(this.props.stationId).then((res) => {
+      if (res.taskCount === 0) {
+        toast.info('No tasks currently exist.');
+      } else {
+        this.props.history.push(url);
+      }
+    });
+  }
+
   handleLogoutBtnClicked() {
     api.station.checkCurrentUnFinishTask(this.stationId).then((res) => {
       if (res) {
-        const unfinishedTask = res.filter((o) => o.cnt > 0);
+        const unfinishedTask = res.filter(o => o.cnt > 0);
         if (unfinishedTask.length > 0) {
           toast.error('Unable to log out, please finish all the task first!');
 
           // stop pick operation
-          api.station.stopStationOperation(this.stationId, this.props.username, 'P').then((res) => {
-            if (res.data) {
+          api.station.stopStationOperation(this.stationId, this.props.username, 'P').then((response) => {
+            if (response.data) {
               console.log('[STOP STATION OPERATION] SUCCESS');
             } else {
               toast.error('Error while stopping pick operation');
             }
           });
         } else {
-          api.station.deactivateStationWithUser(this.stationId, this.props.username).then((res) => {
+          api.station.deactivateStationWithUser(this.stationId, this.props.username).then(() => {
             console.log('[DEACTIVATE STATION] Station Deactivated');
-            this.props.logout().then((res) => {
-              if (res) {
+            this.props.logout().then((result) => {
+              if (result) {
                 toast.success('Successfully logged out');
               }
             });
@@ -118,11 +128,9 @@ class SideNavigation extends Component {
             </Link>
           </div>
           <div className="nav-item-container">
-            <Link to={operationUrl} replace={currentPath === operationUrl}>
-              <Button className="nav-btn">
-                Operation
-              </Button>
-            </Link>
+            <Button className="nav-btn" onClick={() => this.handleOperationBtnClicked(operationUrl)}>
+              Operation
+            </Button>
           </div>
           <div className="nav-item-container">
             <Link to={taskListUrl} replace={currentPath === taskListUrl}>

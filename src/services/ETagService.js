@@ -2,7 +2,7 @@ import api from 'api';
 
 let ETagService;
 
-if (process.env.REACT_APP_ENV === 'PRODUCTION') {
+// if (process.env.REACT_APP_ENV === 'PRODUCTION') {
   ETagService = {
     turnPickLightOnById: (labelId, num) => {
       api.eTag.turnPickLightOnById(labelId, num).then((res) => {
@@ -53,28 +53,28 @@ if (process.env.REACT_APP_ENV === 'PRODUCTION') {
       });
     },
   }
-} else {
-  ETagService = {
-    turnPickLightOnById: () => {
-      return Promise.resolve(true);
-    },
+// } else {
+//   ETagService = {
+//     turnPickLightOnById: () => {
+//       return Promise.resolve(true);
+//     },
 
-    turnPickLightOffById: () => {
-      return Promise.resolve(true);
-    },
+//     turnPickLightOffById: () => {
+//       return Promise.resolve(true);
+//     },
 
-    turnEndLightOnById: () => {
-      return Promise.resolve(true);
-    },
+//     turnEndLightOnById: () => {
+//       return Promise.resolve(true);
+//     },
 
-    turnEndLightOffById: () => {
-      return Promise.resolve(true);
-    },
+//     turnEndLightOffById: () => {
+//       return Promise.resolve(true);
+//     },
 
-    checkRespond: () => {
-      return Promise.resolve(true);
-    },
-  };
-}
+//     checkRespond: () => {
+//       return Promise.resolve(true);
+//     },
+//   };
+// }
 
 export default ETagService;
