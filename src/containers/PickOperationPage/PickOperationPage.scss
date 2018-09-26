@@ -1,10 +1,16 @@
 .pick-operation-page {
   padding: 10% 4% 0;
 
-  .numpad-container, .ok-btn {
+  .ok-btn {
     position: absolute;
     bottom: 0;
     right: 0;
+  }
+
+  .numpad-container {
+    position: absolute;
+    bottom: 0;
+    right: 35%;
   }
   
   .pod-info-block {

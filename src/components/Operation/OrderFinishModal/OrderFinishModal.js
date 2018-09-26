@@ -48,7 +48,7 @@ class OrderFinishModal extends Component {
       >
         <Modal.Header><h1 className="modal-header">Order #{ data.orderNo } completed</h1></Modal.Header>
         <Modal.Content scrolling>
-          <BinGroup openedBinNum={ data.binNum } highlightColor={ 'lightgreen' }></BinGroup>
+          <BinGroup openedBinNum={ data.binNum } highlightColor={ '#4A7AFE' }></BinGroup>
           <h2>Please replaced the highlighed bin with an empty bin</h2>
           <h2>Please scan the bin</h2>
           <br />

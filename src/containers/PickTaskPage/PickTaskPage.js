@@ -7,7 +7,8 @@ import { toast } from 'react-toastify';
 import api from 'api';
 import OrderListTable from 'components/common/OrderListTable/OrderListTable';
 import PickOrderTableColumns from 'models/PickOrderTableModel';
-import { setStationTaskType } from 'redux/actions/stationAction';
+import { setStationTaskType, checkCurrentUnFinishTask } from 'redux/actions/stationAction';
+
 import './PickTaskPage.css';
 import OperationTaskMenu from 'components/OperationTaskMenu/OperationTaskMenu';
 import * as log4js from 'log4js2';
@@ -144,7 +145,19 @@ class PickTaskPage extends Component {
 
       api.pick.callServerGeneratePickTask(this.props.stationId).then(() => {
         this.log.info('[HANDLE START BTN] GenPickTask success');
-        this.props.history.push('/operation');
+        this.setState({ loading: true }, () => {
+          setTimeout(() => {
+            this.props.checkCurrentUnFinishTask(this.props.stationId).then((response) => {
+              if (response.taskCount === 0) {
+                this.log.info('[HANDLE START BTN] No Task. STAY');
+                toast.info('No tasks currently exist.');
+              } else {
+                this.log.info('[HANDLE START BTN] Yes task. Going to operation page');
+                this.props.history.push('/operation');
+              }
+            });
+          }, 2000);
+        });
       }).catch((error) => {
         this.log.info('[HANDLE START BTN] GenPickTask FAILED');
         toast.error('Error while server generate pick task. Please contact system admin.');
@@ -230,4 +243,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps, { setStationTaskType })(PickTaskPage);
+export default connect(mapStateToProps, { setStationTaskType, checkCurrentUnFinishTask })(PickTaskPage);

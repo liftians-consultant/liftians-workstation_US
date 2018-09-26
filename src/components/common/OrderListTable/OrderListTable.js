@@ -9,7 +9,7 @@ const OrderListTable = ({ columns, listData, loading }) => (
   <ReactTable
     columns={columns}
     data={listData}
-    defaultPageSize={15}
+    defaultPageSize={12}
     SubComponent={row => <OrderDetailTable taskType="P" recordId={row.original.order_No} />}
     loading={loading}
     manual

@@ -1,6 +1,6 @@
 {
   "name": "liftians-workstation",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "author": "Kevin Hong",
   "proxy": {
     "/v1": {
