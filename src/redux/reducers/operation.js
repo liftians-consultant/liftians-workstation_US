@@ -4,6 +4,7 @@ import {
   ADD_BIN_TO_HOLDER,
   UNASSIGN_BIN_FROM_HOLDER,
   SHOW_CHANGE_BIN_MODAL,
+  UNLINK_ALL_BIN_FROM_HOLDER_SUCCESS,
 } from '../types';
 
 const operationDefaultState = {
@@ -24,9 +25,9 @@ export default function operation(state = operationDefaultState, action = {}) {
       };
     case ADD_BIN_TO_HOLDER:
       return { ...state,
-        deviceList: state.deviceList.map(device =>
-          (device.deviceId === action.holderId)
-          ? { ...device, bin: action.binInfo } : device)
+        deviceList: state.deviceList.map((device) => { // eslint-disable-line arrow-body-style
+          return (device.deviceId === action.holderId) ? { ...device, bin: action.binInfo } : device;
+        }),
       };
     case SET_HOLDER_SETUP_WAITLIST:
       return { ...state,
@@ -36,14 +37,23 @@ export default function operation(state = operationDefaultState, action = {}) {
     case UNASSIGN_BIN_FROM_HOLDER:
       return {
         ...state,
-        deviceList: state.deviceList.map(device =>
-          (device.deviceId === action.holderId)
-          ? { ...device, bin: {} } : device)
+        deviceList: state.deviceList.map((device) => { // eslint-disable-line arrow-body-style
+          return (device.deviceId === action.holderId) ? { ...device, bin: {} } : device;
+        }),
       };
     case SHOW_CHANGE_BIN_MODAL:
       return {
         ...state,
         openChangeBinModal: action.showChangeBinModal,
+      };
+    case UNLINK_ALL_BIN_FROM_HOLDER_SUCCESS:
+      return {
+        ...state,
+        deviceList: [],
+        currentSetupHolder: {
+          deviceIndex: 0,
+          deviceId: -1,
+        },
       };
     default:
       return state;

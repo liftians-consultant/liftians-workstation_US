@@ -9,7 +9,7 @@ import api from 'api';
 import * as actions from 'redux/actions/authAction';
 import appConfig from 'services/AppConfig';
 import { checkCurrentUnFinishTask } from 'redux/actions/stationAction';
-import { showChangeBinModal } from 'redux/actions/operationAction';
+import { showChangeBinModal, unlinkAllBinFromHolder } from 'redux/actions/operationAction';
 import './SideNavigation.css';
 
 class SideNavigation extends Component {
@@ -63,29 +63,36 @@ class SideNavigation extends Component {
     api.station.checkCurrentUnFinishTask(this.stationId).then((res) => {
       if (res) {
         const unfinishedTask = res.filter(o => o.cnt > 0);
-        if (unfinishedTask.length > 0) {
+        if (unfinishedTask.length > 0) { // have remainging task
           toast.error('Unable to log out, please finish all the task first!');
-
+        } else { // no more task
           // stop pick operation
           api.station.stopStationOperation(this.stationId, this.props.username, 'P').then((response) => {
             if (response.data) {
               console.log('[STOP STATION OPERATION] SUCCESS');
+              api.station.deactivateStationWithUser(this.stationId, this.props.username).then(() => {
+                console.log('[DEACTIVATE STATION] Station Deactivated');
+                this.props.unlinkAllBinFromHolder(this.stationId).then((result) => {
+                  if (result) {
+                    toast.info('All bin unlinked from holder');
+                  } else {
+                    toast.warn('Bin unlink from holder failed');
+                  }
+                });
+                this.props.logout().then((result) => {
+                  if (result) {
+                    toast.success('Successfully logged out');
+                  }
+                });
+              }).catch(() => {
+                toast.error('Error while deactivating station');
+                console.log('[ERROR] error while deactivating station');
+              });
             } else {
               toast.error('Error while stopping pick operation');
             }
           });
-        } else {
-          api.station.deactivateStationWithUser(this.stationId, this.props.username).then(() => {
-            console.log('[DEACTIVATE STATION] Station Deactivated');
-            this.props.logout().then((result) => {
-              if (result) {
-                toast.success('Successfully logged out');
-              }
-            });
-          }).catch((err) => {
-            toast.error('Error while deactivating station');
-            console.log('[ERROR] error while deactivating station');
-          });
+          
         }
       }
     });
@@ -154,7 +161,7 @@ class SideNavigation extends Component {
 
 SideNavigation.propTypes = {
   history: PropTypes.shape({
-    push: PropTypes.func.isRequired
+    push: PropTypes.func.isRequired,
   }).isRequired,
   logout: PropTypes.func.isRequired,
   stationId: PropTypes.string.isRequired,
@@ -175,4 +182,5 @@ export default withRouter(connect(mapStateToProps, {
   logout: actions.logout,
   checkCurrentUnFinishTask,
   showChangeBinModal,
+  unlinkAllBinFromHolder,
 })(SideNavigation));

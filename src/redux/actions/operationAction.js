@@ -4,6 +4,7 @@ import {
   ADD_BIN_TO_HOLDER,
   UNASSIGN_BIN_FROM_HOLDER,
   SHOW_CHANGE_BIN_MODAL,
+  UNLINK_ALL_BIN_FROM_HOLDER_SUCCESS,
 } from 'redux/types';
 import api from 'api';
 import ETagService from 'services/ETagService';
@@ -45,6 +46,18 @@ function hideChangeBinModalAction() {
   return {
     type: SHOW_CHANGE_BIN_MODAL,
     showChangeBinModal: false,
+  };
+}
+
+function unlinkAllBinFromHolderSuccessAction() {
+  return {
+    type: UNLINK_ALL_BIN_FROM_HOLDER_SUCCESS,
+  };
+}
+
+function unlinkAllBinFromHolderFailureAction() {
+  return {
+    type: UNLINK_ALL_BIN_FROM_HOLDER_SUCCESS,
   };
 }
 
@@ -112,21 +125,17 @@ export const addBinToHolder = (binBarcode, holderId) => (dispatch, getState) => 
   });
 };
 
-export const unassignBinFromHolder = (holderId) => (dispatch, getState) => {
-  return api.pick.unassignBinFromHolder(holderId).then((res) => {
+export const unassignBinFromHolder = holderId => dispatch =>
+  // eslint-disable-next-line implicit-arrow-linebreak
+  api.pick.unassignBinFromHolder(holderId).then(() => {
     opActionLog.info(`Unassigned bin from ${holderId}`);
     dispatch(removeBinFromHolder(holderId));
     return Promise.resolve(true);
   });
-};
 
-export const showChangeBinModal = () => (dispatch, getState) => {
-  dispatch(showChangeBinModalAction());
-};
+export const showChangeBinModal = () => dispatch => dispatch(showChangeBinModalAction());
 
-export const hideChangeBinModal = () => (dispatch, getState) => {
-  dispatch(hideChangeBinModalAction());
-};
+export const hideChangeBinModal = () => dispatch => dispatch(hideChangeBinModalAction());
 
 export const changeHolderBin = (binBarcode, holderId) => (dispatch, getState) => {
   return api.pick.changeHolderBin(binBarcode, holderId).then((res) => {
@@ -144,3 +153,15 @@ export const changeHolderBin = (binBarcode, holderId) => (dispatch, getState) =>
     }
   });
 };
+
+export const unlinkAllBinFromHolder = stationId => dispatch =>
+  // eslint-disable-next-line implicit-arrow-linebreak
+  api.pick.unlinkAllBinFromHolder(stationId).then((res) => {
+    if (res.data) {
+      dispatch(unlinkAllBinFromHolderSuccessAction());
+      return true;
+    } else {
+      dispatch(unlinkAllBinFromHolderFailureAction());
+      return false;
+    }
+  });

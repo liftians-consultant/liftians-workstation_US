@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, Input, Dimmer, Loader } from 'semantic-ui-react';
+import { Modal, Input, Loader } from 'semantic-ui-react';
 import BinGroup from 'components/Operation/BinGroup/BinGroup';
 import ETagService from 'services/ETagService';
 import './BinSetupModal.css';
@@ -14,29 +14,29 @@ class BinSetupModal extends Component {
     this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (prevProps.open !== this.props.open && this.props.open === true) {
-      setTimeout(function(){
+      setTimeout(() => {
         this.setupInputRef.current.inputRef.value = '';
         this.setupInputRef.current.focus();
-      }.bind(this), 0);
+      }, 0);
     }
 
     if (prevProps.location !== this.props.location && this.props.location) {
-      setTimeout(function() {
-        ETagService.turnEndLightOnById(this.props.location); 
-      }.bind(this), 100);
+      setTimeout(() => {
+        ETagService.turnEndLightOnById(this.props.location);
+      }, 100);
     }
   }
 
   handleInputChange(e) {
     if (e.key === 'Enter' && e.target.value) {
       e.persist();
-      setTimeout(function() {
+      setTimeout(() => {
         this.props.onInputEnter(e.target.value, this.props.location);
         this.setupInputRef.current.inputRef.value = '';
         this.setupInputRef.current.focus();
-      }.bind(this), 100);
+      }, 100);
     }
   }
 
@@ -47,14 +47,14 @@ class BinSetupModal extends Component {
         className="bin-setup-modal-container"
         size="fullscreen"
         open={open}
-        onOpen={ this.handleOnOpen }
+        onOpen={this.handleOnOpen}
         style={{ marginTop: '10%', marginLeft: 'auto', marginRight: 'auto' }}
       >
         <Modal.Header>Bin Setup</Modal.Header>
         <Modal.Content>
-          <Loader indeterminate inverted active={loading} size="massive"/>
+          <Loader indeterminate inverted active={loading} size="massive" />
           <div className="info-text">Please place an empty bin on correspond location and scan the barcode on it.</div>
-          <BinGroup openedBinNum={location} highlighColor="orange" size="150" />
+          <BinGroup openedBinNum={location} highlightColor="#4A7AFE" size="150" />
           <Input
             onKeyPress={this.handleInputChange}
             ref={this.setupInputRef}

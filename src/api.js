@@ -226,6 +226,13 @@ const pick = {
       String(holderId),
     ],
   }),
+
+  unlinkAllBinFromHolder: stationId => axios.post(`${appConfig.getApiUrl()}/Common`, {
+    name: 'UnlinkAllBinFromHolder',
+    parameter: [
+      String(stationId),
+    ],
+  }),
 };
 
 const replenish = {
