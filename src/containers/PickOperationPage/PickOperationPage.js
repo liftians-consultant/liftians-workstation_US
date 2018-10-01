@@ -785,8 +785,7 @@ class PickOperationPage extends Component {
                 <div>
                   <ProductInfoDisplay
                     product={currentPickProduct}
-                    quantity={currentPickProduct.quantity}
-                    pickedAmount={pickedAmount}
+                    amount={currentPickProduct.quantity - pickedAmount}
                     currentBarcode={currentBarcode}
                   />
                   <div className="action-group-container">

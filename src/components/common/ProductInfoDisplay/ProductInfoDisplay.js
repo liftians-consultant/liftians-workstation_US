@@ -6,17 +6,17 @@ import ImageNotFound from '../../../assets/images/no_photo_available.jpg';
 
 const productImgBaseUrl = process.env.REACT_APP_IMAGE_BASE_URL;
 
-const ProductInfoDisplay = ({ product, pickedAmount, quantity, currentBarcode }) => {
+const ProductInfoDisplay = ({ product, amount, currentBarcode }) => {
   const imageUrl = `${productImgBaseUrl}${product.productID}.png`;
 
   return (
     <div className="product-info-block">
       <div className="product-remain-container">
         <span className="remain-amount">
-          {quantity - pickedAmount}
+          {amount}
         </span>
         <div className="remain-unit">
-          {quantity - pickedAmount > 1 ? 'items' : 'item'}
+          {amount > 1 ? 'items' : 'item'}
         </div>
       </div>
       <div className="product-info-container">
@@ -30,20 +30,25 @@ const ProductInfoDisplay = ({ product, pickedAmount, quantity, currentBarcode })
           </span>
           <br />
           <br />
-          <Label size="huge">
-            {currentBarcode}
-          </Label>
+          { currentBarcode !== '' && (
+            <Label size="huge">
+              {currentBarcode}
+            </Label>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
+ProductInfoDisplay.defaultProps = {
+  currentBarcode: '',
+};
+
 ProductInfoDisplay.propTypes = {
   product: PropTypes.object.isRequired,
-  quantity: PropTypes.number.isRequired,
-  pickedAmount: PropTypes.number.isRequired,
-  currentBarcode: PropTypes.string.isRequired,
+  amount: PropTypes.number.isRequired,
+  currentBarcode: PropTypes.string,
 };
 
 export default ProductInfoDisplay;

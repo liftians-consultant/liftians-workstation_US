@@ -18,8 +18,12 @@ class NumPad extends Component {
   }
 
   selectNumberHandler(number) {
-    const total = this.state.total + number;
-    this.setState({ total });
+    if (number === -1) {
+      this.setState({ total: '' });
+    } else {
+      const total = this.state.total + number;
+      this.setState({ total });
+    }
   }
 
   enterHandler() {
@@ -52,31 +56,33 @@ class NumPad extends Component {
               <Button disabled={disabled || highlightAmount < 9} primary={highlightAmount >= 9} onClick={() => this.clickHandler(9)}>9</Button>
             </div>
             <div className="num-group">
-              <Button disabled={disabled || highlightAmount < 9} primary={highlightAmount > 9}  onClick={() => this.otherClickHandler()} className="other-btn" >Other</Button>
+              <Button disabled={disabled || highlightAmount < 9} primary={highlightAmount > 9} onClick={() => this.otherClickHandler()} className="other-btn">Other</Button>
             </div>
           </div>
         )}
 
         { showMore && (
           <div className="numpad-container">
+
             <div className="num-group">
-              <Button onClick={ () => this.selectNumberHandler(1) }>1</Button>
-              <Button onClick={ () => this.selectNumberHandler(2) }>2</Button>
-              <Button onClick={ () => this.selectNumberHandler(3) }>3</Button>
+              <Button onClick={() => this.selectNumberHandler(1)}>1</Button>
+              <Button onClick={() => this.selectNumberHandler(2)}>2</Button>
+              <Button onClick={() => this.selectNumberHandler(3)}>3</Button>
             </div>
             <div className="num-group">
-              <Button onClick={ () => this.selectNumberHandler(4) }>4</Button>
-              <Button onClick={ () => this.selectNumberHandler(5) }>5</Button>
-              <Button onClick={ () => this.selectNumberHandler(6) }>6</Button>
+              <Button onClick={() => this.selectNumberHandler(4)}>4</Button>
+              <Button onClick={() => this.selectNumberHandler(5)}>5</Button>
+              <Button onClick={() => this.selectNumberHandler(6)}>6</Button>
             </div>
             <div className="num-group">
-              <Button onClick={ () => this.selectNumberHandler(7) }>7</Button>
-              <Button onClick={ () => this.selectNumberHandler(8) }>8</Button>
-              <Button onClick={ () => this.selectNumberHandler(9) }>9</Button>
+              <Button onClick={() => this.selectNumberHandler(7)}>7</Button>
+              <Button onClick={() => this.selectNumberHandler(8)}>8</Button>
+              <Button onClick={() => this.selectNumberHandler(9)}>9</Button>
             </div>
             <div className="num-group">
-              <Button onClick={ () => this.selectNumberHandler(0) }>0</Button>
-              <Button className="enterBtn" onClick={ () => this.enterHandler() }>Enter</Button>
+              <Button onClick={() => this.selectNumberHandler(0)}>0</Button>
+              <Button className="enterBtn" onClick={() => this.enterHandler()}>Enter</Button>
+              <Button className="enterBtn" onClick={() => this.selectNumberHandler(-1)}>Clear</Button>
             </div>
           </div>
         )}

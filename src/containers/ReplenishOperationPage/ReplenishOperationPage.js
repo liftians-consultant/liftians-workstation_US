@@ -1,31 +1,28 @@
 import React, { Component } from 'react';
-import { connect } from "react-redux";
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import _ from "lodash";
-import { Segment, Grid, Button, Dimmer, Loader, Image, Input } from 'semantic-ui-react';
+import _ from 'lodash';
+import { Segment, Grid, Button, Dimmer, Loader, Input } from 'semantic-ui-react';
 
 import api from 'api';
 import PodShelf from 'components/common/PodShelf/PodShelf';
 import NumPad from 'components/common/NumPad/NumPad';
 import WarningModal from 'components/common/WarningModal/WarningModal';
+import ProductInfoDisplay from 'components/common/ProductInfoDisplay/ProductInfoDisplay';
 
 import './ReplenishOperationPage.css';
-import ImageNotFound from 'assets/images/no_photo_available.jpg';
-
 
 const productImgBaseUrl = process.env.REACT_APP_IMAGE_BASE_URL;
 
 class ReplenishOperationPage extends Component {
-
   state = {
-    businessMode: process.env.REACT_APP_BUSINESS_MODE,
     podInfo: {
       podId: 0,
       podSide: 0,
-      shelfBoxes: []
+      shelfBoxes: [],
     },
     currentReplenishProduct: {
-      totalReplenishQuantity: 0
+      totalReplenishQuantity: 0,
     },
     taskId: 0,
     orderList: [],
@@ -39,13 +36,16 @@ class ReplenishOperationPage extends Component {
     warningMessage: {
       onCloseFunc: () => {},
       headerText: '',
-      contentText: ''
-    }
-  }
+      contentText: '',
+    },
+  };
+
+  businessMode = process.env.REACT_APP_BUSINESS_MODE;
 
   checkPodInterval = {};
 
   scanBoxInputRef = null;
+
   scanProductInputRef = null;
 
   wrongBoxWarningMessage = {
@@ -62,11 +62,11 @@ class ReplenishOperationPage extends Component {
 
   finishedOrder = {
     binNum: 3,
-    orderNo: '235345'
+    orderNo: '235345',
   };
 
   constructor(props) {
-    super(props)
+    super(props);
 
     // Setup Ref for input fields
     this.scanBoxInputRef = React.createRef();
@@ -127,12 +127,12 @@ class ReplenishOperationPage extends Component {
     // TODO: add simulation mode to .env
     let isRecieve = false;
     this.setState({ loading: true });
-    this.checkPodInterval = setInterval( () => {
+    this.checkPodInterval = setInterval(() => {
       if (!isRecieve) {
-        api.station.atStationTask(this.props.stationId).then( res => {
+        api.station.atStationTask(this.props.stationId).then((res) => {
           if (res.data > 0) {
             console.log(`Pod arrive station with TaskId ${res.data}`);
-            this.setState({ orderProductList: res.data, taskId: res.data }, () => isRecieve = true);
+            this.setState({ orderProductList: res.data, taskId: res.data }, () => { isRecieve = true; });
           }
         });
       } else {
@@ -179,9 +179,9 @@ class ReplenishOperationPage extends Component {
       return;
     }
 
-    console.log("[REPLENISH] Request data", data);
-    console.log("[REPLENISH] BoxBarcode", data.boxBarcode);
-    api.replenish.atStationSubmitReplenishProduct(data).then(res => {
+    console.log('[REPLENISH] Request data', data);
+    console.log('[REPLENISH] BoxBarcode', data.boxBarcode);
+    api.replenish.atStationSubmitReplenishProduct(data).then((res) => {
       if (res.data) { // return 1 if success
         console.log('[REPLENISH] Success');
 
@@ -221,7 +221,7 @@ class ReplenishOperationPage extends Component {
   }
 
   forcePodToLeaveStation() {
-    api.station.forcePodToLeaveStationByTaskId(this.props.stationId, this.state.taskId).then(res => {
+    api.station.forcePodToLeaveStationByTaskId(this.props.stationId, this.state.taskId).then((res) => {
       console.log(`[REPLENISH] Force Pod with TaskId ${this.state.taskId} to leave`);
       this.getUpcomingPod();
       this.setFocusToBoxScanInput();
@@ -233,22 +233,22 @@ class ReplenishOperationPage extends Component {
 
     this.getProductBarcodeList(); // SIMULATION: GET BARCODE
 
-    api.station.getPodLayoutInfoByTaskID(this.state.taskId).then(res => {
+    api.station.getPodLayoutInfoByTaskID(this.state.taskId).then((res) => {
       // console.log(res.data);
       if (res.data.length) {
         const podInfo = {
           ...this.state.podInfo,
-          shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxBox, 10) }).reverse().value()
-        }
-        this.setState({ podInfo, loading: false })
+          shelfBoxes: _.chain(res.data).sortBy('shelfID').map((elmt) => { return parseInt(elmt.maxBox, 10); }).reverse().value(),
+        };
+        this.setState({ podInfo, loading: false });
       }
-    }).catch( err => {
+    }).catch((err) => {
       console.error('[ERROR] Getting pod info', err);
     });
   }
 
   getProductList() {
-    api.replenish.getReplenishInfoByTaskId(this.state.taskId).then(res => {
+    api.replenish.getReplenishInfoByTaskId(this.state.taskId).then((res) => {
       // console.log(res.data);
       // res.data = testProduct;
       if (res.data.length) {
@@ -258,16 +258,16 @@ class ReplenishOperationPage extends Component {
           podInfo: {
             podId: res.data[0].podID,
             podSide: res.data[0].podSide,
-            shelfBoxes: []
+            shelfBoxes: [],
           },
           replenishedAmount: 0,
           boxBarcode: 0,
-          barcode: ''
+          barcode: '',
         }, this.getPodInfo);
       } else {
         // when nothing return, that means the pod is finished
         // and need to wait for the next pod come in to station
-        console.log("[GET PRODUCT LIST] No order return from the server");
+        console.log('[GET PRODUCT LIST] No order return from the server');
         this.getUpcomingPod();
       }
     }).catch((err) => {
@@ -285,14 +285,14 @@ class ReplenishOperationPage extends Component {
 
   getProductBarcodeList(callback) {
     const { productID, source_lines_id } = this.state.currentReplenishProduct;
-    api.replenish.getProductInfoByTaskId(this.state.taskId, source_lines_id, productID, 100).then( res => {
+    api.replenish.getProductInfoByTaskId(this.state.taskId, source_lines_id, productID, 100).then((res) => {
       if (res.data) {
-        const barcodeList = res.data.map(item => {
+        const barcodeList = res.data.map((item) => {
           return {
             barcode: item.productBarCode,
-            scanned: false
-          }
-        })
+            scanned: false,
+          };
+        });
         console.log('[GET PRODUCT BARCODE LIST] Barcode List', barcodeList);
         this.setState({ barcodeList });
       }
@@ -300,15 +300,15 @@ class ReplenishOperationPage extends Component {
       if (callback) {
         callback();
       }
-    }).catch( err => {
-      console.log("[ERROR] WHILE GETTING BARCODE LIST", err);
+    }).catch((err) => {
+      console.log('[ERROR] WHILE GETTING BARCODE LIST', err);
     });
   }
 
   /* Simulate when the user scan the product */
   handleProductScanBtnClick() {
     // TODO: SIMULATION ONLY! NO PRODUCTION
-    if (this.state.businessMode === 'pharmacy') {
+    if (this.businessMode === 'pharmacy') {
       // all product have unique barcode. scann all product then send out the finish request
 
       this.setState({ replenishedAmount: this.state.replenishedAmount + 1 }, () => {
@@ -317,7 +317,7 @@ class ReplenishOperationPage extends Component {
           this.finishReplenish(this.state.replenishedAmount);
         }
       });
-    } else if (this.state.businessMode === 'ecommerce' ) {
+    } else if (this.businessMode === 'ecommerce') {
       // only one barcode will be return and all product use same barcode
       // scanned once, send request everything number pad is clicked.
       console.log('[SCAN PRODUCT] SIMULATION: product scanned');
@@ -350,7 +350,7 @@ class ReplenishOperationPage extends Component {
   }
 
   validatePharmacyBarcode(barcode) {
-    return new Promise( (resolve, reject) => {
+    return new Promise( (resolve) => {
       const barcodeIndex = _.findIndex(this.state.barcodeList, function(o) { return o.barcode === barcode });
       // validate if barcode is in barcode list
       if (barcodeIndex === -1) { // TODO: this is not right, its an object now. User lodash
@@ -361,7 +361,7 @@ class ReplenishOperationPage extends Component {
       if (this.state.barcodeList[barcodeIndex].scanned === true) {
         resolve({ valid: false, message: 'Duplicate barcode!'});
       }
-  
+
       // // check if barcode on shelf
       // api.pick.getInventoryByProductBarcode(barcode, this.state.podInfo.podId, this.state.podInfo.podSide).then( res => {
       //   // api.pick.getInventoryByProductBarcode('T168000', 33 , 0).then( res => {
@@ -385,7 +385,7 @@ class ReplenishOperationPage extends Component {
     if (e.key === 'Enter' && e.target.value) {
       console.log(`[SCAN PRODUCT] Product Scanned: ${e.target.value}`);
 
-      if (this.state.businessMode === 'pharmacy') {
+      if (this.businessMode === 'pharmacy') {
         this.validatePharmacyBarcode(e.target.value).then((result) => {
           if (result.valid) {
             // all product have unique barcode. scann all product then send out the finish request
@@ -401,17 +401,17 @@ class ReplenishOperationPage extends Component {
             const warningMessage = {
               onCloseFunc: this.closeWrongProductModal,
               headerText: 'Warning',
-              contentText: result.message
+              contentText: result.message,
             }
             this.setState({ openＷarningModal: true, warningMessage });
           }
         });
-      } else if (this.state.businessMode === 'ecommerce' ) {
+      } else if (this.businessMode === 'ecommerce') {
         // only one barcode will be return and all product use same barcode
         // scanned once, send request everything number pad is clicked.
         if (this.scanValidation(e.target.value)) {
           console.log('[SCAN PRODUCT] Product correct');
-          this.setState({ barcodeList: [{ barcode: e.target.value, scanned: true }]});
+          this.setState({ barcodeList: [{ barcode: e.target.value, scanned: true }] });
         } else {
           console.log('[SCAN PRODUCT] Wrong product!');
           this.setState({ openＷarningModal: true, warningMessage: this.wrongProductWarningMessage });
@@ -434,9 +434,9 @@ class ReplenishOperationPage extends Component {
   }
 
   handleNextPodBtnClick() {
-    if (this.state.businessMode === 'pharmacy') {
+    if (this.businessMode === 'pharmacy') {
       this.finishReplenish(this.state.replenishedAmount, true);
-    } else if (this.state.businessMode === 'ecommerce') {
+    } else if (this.businessMode === 'ecommerce') {
       this.forcePodToLeaveStation();
     }
   }
@@ -466,54 +466,50 @@ class ReplenishOperationPage extends Component {
       column: currentReplenishProduct ? parseInt(currentReplenishProduct.boxID, 10) : 0
     };
 
-    const imageUrl = productImgBaseUrl + currentReplenishProduct.productID + '.png';
+    const imageUrl = `${productImgBaseUrl}${currentReplenishProduct.productID}.png`;
 
     const isScanned = (barcodeList.filter(o => o.scanned).length > 0);
 
     return (
       <div className="replenish-operation-page">
         <Dimmer active={this.state.loading}>
-          <Loader content='Waiting for pod...' indeterminate size="massive"/>
+          <Loader content="Waiting for pod..." indeterminate size="massive" />
         </Dimmer>
         <Grid>
           <Grid.Row>
             <Grid.Column width={5}>
               <div className="pod-info-block">
-                <span>Pod #{ podInfo.podId } </span><span>- { podInfo.podSide }</span>
+                <span>Pod #{podInfo.podId} </span><span>- {podInfo.podSide}</span>
               </div>
               <Segment.Group>
                 <Segment>
-                  <PodShelf podInfo={ podInfo } highlightBox={ highlightBox }></PodShelf>
+                  <PodShelf podInfo={podInfo} highlightBox={highlightBox} />
                 </Segment>
               </Segment.Group>
 
               <div>
-                <Button color="red" >Shortage</Button>
+                <Button color="red">Shortage</Button>
               </div>
             </Grid.Column>
 
             <Grid.Column width={11}>
-              <div className="product-info-block">
-                <div className="product-name-container">
-                  <span className="product-name">{ currentReplenishProduct.productName }</span>
-                </div>
-                <div className="product-remain-container">
-                  <span className="remain-amount">{ currentReplenishProduct.totalReplenishQuantity - this.state.replenishedAmount }</span>
-                </div>
-                <div className="product-image-container">
-                  <Image className="product-image" src={ imageUrl } onError={(e) => { e.target.src = ImageNotFound }}></Image>
-                </div>
-              </div>
+              <ProductInfoDisplay
+                product={currentReplenishProduct}
+                amount={currentReplenishProduct.totalReplenishQuantity - this.state.replenishedAmount}
+                // currentBarcode={currentBarcode}
+              />
               <div className="action-group-container">
                 <div className="scan-input-group">
                   <div className="scan-input-holder">
-                    <Input type="text"
+                    <Input
+                      type="text"
                       placeholder="Enter or Scan Box Barcode"
                       ref={this.scanBoxInputRef}
                       onKeyPress={this.handleBoxScanKeyPress} />
                   </div>
                   <div className="scan-input-holder">
-                    <Input type="text"
+                    <Input
+                      type="text"
                       placeholder="Enter or scan Product Barcode"
                       ref={this.scanProductInputRef}
                       onKeyPress={this.handleProductScanKeyPress} />
@@ -521,25 +517,30 @@ class ReplenishOperationPage extends Component {
                 </div>
                 <div className="action-btn-group">
                   {/* <Button primary onClick={ () => this.setFocusToInputManual() }>Set Focus</Button> */}
-                  <Button primary size="medium" onClick={ () => this.handleNextPodBtnClick() }>Next Pod</Button>
+                  <Button primary size="medium" onClick={() => this.handleNextPodBtnClick()}>Next Pod</Button>
                 </div>
 
                 { process.env.REACT_APP_ENV === 'DEV' && (
                   <div>
-                    <Button primary size="medium" onClick={ () => this.handleScanBoxBtnClick() }>Scan Box</Button>
-                    <Button primary size="medium" onClick={ () => this.handleProductScanBtnClick() } disabled={ this.state.boxBarcode === 0 } >Scan Product</Button>
+                    <Button primary size="medium" onClick={() => this.handleScanBoxBtnClick()}>Scan Box</Button>
+                    <Button primary size="medium" onClick={() => this.handleProductScanBtnClick()} disabled={this.state.boxBarcode === 0}>Scan Product</Button>
                   </div>
                 )}
-              
-                { this.state.businessMode === 'ecommerce' && <NumPad highlightAmount={ currentReplenishProduct.totalReplenishQuantity - replenishedAmount }
-                  callback={this.selectReplenishedAmount}
-                  disabled={ !isScanned || !boxBarcode }></NumPad> }
+
+                { this.businessMode === 'ecommerce' && (
+                  <NumPad
+                    highlightAmount={currentReplenishProduct.totalReplenishQuantity - replenishedAmount}
+                    callback={this.selectReplenishedAmount}
+                    disabled={!isScanned || !boxBarcode}
+                  />
+                )}
               </div>
             </Grid.Column>
           </Grid.Row>
         </Grid>
 
-        <WarningModal open={ this.state.openＷarningModal}
+        <WarningModal
+          open={this.state.openＷarningModal}
           onClose={warningMessage.onCloseFunc.bind(this)}
           headerText={warningMessage.headerText}
           contentText={warningMessage.contentText}
@@ -555,8 +556,8 @@ ReplenishOperationPage.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    stationId: state.station.id
-  }
+    stationId: state.station.id,
+  };
 }
 
 export default connect(mapStateToProps, {})(ReplenishOperationPage);
