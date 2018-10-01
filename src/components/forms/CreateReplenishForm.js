@@ -2,19 +2,23 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Form, Input, Button, Checkbox, Select, Dropdown } from 'semantic-ui-react';
 import moment from 'moment';
+import { toast } from 'react-toastify';
+import api from 'api';
 
 class CreateReplenishForm extends Component {
   initData = {
-    productSku: '',
     quantity: 0,
     unitNum: 1,
   };
 
   state = {
+    product: {},
+    scancode: '',
     data: this.initData,
     loading: false,
     unitNumError: false,
     quantityError: false,
+    scancodeError: false,
   }
 
   constructor(props) {
@@ -24,6 +28,8 @@ class CreateReplenishForm extends Component {
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleFormChange = this.handleFormChange.bind(this);
+    this.handleScancodeChange = this.handleScancodeChange.bind(this);
+    this.handleScancodeKeyPress = this.handleScancodeKeyPress.bind(this);
   }
 
   static generateLineItemNo() {
@@ -56,48 +62,79 @@ class CreateReplenishForm extends Component {
     }
 
     // add product to list
-    const selectedSku = this.state.data.productSku;
-    const productObj = this.props.productListOptions.find(obj => obj.key === selectedSku);
+    const { product, scancode } = this.state;
     const data = {
       itemId: CreateReplenishForm.generateLineItemNo(),
-      sku: productObj.product.sku,
-      name: productObj.product.name,
+      sku: product.sku,
+      caseNbr: product.barcode,
+      name: product.productName,
       unitNum: this.state.data.unitNum,
       quantity: this.state.data.quantity,
     };
 
     this.props.onSubmit(data);
-    this.setState({ data: this.initData });
+    this.setState({ data: this.initData, product: {}, scancode: '' });
   }
 
   handleFormChange(e, { name, value }) {
     this.setState(prevState => ({ data: { ...prevState.data, [name]: value } }));
+  }
 
-    if (name === 'product') {
-      this.quantityInputRef.current.inputRef.value = '';
-      this.quantityInputRef.current.focus();
+  handleScancodeChange(e, { value }) {
+    if (value === this.state.scancode) {
+      return;
     }
+
+    this.setState({ scancode: value });
+  }
+
+  handleScancodeKeyPress(e) {
+    if (this.state.scancode === '') {
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      this.setState({ loading: true, product: {} });
+      const { accountNo, token } = this.props;
+      const { scancode } = this.state;
+      api.inventory.getProductInfoByScanCode(scancode, token).then((res) => {
+        if (res.data) {
+          if (res.data.length > 0) { // product exist
+            // filter account
+            const product = res.data.find(obj => parseInt(obj.accountNo, 10) === accountNo);
+            this.setState({ loading: false, product });
+          } else {
+            toast.warning('Cannot find product associate to the scancode.');
+            this.setState({ loading: false, scancode: '', product: {} });
+          }
+        } else {
+          this.setState({ loading: false });
+        }
+      }).catch((error) => {
+        toast.error(error.message);
+        this.setState({ loading: false });
+      });
+    }
+
   }
 
   render() {
-    const { data, loading, product, unitNumError, quantityError } = this.state;
-    const { productListOptions } = this.props;
+    const { data, loading, scancode, unitNumError, quantityError, scancodeError, product } = this.state;
+    const { accountNo } = this.props;
 
     return (
-      <Form inverted widths="equal" size="small" onSubmit={this.handleSubmit} loading={loading} disabled={productListOptions.length === 0}>
+      <Form inverted widths="equal" size="small" onSubmit={this.handleSubmit} loading={loading}>
         <Form.Group>
-          <Form.Field>
-            <label>Product</label>
-            <Dropdown
-              placeholder="Select Product"
-              disabled={productListOptions.length === 0}
-              fluid search selection
-              name="productSku"
-              value={data.productSku}
-              options={productListOptions}
-              onChange={this.handleFormChange}
-            />
-          </Form.Field>
+          <Form.Field
+            control={Input}
+            label="Scancode"
+            disabled={accountNo === 0}
+            name="scancode"
+            value={scancode}
+            error={scancodeError}
+            onChange={this.handleScancodeChange}
+            onKeyPress={this.handleScancodeKeyPress}
+          />
           <Form.Field
             control={Input}
             required
@@ -105,27 +142,31 @@ class CreateReplenishForm extends Component {
             width="4"
             name="unitNum"
             value={data.unitNum}
-            disabled={productListOptions.length === 0}
+            disabled={accountNo === 0 || !product.barcode}
             onChange={this.handleFormChange}
             error={unitNumError}
           />
-          <Form.Field width="4" required
+          <Form.Field
+            width="4"
+            required
             error={quantityError}
-            disabled={productListOptions.length === 0}
+            disabled={accountNo === 0}
           >
             <label>Quantity</label>
-            <Input 
+            <Input
               name="quantity"
               value={data.quantity}
               onChange={this.handleFormChange}
               ref={this.quantityInputRef}
+              disabled={accountNo === 0 || !product.barcode}
             />
           </Form.Field>
         </Form.Group>
         <Form.Field
           control={Button}
           className="submit-btn"
-          disabled={productListOptions.length === 0}>
+          disabled={accountNo === 0 || !product.barcode}
+        >
           Add Product
         </Form.Field>
       </Form>
@@ -134,7 +175,7 @@ class CreateReplenishForm extends Component {
 }
 
 CreateReplenishForm.propTypes = {
-  productListOptions: PropTypes.array.isRequired,
+  accountNo: PropTypes.number.isRequired,
   onSubmit: PropTypes.func.isRequired,
 };
 

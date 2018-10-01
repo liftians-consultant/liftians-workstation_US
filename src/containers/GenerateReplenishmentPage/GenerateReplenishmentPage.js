@@ -14,7 +14,7 @@ import GenReplenishProductListTable from 'components/tables/GenReplenishProductL
 class GenerateReplenishmentPage extends Component {
   initData = {
     items: [],
-    accountNo: '',
+    accountNo: 0,
     requestNo: GenerateReplenishmentPage.generateReceiveNo(),
     priority: 1,
   };
@@ -154,7 +154,7 @@ class GenerateReplenishmentPage extends Component {
 
   handleDeleteConfirmAction(result) {
     if (result) {
-      let newItems = [...this.state.data.items];
+      const newItems = [...this.state.data.items];
       newItems.splice(this.deleteIndex, 1);
       this.setState(prevState => ({ data: { ...prevState.data, items: newItems }, openDeleteConfirm: false }));
     }
@@ -163,8 +163,9 @@ class GenerateReplenishmentPage extends Component {
 
   handleSubmitConfirmAction(result) {
     if (result) {
-      let requestData = this.state.data;
+      const requestData = this.state.data;
       requestData.creator = this.props.username;
+      requestData.receiveDate = moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS);
       this.confirm(requestData);
       this.setState({ data: this.initData, openSubmitConfirm: false });
     }
@@ -173,6 +174,10 @@ class GenerateReplenishmentPage extends Component {
 
   confirm = data => erpApi.replenish.createReplenish(data).then((response) => {
     if (response.data && response.data.success) {
+      if (response.data.recordRejected > 0) {
+        toast.warn('Your request has been rejected. Please make sure all the information are correct.');
+        return false;
+      }
       toast.success('Replenish Created');
       return true;
     }
@@ -201,7 +206,7 @@ class GenerateReplenishmentPage extends Component {
           </Form>
           <CreateReplenishForm
             onSubmit={this.handleAddProduct}
-            productListOptions={productListOptions}
+            accountNo={data.accountNo}
           />
 
           <br />
@@ -247,8 +252,8 @@ GenerateReplenishmentPage.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    username: state.user.info.user_Name
-    // username: state.user.username,
+    // username: state.user.info.user_Name
+    username: state.user.username,
   };
 }
 

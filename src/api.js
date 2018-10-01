@@ -323,6 +323,8 @@ const inventory = {
       String(data.expireDate),
     ],
   }),
+
+  getProductInfoByScanCode: scancode => axios.get(`${appConfig.getApiUrl()}/Info/GetProductInfoByScanCode/?scanCode=${scancode}`),
 };
 
 const system = {
