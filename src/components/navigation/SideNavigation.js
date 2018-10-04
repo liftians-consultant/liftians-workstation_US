@@ -130,7 +130,7 @@ class SideNavigation extends Component {
           <div className="nav-item-container">
             <Link to="/" replace={currentPath === '/'}>
               <Button className="nav-btn">
-                Menu
+                Main Menu
               </Button>
             </Link>
           </div>

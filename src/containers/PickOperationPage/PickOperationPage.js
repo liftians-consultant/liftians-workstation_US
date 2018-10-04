@@ -100,25 +100,19 @@ class PickOperationPage extends Component {
   }
 
   componentWillMount() {
-
     this.logInfo('Into Pick Operation Page');
 
     this.getUpcomingPod();
     ETagService.turnEndLightOffById(0);
 
-    if (this.props.deviceList.length === 0) {
-      this.logInfo('[GET STATION DEVICE LIST]');
-      this.props.getStationDeviceList(this.props.stationId).then(() => {
-        this.log.info('[GET STATION DEVICE] device list get on CWM');
+    this.getDeviceList().then(() => {
+      // Register bin when first init
+      api.pick.getUnassignedHolderByStation(this.props.stationId).then((res) => {
+        this.log.info(`[UNASSINGED HOLDER] ${res.data}`);
+        if (res.data.length > 0) {
+          this.props.addHoldersToSetupWaitlist(res.data);
+        }
       });
-    }
-
-    // Register bin when first init
-    api.pick.getUnassignedHolderByStation(this.props.stationId).then((res) => {
-      this.log.info(`[UNASSINGED HOLDER] ${res.data}`);
-      if (res.data.length > 0) {
-        this.props.addHoldersToSetupWaitlist(res.data);
-      }
     });
   }
 
@@ -132,6 +126,18 @@ class PickOperationPage extends Component {
   componentDidMount() {
     this.setFocusToScanInput();
   }
+
+  getDeviceList = () => new Promise((resolve) => {
+    if (this.props.deviceList.length === 0) {
+      this.logInfo('[GET STATION DEVICE LIST]');
+      this.props.getStationDeviceList(this.props.stationId).then(() => {
+        this.log.info('[GET STATION DEVICE] device list get on CWM');
+        resolve(true);
+      });
+    } else {
+      resolve(true);
+    }
+  });
 
   logInfo(msg) {
     // console.log(msg);
@@ -227,7 +233,7 @@ class PickOperationPage extends Component {
     }, 1500);
   }
 
-  validateAfterPickData(data) {
+  validateAfterPickData() {
     return true; // need to work on
   }
 
@@ -414,7 +420,7 @@ class PickOperationPage extends Component {
           };
           this.getBarcode(data);
           this.getPodInfo();
-          if (!this.state.openBinSetupModal && !this.state.openOrderFinishModal) {
+          if (!this.state.openBinSetupModal || !this.state.openOrderFinishModal) {
             this.setFocusToScanInput();
           }
         });
@@ -459,9 +465,7 @@ class PickOperationPage extends Component {
         // api.pick.getInventoryByProductBarcode('T168000', 33 , 0).then( res => {
         this.logInfo(`[VALIDATE BARCODE] ${JSON.stringify(res.data)}`);
         if (res.data.length > 0) { // barcode is on the shelf
-          const search = res.data.find((item) => {
-            return (item.shelfID === currentPickProduct.shelfID) && (item.boxID === currentPickProduct.boxID);
-          });
+          const search = res.data.find(item => (item.shelfID === currentPickProduct.shelfID) && (item.boxID === currentPickProduct.boxID));
 
           if (search) {
             this.logInfo('[VALIDATE BARCODE] Correct');
