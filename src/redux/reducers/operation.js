@@ -58,5 +58,4 @@ export default function operation(state = operationDefaultState, action = {}) {
     default:
       return state;
   }
-
 }
