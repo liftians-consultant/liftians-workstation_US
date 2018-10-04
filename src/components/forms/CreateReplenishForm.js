@@ -35,7 +35,7 @@ class CreateReplenishForm extends Component {
   static generateLineItemNo() {
     const x = parseInt(Math.random() * 10, 10);
     let lineItemNo = (moment() + x).toString();
-    lineItemNo = `LIFT-${lineItemNo.substring(5, lineItemNo.length)}`;
+    lineItemNo = lineItemNo.substring(5, lineItemNo.length);
 
     return lineItemNo;
   }

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { toast } from 'react-toastify';
 
+import api from 'api';
 import erpApi from 'erpApi';
 import SubPageContainer from 'components/common/SubPageContainer/SubPageContainer';
 import CreateProductForm from 'components/forms/CreateProductForm';
@@ -25,7 +26,15 @@ class GenerateProductPage extends Component {
 
   confirm = data => erpApi.product.createProduct(data).then((response) => {
     if (response.data && response.data.success) {
-      toast.success('Product Created');
+      toast.success('Product Created in ERP');
+
+      api.erpProcess.product().then((res) => {
+        if (res === 1) {
+          toast.success('ERP process success.');
+        } else {
+          toast.error('ERP process failed. Contact Liftians.');
+        }
+      });
       return true;
     }
     return false;

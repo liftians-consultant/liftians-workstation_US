@@ -7,10 +7,12 @@ import moment from 'moment';
 
 
 import erpApi from 'erpApi';
+import api from 'api';
 import SubPageContainer from 'components/common/SubPageContainer/SubPageContainer';
 import CreateReplenishForm from 'components/forms/CreateReplenishForm';
 import ConfirmDialogModal from 'components/common/ConfirmDialogModal/ConfirmDialogModal';
 import GenReplenishProductListTable from 'components/tables/GenReplenishProductListTable';
+
 class GenerateReplenishmentPage extends Component {
   initData = {
     items: [],
@@ -22,7 +24,6 @@ class GenerateReplenishmentPage extends Component {
   state = {
     data: this.initData,
     accountListOptions: [],
-    productListOptions: [],
     requestNo: '',
     loading: false,
     openDeleteConfirm: false,
@@ -90,7 +91,7 @@ class GenerateReplenishmentPage extends Component {
   static createAccountList(data) {
     const output = data.map(account => ({
       key: account.accountNo,
-      text: `${account.accountName} (${account.accountNo}) - ${account.active ? 'Active': 'Inactive'}`,
+      text: `${account.accountName} (${account.accountNo}) - ${account.active ? 'Active' : 'Inactive'}`,
       value: account.accountNo,
     }));
 
@@ -118,19 +119,12 @@ class GenerateReplenishmentPage extends Component {
     return output;
   }
 
-  getProductsByAccount(accountNo) {
-    erpApi.product.getProductListByAccount(accountNo).then((res) => {
-      this.setState({ productListOptions: GenerateReplenishmentPage.createProductList(res.data.products) });
-    });
-  }
-
   handleFormChange(e, { name, value }) {
     this.setState(prevState => ({ data: { ...prevState.data, [name]: value } }));
   }
 
   handleAccountChange(e, { name, value }) {
     this.setState(prevState => ({ data: { ...prevState.data, [name]: value } }));
-    this.getProductsByAccount(value);
   }
 
   handleDeleteProduct = (index) => {
@@ -178,14 +172,21 @@ class GenerateReplenishmentPage extends Component {
         toast.warn('Your request has been rejected. Please make sure all the information are correct.');
         return false;
       }
-      toast.success('Replenish Created');
+
+      toast.success('Replenish Created in ERP');
+      // process to SPD
+      // api.erpProcess.replenishment().then((res) => {
+      //   if (res === 1) {
+      //     toast.success('Replenish successfully proccesed to SPD');
+      //   }
+      // });
       return true;
     }
     return false;
   });
 
   render() {
-    const { requestNo, data, loading, accountListOptions, openDeleteConfirm, openSubmitConfirm, productListOptions } = this.state;
+    const { data, loading, accountListOptions, openDeleteConfirm, openSubmitConfirm } = this.state;
     const { username } = this.props;
 
     return (
@@ -252,8 +253,8 @@ GenerateReplenishmentPage.propTypes = {
 
 function mapStateToProps(state) {
   return {
-    // username: state.user.info.user_Name
-    username: state.user.username,
+    username: state.user.info.user_Name,
+    // username: state.user.username,
   };
 }
 
