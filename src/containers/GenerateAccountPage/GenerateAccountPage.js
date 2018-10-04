@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+
+import api from 'api';
 import erpApi from 'erpApi';
 import { toast } from 'react-toastify';
 
@@ -25,9 +27,9 @@ class GenerateAccountPage extends Component {
       return false;
     }
 
-    return erpApi.account.createAccount(data).then((response) => {
-      if (response.data && response.data.success) {
-        toast.success('Account Created');
+    return api.account.create(data).then((response) => {
+      if (response.data) {
+        toast.success(`Account number ${response.data.accountNo} has been created`);
         return true;
       }
       return false;

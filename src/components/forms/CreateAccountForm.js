@@ -5,7 +5,6 @@ import { Form, Input, Button, Checkbox } from 'semantic-ui-react';
 class CreateAccountForm extends Component {
   state = {
     data: {
-      accountNo: '',
       accountName: '',
       description: '',
       active: true,
@@ -13,7 +12,6 @@ class CreateAccountForm extends Component {
   };
 
   initData = {
-    accountNo: '',
     accountName: '',
     description: '',
     active: true,
@@ -49,7 +47,6 @@ class CreateAccountForm extends Component {
 
     return (
       <Form inverted widths="equal" size="small" onSubmit={this.handleSubmit}>
-        <Form.Field control={Input} width="4" required label="Account No" name="accountNo" value={data.accountNo} onChange={this.handleFormChange} autoFocus />
         <Form.Field control={Input} width="4" required label="Account Name" name="accountName" value={data.accountName} onChange={this.handleFormChange} />
         <Form.Field control={Input} width="8" label="Description" name="description" value={data.description} onChange={this.handleFormChange} />
 

@@ -7,9 +7,7 @@ import appConfig from 'services/AppConfig';
 
 const user = {
   login: credentials => axios.post(`${appConfig.getApiUrl()}/login`, { ...credentials }, { timeout: 6000, headers: { 'content-type': 'application/json' } })
-    .then((res) => {
-      return res.headers.authorization;
-    }),
+    .then(res => res.headers.authorization),
 
   logout: () => axios.post(`${appConfig.getApiUrl()}/logout`).then(res => res),
 
@@ -369,6 +367,27 @@ const eTag = {
   }),
 };
 
+const erpProcess = {
+  product: () => axios.get(`${appConfig.getApiUrl()}/Info/processERP?flag=1`),
+
+  inventory: () => axios.get(`${appConfig.getApiUrl()}/Info/processERP?flag=2`),
+
+  order: () => axios.get(`${appConfig.getApiUrl()}/Info/processERP?flag=3`),
+
+  replenishment: () => axios.get(`${appConfig.getApiUrl()}/Info/processERP?flag=4`),
+};
+
+const account = {
+  insert: data => axios.post(`${appConfig.getApiUrl()}/Common`, {
+    name: 'InsertAccount',
+    parameter: [
+      String(data.accountName),
+      String(data.description),
+      String(data.active),
+    ],
+  }),
+};
+
 export default {
   user,
   menu,
@@ -378,4 +397,6 @@ export default {
   inventory,
   system,
   eTag,
+  erpProcess,
+  account,
 };
