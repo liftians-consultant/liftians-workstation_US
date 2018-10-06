@@ -30,6 +30,7 @@ import { checkCurrentUnFinishTask } from 'redux/actions/stationAction';
 import './PickOperationPage.css';
 
 import * as log4js from 'log4js2';
+import InfoDialogModal from '../../components/common/InfoDialogModal';
 
 class PickOperationPage extends Component {
   state = {
@@ -56,6 +57,7 @@ class PickOperationPage extends Component {
     isKeyPadPressed: false,
     currentBarcode: '', // just for assembly
     binSetupLoading: false,
+    openTaskFinishModal: false,
   };
 
   idleCounter = 0;
@@ -96,6 +98,7 @@ class PickOperationPage extends Component {
     this.handleChangeBinCallback = this.handleChangeBinCallback.bind(this);
     this.handleOkBtnClick = this.handleOkBtnClick.bind(this);
     this.handleShortageModalConfirmed = this.handleShortageModalConfirmed.bind(this);
+    this.handleTaskFinishClose = this.handleTaskFinishClose.bind(this);
     // this.handleWrongProductBtnClick = this.handleWrongProductBtnClick.bind(this);
   }
 
@@ -212,7 +215,8 @@ class PickOperationPage extends Component {
             if (response.taskCount === 0) {
               this.logInfo('[GET UPCOMING POD] Timed out. Jumping back pick-task page');
               toast.success('All Task Finished!');
-              this.props.history.push('/pick-task');
+              this.setState({ openTaskFinishModal: true });
+              clearInterval(this.checkPodInterval);
             } else {
               counter = 0;
             }
@@ -230,7 +234,7 @@ class PickOperationPage extends Component {
         clearInterval(this.checkPodInterval);
         this.retrieveNextOrder();
       }
-    }, 1500);
+    }, 500);
   }
 
   validateAfterPickData() {
@@ -757,6 +761,11 @@ class PickOperationPage extends Component {
     }
   }
 
+  handleTaskFinishClose() {
+    this.setState({ openTaskFinishModal: false });
+    this.props.history.push('/pick-task');
+  }
+
   render() {
     const { warningMessage, podInfo, currentPickProduct, pickedAmount, showBox,
       orderList, openOrderFinishModal, openWrongProductModal, barcode, currentBarcode,
@@ -885,6 +894,14 @@ class PickOperationPage extends Component {
           header="Shortage"
           content="Are you sure you want to report a shortage?"
         />
+
+        <InfoDialogModal
+          open={this.state.openTaskFinishModal}
+          onClose={this.handleTaskFinishClose}
+          headerText="Finished"
+          contentText="Yay! All orders are finished"
+        />
+
       </div>
     );
   }

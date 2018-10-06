@@ -37,7 +37,6 @@ if (localStorage.liftiansJWT) {
       localStorage.removeItem('liftiansJWT');
       setAuthorizationHeader();
       store.dispatch(userLoggedOut());
-      
     } else {
       const user = {
         token: localStorage.liftiansJWT,

@@ -3,7 +3,7 @@ const appConfig = {
   apiPort: '8060',
   apiUrl: 'http://localhost:8060',
   erpUrl: 'http://localhost:8070',
-  erpPort: '3000',
+  erpPort: process.env.REACT_APP_ENV === 'DEV' ? '3000' : '8070',
   stationId: '1',
 
   getApiHost() {

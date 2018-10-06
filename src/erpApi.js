@@ -5,53 +5,69 @@ import moment from 'moment';
 /**
  * All ERP API call.
  */
+const erpAxios = axios.create();
+
+const basicAuthConfig = () => ({
+  auth: {
+    username: process.env.REACT_APP_ERP_API_KEY,
+    password: process.env.REACT_APP_ERP_API_SECRET,
+  },
+});
 
 const info = {
-  getReceiveType: () => axios.get(`${appConfig.getErpUrl()}/v1/info/receiveType`),
+  getReceiveType: () => erpAxios.get(`${appConfig.getErpUrl()}/v1/info/receiveType`, basicAuthConfig()),
 };
 
 const account = {
-  getAccount: accountNo => axios.get(`${appConfig.getErpUrl()}/v1/accounts/${accountNo}`)
+  getAccount: accountNo => erpAxios.get(`${appConfig.getErpUrl()}/v1/accounts/${accountNo}`, basicAuthConfig())
     .then(res => ({ success: true, account: res.data }))
     .catch(() => ({ success: false })),
 
-  createAccount: data => axios.post(`${appConfig.getErpUrl()}/v1/accounts`, [{
+  createAccount: data => erpAxios.post(`${appConfig.getErpUrl()}/v1/accounts`, [{
     ...data,
     createDate: moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS),
     modifyDate: moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS),
-  }]),
+  }], basicAuthConfig()),
 
-  getAccountList: () => axios.get(`${appConfig.getErpUrl()}/v1/accounts`),
+  getAccountList: () => erpAxios.get(`${appConfig.getErpUrl()}/v1/accounts`, basicAuthConfig()),
 };
 
 const product = {
-  getProduct: productSku => axios.get(`${appConfig.getErpUrl()}/v1/products/${productSku}`)
+  getProduct: productSku => erpAxios.get(`${appConfig.getErpUrl()}/v1/products/${productSku}`, basicAuthConfig())
     .then(res => ({ success: true, product: res.data }))
     .catch(() => ({ success: false })),
 
-  createProduct: data => axios.post(`${appConfig.getErpUrl()}/v1/products`, [{
+  createProduct: data => erpAxios.post(`${appConfig.getErpUrl()}/v1/products`, [{
     ...data,
     createDate: moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS),
     modifyDate: moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS),
-  }]),
+  }], basicAuthConfig()),
 
-  getProductList: () => axios.get(`${appConfig.getErpUrl()}/v1/products`),
+  getProductList: () => erpAxios.get(`${appConfig.getErpUrl()}/v1/products`, basicAuthConfig()),
 
-  getProductListByAccount: accountNo => axios.get(`${appConfig.getErpUrl()}/v1/products?accountNo=${accountNo}`),
+  getProductListByAccount: accountNo => erpAxios.get(`${appConfig.getErpUrl()}/v1/products?accountNo=${accountNo}`, basicAuthConfig()),
 };
 
 const replenish = {
-  getReplenish: requestNo => axios.get(`${appConfig.getErpUrl()}/v1/replenishments/${requestNo}`)
+  getReplenish: requestNo => erpAxios.get(`${appConfig.getErpUrl()}/v1/replenishments/${requestNo}`, basicAuthConfig())
     .then(res => ({ success: true, product: res.data }))
     .catch(() => ({ success: false })),
 
-  createReplenish: data => axios.post(`${appConfig.getErpUrl()}/v1/replenishments`, [{
+  createReplenish: data => erpAxios.post(`${appConfig.getErpUrl()}/v1/replenishments`, [{
     ...data,
     createDate: moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS),
     modifyDate: moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS),
-  }]),
+  }], basicAuthConfig()),
 
-  getReplenishList: () => axios.get(`${appConfig.getErpUrl()}/v1/replenishments`),
+  getReplenishList: () => erpAxios.get(`${appConfig.getErpUrl()}/v1/replenishments`, basicAuthConfig()),
+};
+
+const order = {
+  createOrder: data => erpAxios.post(`${appConfig.getErpUrl()}/v1/orders`, [{
+    ...data,
+    createDate: moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS),
+    modifyDate: moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS),
+  }], basicAuthConfig()),
 };
 
 export default {
@@ -59,4 +75,5 @@ export default {
   account,
   product,
   replenish,
+  order,
 };

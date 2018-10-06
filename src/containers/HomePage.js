@@ -38,6 +38,7 @@ class HomePage extends Component {
         url: `${appConfig.getApiUrl()}/logs`,
         headers: {
           'Content-Type': 'text/plain',
+          'Authorization': localStorage.liftiansJWT,
         },
       }));
 
@@ -116,7 +117,7 @@ HomePage.propTypes = {
 };
 
 function mapStateToProps(state) {
-  return {
+  return { 
     isAuthenticated: !!state.user.token,
     username: state.user.username,
     stationInfo: state.station.info,
