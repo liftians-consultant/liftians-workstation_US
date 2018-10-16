@@ -237,6 +237,7 @@ class PickOperationPage extends Component {
     }, 500);
   }
 
+  // eslint-disable-next-line
   validateAfterPickData() {
     return true; // need to work on
   }
@@ -320,19 +321,26 @@ class PickOperationPage extends Component {
         this.retrieveNextOrder();
       } else {
         this.logInfo(`[FINISH ORDER] AtHolderAfterPickProduct FAILED: ${res.data}`);
-        if (!retry) { // first time retry
-          this.logInfo('[FINISH ORDER - RETRY] Retry AtHolderAfterPickProduct...');
-          toast.error('ERROR: AtHolderAfterPickProduct: Will retry in 2 sec');
-          setTimeout(() => { // set timeout just to let database buffer
-            this.atHolderAfterPickProduct(data, true);
-          }, 2000);
-        } else {
-          // retry also failed
-          this.logInfo(`[FINISH ORDER - RETRY] AtHolderAfterPickProduct Failed after retry: ${res.data}`);
-          toast.error('ERROR: AtHolderAfterPickProduct. Retry failed as well');
-        }
+        this.retryAtHolderAfterPick(data, retry);
       }
+    }).catch(() => {
+      this.logInfo('[SERVER ERROR] AtHolderAfterPickProduct');
+      this.retryAtHolderAfterPick(data, retry);
     });
+  }
+
+  retryAtHolderAfterPick(data, retry) {
+    if (!retry) { // first time retry
+      this.logInfo('[FINISH ORDER - RETRY] Retry AtHolderAfterPickProduct...');
+      toast.error('ERROR: AtHolderAfterPickProduct: Will retry in 2 sec');
+      setTimeout(() => { // set timeout just to let database buffer
+        this.atHolderAfterPickProduct(data, true);
+      }, 2000);
+    } else {
+      // retry also failed
+      this.logInfo('[FINISH ORDER - RETRY] AtHolderAfterPickProduct Failed after retry');
+      toast.error('ERROR: AtHolderAfterPickProduct. Retry failed as well');
+    }
   }
 
   callGenStationTask() {
@@ -424,7 +432,7 @@ class PickOperationPage extends Component {
           };
           this.getBarcode(data);
           this.getPodInfo();
-          if (!this.state.openBinSetupModal || !this.state.openOrderFinishModal) {
+          if (!this.state.openBinSetupModal && !this.state.openOrderFinishModal) {
             this.setFocusToScanInput();
           }
         });
@@ -743,7 +751,7 @@ class PickOperationPage extends Component {
     if (this.businessMode === 'pharmacy') {
       ETagService.turnPickLightOffById();
       this.finishPick();
-    } else {
+    } else { // ecommerce
       clearInterval(this.checkETagResondInterval);
       ETagService.turnPickLightOffById(parseInt(this.state.currentPickProduct.binPosition, 10));
 
