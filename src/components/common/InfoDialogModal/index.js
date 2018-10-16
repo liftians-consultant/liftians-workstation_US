@@ -7,10 +7,16 @@ const InfoDialogModal = ({ open, onClose, headerText, contentText }) => (
     open={open}
     onClose={onClose}
     size="tiny"
-    style={{ marginTop: '20%', marginLeft: 'auto', marginRight: 'auto' }}>
-    <Modal.Header><Icon name="info circle" size="large" /> { headerText }</Modal.Header>
+    style={{ marginTop: '20%', marginLeft: 'auto', marginRight: 'auto' }}
+  >
+    <Modal.Header>
+      <Icon name="info circle" size="large" />
+      { headerText }
+    </Modal.Header>
     <Modal.Content>
-      <p>{ contentText }</p>
+      <p>
+        { contentText }
+      </p>
     </Modal.Content>
     <Modal.Actions>
       <Button primary onClick={onClose}>
