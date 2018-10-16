@@ -2,6 +2,7 @@
   "name": "liftians-workstation",
   "version": "0.2.12",
   "author": "Kevin Hong",
+  "private": true,
   "proxy": {
     "/v1": {
       "target": "http://l1.liftians.com:8070"
@@ -40,7 +41,6 @@
       "target": "http://l1.liftians.com:8060"
     }
   },
-  "private": true,
   "dependencies": {
     "@norauto/log4js2-ajax-appender": "^1.1.9",
     "axios": "^0.19.0",
@@ -53,7 +53,9 @@
     "electron-renderer-react-scripts-target": "^1.1.1",
     "eslint": "^4.18.1",
     "history": "^4.7.2",
+    "husky": "^1.1.2",
     "jwt-decode": "^2.2.0",
+    "lint-staged": "^7.3.0",
     "lodash": "^4.17.5",
     "log4js2": "^1.0.2",
     "moment": "^2.22.2",
@@ -89,7 +91,14 @@
     "test": "NODE_PATH=src react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "electron-pack": "electron-builder -mw -c.extraMetadata.main=build/electron.js",
-    "preelectron-pack": "yarn build"
+    "preelectron-pack": "yarn build",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   },
   "main": "public/electron.js",
   "homepage": "./",

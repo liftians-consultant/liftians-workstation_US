@@ -14,7 +14,9 @@
       "react/forbid-prop-types": [1],
       "prefer-destructuring": [1],
       "no-else-return": "warn",
-      "react/jsx-one-expression-per-line": [1]
+      "react/jsx-one-expression-per-line": [1],
+      "no-param-reassign": "warn",
+      "no-plusplus":"off"
     },
     "settings": {
 
