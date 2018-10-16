@@ -48,7 +48,6 @@ class ReplenishTaskPage extends Component {
     activeProcessType: 0,
     ordersList: [],
     loading: false,
-    errors: {},
     selection: [], // select react table
     selectAll: false, // select react table
     searchedList: [],
@@ -115,7 +114,7 @@ class ReplenishTaskPage extends Component {
 
   handleRequestPodBtn() {
     const sourceIdList = this.state.selection.join(',');
-    api.replenish.replenishBySourceId(this.props.stationId, this.props.username, sourceIdList, 1).then((res) => {
+    api.replenish.replenishBySourceId(this.props.stationId, this.props.username, sourceIdList, 1).then(() => {
       console.log('Going into replenish operation page~~~~');
       this.props.history.push('/replenish-operation');
     });
@@ -130,9 +129,8 @@ class ReplenishTaskPage extends Component {
   };
 
   filterOrderListBySourceId(keyword = '') {
-    const filteredList = this.state.ordersList.filter((order) => {
-      return String(order.sourceID).indexOf(keyword) !== -1;
-    });
+    const { ordersList } = this.state;
+    const filteredList = ordersList.filter(order => String(order.sourceID).indexOf(keyword) !== -1);
 
     this.setState({ searchedList: filteredList });
   }
@@ -151,14 +149,14 @@ class ReplenishTaskPage extends Component {
       toast.error('Server Error. Please contact your system admin');
       this.setState({ loading: false });
       console.error(e);
-    })
+    });
   }
 
   // For Select React Table
-  toggleSelection = (key, shift, row) => {
+  toggleSelection = (key) => {
     // start off with the existing state
     let selection = [
-      ...this.state.selection
+      ...this.state.selection, // eslint-disable-line react/no-access-state-in-setstate
     ];
     const keyIndex = selection.indexOf(key);
     // check to see if the key exists
@@ -166,8 +164,8 @@ class ReplenishTaskPage extends Component {
       // it does exist so we will remove it using destructing
       selection = [
         ...selection.slice(0, keyIndex),
-        ...selection.slice(keyIndex + 1)
-      ]
+        ...selection.slice(keyIndex + 1),
+      ];
     } else {
       // it does not exist so add it
       selection.push(key);
@@ -178,7 +176,7 @@ class ReplenishTaskPage extends Component {
 
   // For Select React Table
   toggleAll = () => {
-    const selectAll = this.state.selectAll ? false : true;
+    const selectAll = !this.state.selectAll; // eslint-disable-line react/no-access-state-in-setstate
     const selection = [];
     if (selectAll) {
       // we need to get at the internals of ReactTable
@@ -187,16 +185,14 @@ class ReplenishTaskPage extends Component {
       const currentRecords = wrappedInstance.getResolvedState().sortedData;
       // we just push all the IDs onto the selection array
       currentRecords.forEach((item) => {
-        selection.push(item._original.sourceID);
+        selection.push(item._original.sourceID); // eslint-disable-line no-underscore-dangle
       });
     }
     this.setState({ selectAll, selection });
   }
 
   // For Select React Table
-  isSelected = (key) => {
-    return this.state.selection.includes(key);
-  }
+  isSelected = key => this.state.selection.includes(key)
 
 
   render() {
@@ -271,15 +267,17 @@ class ReplenishTaskPage extends Component {
                   size="big"
                   icon="search"
                   iconPosition="left"
-                  placeholder="Enter Source ID..." />
+                  placeholder="Enter Source ID..."
+                />
               </div>
               <div className="order-list-btn-group">
                 { String(activeProcessType) !== '100' && (
                   <Button
                     size="huge"
                     primary
-                    disabled={ selection.length === 0 }
-                    onClick={() => this.handleRequestPodBtn()}>
+                    disabled={selection.length === 0}
+                    onClick={() => this.handleRequestPodBtn()}
+                  >
                     Request POD
                   </Button>
                 )}
@@ -287,7 +285,8 @@ class ReplenishTaskPage extends Component {
                   <Button
                     size="huge"
                     disabled={ordersList.length === 0}
-                    onClick={() => this.handleContinueBtn()}>
+                    onClick={() => this.handleContinueBtn()}
+                  >
                     Continue Replenish
                   </Button>
                 )}
