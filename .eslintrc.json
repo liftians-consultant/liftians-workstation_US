@@ -16,7 +16,8 @@
       "no-else-return": "warn",
       "react/jsx-one-expression-per-line": [1],
       "no-param-reassign": "warn",
-      "no-plusplus":"off"
+      "no-plusplus":"off",
+      "jsx-a11y/label-has-for": [1]
     },
     "settings": {
 
