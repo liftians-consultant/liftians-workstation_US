@@ -3,14 +3,19 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { Segment, Grid, Button, Dimmer, Loader, Input } from 'semantic-ui-react';
+import { toast } from 'react-toastify';
 
 import api from 'api';
 import PodShelf from 'components/common/PodShelf/PodShelf';
 import NumPad from 'components/common/NumPad/NumPad';
 import WarningModal from 'components/common/WarningModal/WarningModal';
 import ProductInfoDisplay from 'components/common/ProductInfoDisplay/ProductInfoDisplay';
+import InfoDialogModal from 'components/common/InfoDialogModal';
 
+import { checkCurrentUnFinishTask } from 'redux/actions/stationAction';
 import './ReplenishOperationPage.css';
+import * as log4js from 'log4js2';
+
 
 class ReplenishOperationPage extends Component {
   state = {
@@ -33,7 +38,10 @@ class ReplenishOperationPage extends Component {
       headerText: '',
       contentText: '',
     },
+    openTaskFinishModal: false,
   };
+
+  log = log4js.getLogger('ReplenishOperPage');
 
   businessMode = process.env.REACT_APP_BUSINESS_MODE;
 
@@ -81,6 +89,7 @@ class ReplenishOperationPage extends Component {
   }
 
   componentWillMount() {
+    this.logInfo('Enter ReplenishOperationPage');
     this.getUpcomingPod();
   }
 
@@ -92,6 +101,9 @@ class ReplenishOperationPage extends Component {
     this.setFocusToBoxScanInput();
   }
 
+  logInfo(msg) {
+    this.log.info(msg);
+  }
 
   setFocusToInputManual() {
     if (this.state.boxBarcode) {
@@ -121,17 +133,34 @@ class ReplenishOperationPage extends Component {
   getUpcomingPod() {
     // TODO: add simulation mode to .env
     let isRecieve = false;
+    let counter = 0;
     this.setState({ loading: true });
     this.checkPodInterval = setInterval(() => {
       if (!isRecieve) {
-        api.station.atStationTask(this.props.stationId).then((res) => {
-          if (res.data > 0) {
-            console.log(`Pod arrive station with TaskId ${res.data}`);
-            this.setState({ taskId: res.data }, () => { isRecieve = true; });
-          }
-        });
+        counter += 1;
+
+        if (counter > process.env.REACT_APP_PICKING_IDLE_TIME) {
+          this.props.checkCurrentUnFinishTask(this.props.stationId).then((response) => {
+            this.logInfo(`[GET UPCOMING PDO] Idle: Check num of task at Station: ${response.taskCount}`);
+            if (response.taskCount === 0) {
+              this.logInfo('[GET UPCOMING POD] Timed out. Jumping back replenish-task page');
+              toast.success('All Task Finished!');
+              this.setState({ openTaskFinishModal: true });
+              clearInterval(this.checkPodInterval);
+            } else {
+              counter = 0;
+            }
+          });
+        } else {
+          api.station.atStationTask(this.props.stationId).then((res) => {
+            if (res.data > 0) {
+              this.logInfo(`Pod arrive station with TaskId ${res.data}`);
+              this.setState({ taskId: res.data }, () => { isRecieve = true; });
+            }
+          });
+        }
       } else {
-        // console.log('stop interval');
+        this.logInfo('[GET UPCOMING POD] Stop interval');
         clearInterval(this.checkPodInterval);
         this.retrieveNextOrder();
         this.setFocusToBoxScanInput();
@@ -174,11 +203,11 @@ class ReplenishOperationPage extends Component {
       return;
     }
 
-    console.log('[REPLENISH] Request data', data);
-    console.log('[REPLENISH] BoxBarcode', data.boxBarcode);
+    this.logInfo(`[REPLENISH] Request data ${data}`);
+    this.logInfo(`[REPLENISH] BoxBarcode ${data.boxBarcode}`);
     api.replenish.atStationSubmitReplenishProduct(data).then((res) => {
       if (res.data) { // return 1 if success
-        console.log('[REPLENISH] Success');
+        this.logInfo('[REPLENISH] Success');
 
         if (isNextPod) {
           this.forcePodToLeaveStation();
@@ -186,7 +215,7 @@ class ReplenishOperationPage extends Component {
         }
 
         if (this.state.replenishedAmount === parseInt(this.state.currentReplenishProduct.totalReplenishQuantity, 10)) {
-          console.log('[REPLENISH] Order Finish, Retrieving next bill');
+          this.logInfo('[REPLENISH] Order Finish, Retrieving next bill');
           this.retrieveNextOrder();
           this.setFocusToBoxScanInput();
         } else {
@@ -196,15 +225,15 @@ class ReplenishOperationPage extends Component {
         }
       } else {
         // TODO: ERROR MESSAGE
-        console.log('[REPLENISH] Failed');
+        this.logInfo('[REPLENISH] Failed');
         let { replenishedAmount } = this.state;
         replenishedAmount -= replenishAmount;
         this.setState({ loading: false, replenishedAmount });
       }
     }).catch((err) => {
-      console.log('[ERROR] atStationAfterReplenishProduct', err);
+      this.logInfo('[ERROR] atStationAfterReplenishProduct', err);
       if (!retry) {
-        console.log('[REPLENISH] Retrying');
+        this.logInfo('[REPLENISH] Retrying');
         this.finishReplenish(replenishAmount, isNextPod, true);
       }
     });
@@ -218,14 +247,14 @@ class ReplenishOperationPage extends Component {
 
   forcePodToLeaveStation() {
     api.station.forcePodToLeaveStationByTaskId(this.props.stationId, this.state.taskId).then(() => {
-      console.log(`[REPLENISH] Force Pod with TaskId ${this.state.taskId} to leave`);
+      this.logInfo(`[REPLENISH] Force Pod with TaskId ${this.state.taskId} to leave`);
       this.getUpcomingPod();
       this.setFocusToBoxScanInput();
     });
   }
 
   getPodInfo() {
-    console.log('[REPLENISH] GetPodInfo: current replenishing product', this.state.currentReplenishProduct);
+    this.logInfo(`[REPLENISH] GetPodInfo: current replenishing product: ${this.state.currentReplenishProduct}`);
 
     this.getProductBarcodeList(); // SIMULATION: GET BARCODE
 
@@ -262,7 +291,7 @@ class ReplenishOperationPage extends Component {
       } else {
         // when nothing return, that means the pod is finished
         // and need to wait for the next pod come in to station
-        console.log('[GET PRODUCT LIST] No order return from the server');
+        this.logInfo('[GET PRODUCT LIST] No order return from the server');
         this.getUpcomingPod();
       }
     }).catch((err) => {
@@ -272,7 +301,7 @@ class ReplenishOperationPage extends Component {
 
   scanValidation(barcode) {
     // if (this.businessMode === 'pharmacy') {
-    if (barcode === this.state.currentReplenishProduct.productID) {
+    if (barcode === this.state.currentReplenishProduct.scanCode) {
       return true;
     }
     return false;
@@ -294,7 +323,7 @@ class ReplenishOperationPage extends Component {
           barcode: item.productBarCode,
           scanned: false,
         }));
-        console.log('[GET PRODUCT BARCODE LIST] Barcode List', barcodeList);
+        this.logInfo(`[GET PRODUCT BARCODE LIST] Barcode List: ${barcodeList}`);
         this.setState({ barcodeList });
       }
 
@@ -302,18 +331,18 @@ class ReplenishOperationPage extends Component {
         callback();
       }
     }).catch((err) => {
-      console.log('[ERROR] WHILE GETTING BARCODE LIST', err);
+      this.logInfo('[ERROR] WHILE GETTING BARCODE LIST');
+      console.log(err);
     });
   }
 
-  /* Simulate when the user scan the product */
+  /* Simulation: when the user scan the product */
   handleProductScanBtnClick() {
-    // TODO: SIMULATION ONLY! NO PRODUCTION
     if (this.businessMode === 'pharmacy') {
       // all product have unique barcode. scann all product then send out the finish request
 
       this.setState(prevState => ({ replenishedAmount: prevState.replenishedAmount + 1 }), () => {
-        console.log(`[SCAN PRODUCT] Replenished amount: ${this.state.replenishedAmount}`);
+        this.logInfo(`[SCAN PRODUCT] Replenished amount: ${this.state.replenishedAmount}`);
         if (this.state.replenishedAmount === this.state.currentReplenishProduct.totalReplenishQuantity) {
           this.finishReplenish(this.state.replenishedAmount);
         }
@@ -321,8 +350,8 @@ class ReplenishOperationPage extends Component {
     } else if (this.businessMode === 'ecommerce') {
       // only one barcode will be return and all product use same barcode
       // scanned once, send request everything number pad is clicked.
-      console.log('[SCAN PRODUCT] SIMULATION: product scanned');
-      this.setState(prevState => ({ barcodeList: [{ barcode: prevState.currentReplenishProduct.productID, scanned: true }] }));
+      this.logInfo('[SCAN PRODUCT] SIMULATION: product scanned');
+      this.setState(prevState => ({ barcodeList: [{ barcode: prevState.currentReplenishProduct.scanCode, scanned: true }] }));
     }
   }
 
@@ -330,18 +359,18 @@ class ReplenishOperationPage extends Component {
   /* Production Scan box handler */
   handleBoxScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
-      console.log(`[SCAN BOX] Box scanned: ${e.target.value}`);
+      this.logInfo(`[SCAN BOX] Box scanned: ${e.target.value}`);
 
       // validate box barcode
       const productInfo = this.state.currentReplenishProduct;
       const correctBoxCode = 1000000000 + (1000 * productInfo.podID) + productInfo.podSide * 100 + productInfo.shelfID * 10 + productInfo.boxID;
       if (e.target.value === String(correctBoxCode)) {
-        console.log('[SCAN BOX] Box correct');
+        this.logInfo('[SCAN BOX] Box correct');
         this.setState({ boxBarcode: e.target.value }, () => {
           this.setFocusToProductScanInput();
         });
       } else {
-        console.log('[SCAN BOX] Wrong box!');
+        this.logInfo('[SCAN BOX] Wrong box!');
         this.setState({ openＷarningModal: true, warningMessage: this.wrongBoxWarningMessage });
         setTimeout(() => {
           this.closeWrongBoxModal();
@@ -377,28 +406,29 @@ class ReplenishOperationPage extends Component {
       // });
       const { barcodeList } = this.state;
       barcodeList[barcodeIndex].scanned = true;
-      console.log('[SCAN PRODUCT] Barcode List', barcodeList);
+      this.logInfo(`[SCAN PRODUCT] Barcode List ${barcodeList}`);
       this.setState({ barcodeList }, () => resolve({ valid: true }));
     });
   }
 
+  // Production
   handleProductScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
-      console.log(`[SCAN PRODUCT] Product Scanned: ${e.target.value}`);
+      this.logInfo(`[SCAN PRODUCT] Product Scanned: ${e.target.value}`);
 
       if (this.businessMode === 'pharmacy') {
         this.validatePharmacyBarcode(e.target.value).then((result) => {
           if (result.valid) {
             // all product have unique barcode. scann all product then send out the finish request
             this.setState(prevState => ({ replenishedAmount: prevState.replenishedAmount + 1 }), () => {
-              console.log(`[SCAN PRODUCT] Replenished amount: ${this.state.replenishedAmount}`);
+              this.logInfo(`[SCAN PRODUCT] Replenished amount: ${this.state.replenishedAmount}`);
               this.setFocusToProductScanInput();
               if (this.state.replenishedAmount === this.state.currentReplenishProduct.totalReplenishQuantity) {
                 this.finishReplenish(this.state.replenishedAmount);
               }
             });
           } else {
-            console.log('[SCANNED] Invalid Barcode');
+            this.logInfo('[SCANNED] Invalid Barcode');
             const warningMessage = {
               onCloseFunc: this.closeWrongProductModal,
               headerText: 'Warning',
@@ -411,10 +441,10 @@ class ReplenishOperationPage extends Component {
         // only one barcode will be return and all product use same barcode
         // scanned once, send request everything number pad is clicked.
         if (this.scanValidation(e.target.value)) {
-          console.log('[SCAN PRODUCT] Product correct');
+          this.logInfo('[SCAN PRODUCT] Product correct');
           this.setState({ barcodeList: [{ barcode: e.target.value, scanned: true }] });
         } else {
-          console.log('[SCAN PRODUCT] Wrong product!');
+          this.logInfo('[SCAN PRODUCT] Wrong product!');
           this.setState({ openＷarningModal: true, warningMessage: this.wrongProductWarningMessage });
           setTimeout(() => {
             this.closeWrongProductModal();
@@ -424,7 +454,7 @@ class ReplenishOperationPage extends Component {
     }
   }
 
-  /* Simulate when user scan the box barcode */
+  /* Simulation: when user scan the box barcode */
   handleScanBoxBtnClick() {
     const productInfo = this.state.currentReplenishProduct;
     // generate box barcode
@@ -460,6 +490,11 @@ class ReplenishOperationPage extends Component {
     this.setState({ openＷarningModal: false });
   }
 
+  handleTaskFinishClose() {
+    this.setState({ openTaskFinishModal: false });
+    this.props.history.push('/replenish-task');
+  }
+
   render() {
     const { podInfo, currentReplenishProduct, replenishedAmount, barcodeList, boxBarcode, warningMessage } = this.state;
     const highlightBox = {
@@ -478,13 +513,13 @@ class ReplenishOperationPage extends Component {
             <Grid.Column width={5}>
               <div className="pod-info-block">
                 <span>
-Pod #
+                  Pod #
                   {podInfo.podId}
                   {' '}
 
                 </span>
                 <span>
--
+                  -
                   {podInfo.podSide}
                 </span>
               </div>
@@ -496,7 +531,7 @@ Pod #
 
               <div>
                 <Button color="red">
-Shortage
+                  Shortage
                 </Button>
               </div>
             </Grid.Column>
@@ -505,7 +540,7 @@ Shortage
               <ProductInfoDisplay
                 product={currentReplenishProduct}
                 amount={currentReplenishProduct.totalReplenishQuantity - this.state.replenishedAmount}
-                // currentBarcode={currentBarcode}
+                currentBarcode={currentReplenishProduct.scanCode}
               />
               <div className="action-group-container">
                 <div className="scan-input-group">
@@ -545,13 +580,13 @@ Shortage
                   </div>
                 )}
 
-                { this.businessMode === 'ecommerce' && (
+                { this.businessMode === 'ecommerce' && ((isScanned && boxBarcode) && (
                   <NumPad
                     highlightAmount={currentReplenishProduct.totalReplenishQuantity - replenishedAmount}
                     callback={this.selectReplenishedAmount}
                     disabled={!isScanned || !boxBarcode}
                   />
-                )}
+                ))}
               </div>
             </Grid.Column>
           </Grid.Row>
@@ -563,12 +598,22 @@ Shortage
           headerText={warningMessage.headerText}
           contentText={warningMessage.contentText}
         />
+
+        <InfoDialogModal
+          open={this.state.openTaskFinishModal}
+          onClose={this.handleTaskFinishClose}
+          headerText="Finished"
+          contentText="Yay! All orders are finished"
+        />
       </div>
     );
   }
 }
 
 ReplenishOperationPage.propTypes = {
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }).isRequired,
   stationId: PropTypes.string.isRequired,
 };
 
@@ -578,4 +623,6 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps, {})(ReplenishOperationPage);
+export default connect(mapStateToProps, {
+  checkCurrentUnFinishTask,
+})(ReplenishOperationPage);

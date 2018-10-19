@@ -205,7 +205,7 @@ class ReplenishTaskPage extends Component {
       toggleSelection,
       toggleAll,
       selectType: 'checkbox',
-      keyField: 'sourceID',
+      keyField: 'replenishBillNo',
     };
 
     return (
@@ -233,7 +233,7 @@ class ReplenishTaskPage extends Component {
                   data={searchedList}
                   columns={ReplenishOrderTableColumns}
                   className="-striped -highlight replenish-task-table"
-                  SubComponent={row => <OrderDetailTable taskType="R" recordId={row.original.sourceID} />}
+                  SubComponent={row => <OrderDetailTable taskType="R" recordId={row.original.replenishBillNo} />}
                   defaultPageSize={15}
                   manual
                   resizable={false}
@@ -247,7 +247,7 @@ class ReplenishTaskPage extends Component {
                     columns={ReplenishOrderTableColumns}
                     data={searchedList}
                     defaultPageSize={15}
-                    SubComponent={row => <OrderDetailTable taskType="R" recordId={row.original.sourceID} />}
+                    SubComponent={row => <OrderDetailTable taskType="R" recordId={row.original.replenishBillNo} />}
                     loading={loading}
                     manual
                     resizable={false}

@@ -10,7 +10,7 @@ import './OrderDetailTable.css';
 class OrderDetailTable extends Component {
   state = {
     recordDetails: [],
-    loading: false
+    loading: false,
   }
 
   locale = process.env.REACT_APP_LOCALE;
@@ -23,17 +23,17 @@ class OrderDetailTable extends Component {
     this.setState({ loading: true });
 
     if (this.props.taskType === 'P') {
-      api.pick.retrievePickOrderItems(this.props.recordId).then(res => {
+      api.pick.retrievePickOrderItems(this.props.recordId).then((res) => {
         console.log(`[PICK ORDER DETAIL] RecordId: ${this.props.recordId}`, res.data);
         res.data.map((object) => {
           object.pick_DATE = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
           object.processStatus = this.locale === 'CHN' ? object.processStatusCHN : object.processStatus;
           return object;
         });
-        this.setState({ recordDetails: res.data, loading: false});
-      })
+        this.setState({ recordDetails: res.data, loading: false });
+      });
     } else if (this.props.taskType === 'R') {
-      api.replenish.getReplenishDetailBySourceId(this.props.recordId).then(res => {
+      api.replenish.DisplayReplenishDetail(this.props.recordId).then((res) => {
         console.log(`[REPLENISH ORDER DETAIL] RecordId: ${this.props.recordId}`, res.data);
         res.data.map((object) => {
           object.pick_DATE = moment(object.pick_DATE).format(process.env.REACT_APP_TABLE_DATE_FORMAT);
@@ -41,13 +41,13 @@ class OrderDetailTable extends Component {
           return object;
         });
         this.setState({ recordDetails: res.data, loading: false });
-      })
+      });
     }
   }
 
   render() {
     const { loading, recordDetails } = this.state;
-    let columns = this.props.taskType === 'P' ? OrderDetailsTableColumn : ReplenishDetailTableColumns;
+    const columns = this.props.taskType === 'P' ? OrderDetailsTableColumn : ReplenishDetailTableColumns;
     return (
       <div className="orderDetailTableContainer">
         <ReactTable
@@ -71,11 +71,11 @@ OrderDetailTable.propTypes = {
   recordId: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
-  ]),
+  ]).isRequired,
   taskType: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
-  ]),
+  ]).isRequired,
 };
 
 export default OrderDetailTable;

@@ -24,7 +24,6 @@ class GenerateReplenishmentPage extends Component {
   state = {
     data: this.initData,
     accountListOptions: [],
-    requestNo: '',
     loading: false,
     openDeleteConfirm: false,
     openSubmitConfirm: false,
@@ -175,11 +174,11 @@ class GenerateReplenishmentPage extends Component {
 
       toast.success('Replenish Created in ERP');
       // process to SPD
-      // api.erpProcess.replenishment().then((res) => {
-      //   if (res === 1) {
-      //     toast.success('Replenish successfully proccesed to SPD');
-      //   }
-      // });
+      api.erpProcess.replenishment().then((res) => {
+        if (res === 1) {
+          toast.success('Replenish successfully proccesed to SPD');
+        }
+      });
       return true;
     }
     return false;
