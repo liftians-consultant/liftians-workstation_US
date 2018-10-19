@@ -17,6 +17,8 @@ import OrderFinishModal from 'components/Operation/OrderFinishModal/OrderFinishM
 import WrongProductModal from 'components/Operation/WrongProductModal/WrongProductModal';
 import PodShelfInfo from 'components/Operation/PodShelfInfo/PodShelfInfo';
 import ConfirmDialogModal from 'components/common/ConfirmDialogModal/ConfirmDialogModal';
+import InfoDialogModal from 'components/common/InfoDialogModal';
+
 import {
   getStationDeviceList,
   addHoldersToSetupWaitlist,
@@ -30,7 +32,6 @@ import { checkCurrentUnFinishTask } from 'redux/actions/stationAction';
 import './PickOperationPage.css';
 
 import * as log4js from 'log4js2';
-import InfoDialogModal from '../../components/common/InfoDialogModal';
 
 class PickOperationPage extends Component {
   state = {
@@ -143,7 +144,6 @@ class PickOperationPage extends Component {
   });
 
   logInfo(msg) {
-    // console.log(msg);
     this.log.info(msg);
   }
 

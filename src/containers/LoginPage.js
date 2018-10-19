@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from "react-redux";
-import { Grid, Image, Segment } from 'semantic-ui-react'
+import { connect } from 'react-redux';
+import { Grid, Image, Segment } from 'semantic-ui-react';
 
 import LoginForm from 'components/forms/LoginForm';
-import ServerSettingModal from "components/common/ServerSettingModal/ServerSettingModal";
-import { login } from "redux/actions/authAction";
+import ServerSettingModal from 'components/common/ServerSettingModal/ServerSettingModal';
+import { login } from 'redux/actions/authAction';
 
 import logo from 'assets/images/assembly_logo_trans.png';
 
@@ -17,23 +17,22 @@ const style = {
 };
 
 class LoginPage extends Component {
-
   constructor() {
     super();
     this.handleSettingBtnClick = this.handleSettingBtnClick.bind(this);
   }
 
-  submit = data =>
-    this.props.login(data).then(() => this.props.history.push("/"));
+  submit = data => this.props.login(data);
 
-  handleSettingBtnClick() {
+  handleSettingBtnClick = () => {
 
   }
 
   render() {
     return (
       <div className="login-page">
-        <style>{`
+        <style>
+          {`
         
         body div.login-page {
           height: 100%;
@@ -46,7 +45,8 @@ class LoginPage extends Component {
           left: 30px;
           bottom: 30px;
         }
-        `}</style>
+        `}
+        </style>
         <Grid
           textAlign="center"
           style={{ height: '100%' }}
@@ -61,7 +61,10 @@ class LoginPage extends Component {
         </Grid>
         <ServerSettingModal />
         <div className="version-block" style={style}>
-          <span>v{ process.env.REACT_APP_VERSION }</span>
+          <span>
+v
+            { process.env.REACT_APP_VERSION }
+          </span>
         </div>
       </div>
     );
@@ -69,9 +72,6 @@ class LoginPage extends Component {
 }
 
 LoginPage.propTypes = {
-  history: PropTypes.shape({
-    push: PropTypes.func.isRequired,
-  }).isRequired,
   login: PropTypes.func.isRequired,
 };
 
