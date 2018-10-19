@@ -1,7 +1,7 @@
 import axios from 'axios';
 import appConfig from 'services/AppConfig';
 import moment from 'moment';
-
+import * as apiKey from 'apiKey.json';
 /**
  * All ERP API call.
  */
@@ -9,8 +9,8 @@ const erpAxios = axios.create();
 
 const basicAuthConfig = () => ({
   auth: {
-    username: process.env.REACT_APP_ERP_API_KEY,
-    password: process.env.REACT_APP_ERP_API_SECRET,
+    username: apiKey.key,
+    password: apiKey.secret,
   },
 });
 
