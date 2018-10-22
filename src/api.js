@@ -262,6 +262,16 @@ const replenish = {
     ],
   }),
 
+  replenishByBillNo: (stationId, userId, sourceIdList, jobPriority) => axios.post(`${appConfig.getApiUrl()}/Replenish`, {
+    name: 'ReplenishByBillNo',
+    parameter: [
+      String(stationId),
+      String(userId),
+      String(sourceIdList),
+      String(jobPriority),
+    ],
+  }),
+
   getReplenishInfoByTaskId: taskId => axios.post(`${appConfig.getApiUrl()}/Replenish`, {
     name: 'GetReplenishInfoByTaskID',
     parameter: [String(taskId)],

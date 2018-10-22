@@ -82,7 +82,7 @@ class GenerateReplenishmentPage extends Component {
   static generateReceiveNo() {
     const x = parseInt(Math.random() * 10, 10);
     let requestNo = (moment() + x).toString();
-    requestNo = `LIFT${requestNo.substring(6, requestNo.length)}`;
+    requestNo = `A${requestNo.substring(6, requestNo.length)}`;
 
     return requestNo;
   }

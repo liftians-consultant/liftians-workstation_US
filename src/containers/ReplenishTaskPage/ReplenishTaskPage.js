@@ -114,7 +114,7 @@ class ReplenishTaskPage extends Component {
 
   handleRequestPodBtn() {
     const sourceIdList = this.state.selection.join(',');
-    api.replenish.replenishBySourceId(this.props.stationId, this.props.username, sourceIdList, 1).then(() => {
+    api.replenish.replenishByBillNo(this.props.stationId, this.props.username, sourceIdList, 1).then(() => {
       console.log('Going into replenish operation page~~~~');
       this.props.history.push('/replenish-operation');
     });
