@@ -6,7 +6,6 @@ import ETagService from 'services/ETagService';
 import './BinSetupModal.css';
 
 class BinSetupModal extends Component {
-
   constructor() {
     super();
 
@@ -50,10 +49,14 @@ class BinSetupModal extends Component {
         onOpen={this.handleOnOpen}
         style={{ marginTop: '10%', marginLeft: 'auto', marginRight: 'auto' }}
       >
-        <Modal.Header>Bin Setup</Modal.Header>
+        <Modal.Header>
+Bin Setup
+        </Modal.Header>
         <Modal.Content>
           <Loader indeterminate inverted active={loading} size="massive" />
-          <div className="info-text">Please place an empty bin on correspond location and scan the barcode on it.</div>
+          <div className="info-text">
+Please place an empty bin on correspond location and scan the barcode on it.
+          </div>
           <BinGroup openedBinNum={location} highlightColor="#4A7AFE" size="150" />
           <Input
             onKeyPress={this.handleInputChange}
@@ -74,7 +77,7 @@ BinSetupModal.propTypes = {
 
 
 // bin position
-// input box 
+// input box
 // on close function
 
 export default BinSetupModal;

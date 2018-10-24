@@ -11,6 +11,7 @@ import NumPad from 'components/common/NumPad/NumPad';
 import WarningModal from 'components/common/WarningModal/WarningModal';
 import ProductInfoDisplay from 'components/common/ProductInfoDisplay/ProductInfoDisplay';
 import InfoDialogModal from 'components/common/InfoDialogModal';
+import ConfirmDialogModal from 'components/common/ConfirmDialogModal/ConfirmDialogModal';
 
 import { checkCurrentUnFinishTask } from 'redux/actions/stationAction';
 import './ReplenishOperationPage.css';
@@ -32,7 +33,8 @@ class ReplenishOperationPage extends Component {
     loading: true,
     barcodeList: [],
     boxBarcode: '',
-    openＷarningModal: false,
+    openWrongProductModal: false,
+    openChangeLocationModal: false,
     warningMessage: {
       onCloseFunc: () => {},
       headerText: '',
@@ -53,8 +55,8 @@ class ReplenishOperationPage extends Component {
 
   wrongBoxWarningMessage = {
     onCloseFunc: this.closeWrongBoxModal,
-    headerText: 'Wrong Box',
-    contentText: 'You scanned a wrong box! Please make sure you locate the right box and try again.',
+    headerText: 'Change Location',
+    contentText: 'You scanned a different location! Are you sure?',
   };
 
   wrongProductWarningMessage = {
@@ -86,6 +88,7 @@ class ReplenishOperationPage extends Component {
     this.handleProductScanKeyPress = this.handleProductScanKeyPress.bind(this);
     this.setFocusToInputManual = this.setFocusToInputManual.bind(this);
     this.closeWarningModal = this.closeWarningModal.bind(this);
+    this.handleTaskFinishClose = this.handleTaskFinishClose.bind(this);
   }
 
   componentWillMount() {
@@ -199,7 +202,7 @@ class ReplenishOperationPage extends Component {
         headerText: 'Invalid Data',
         contentText: 'The replenish data is not correct. Please contact your admin and make sure you have the right data',
       };
-      this.setState({ openＷarningModal: true, warningMessage });
+      this.setState({ openWrongProductModal: true, warningMessage });
       return;
     }
 
@@ -359,22 +362,27 @@ class ReplenishOperationPage extends Component {
   /* Production Scan box handler */
   handleBoxScanKeyPress(e) {
     if (e.key === 'Enter' && e.target.value) {
-      this.logInfo(`[SCAN BOX] Box scanned: ${e.target.value}`);
+      const value = e.target.value;
+      this.logInfo(`[SCAN BOX] Box scanned: ${value}`);
 
       // validate box barcode
       const productInfo = this.state.currentReplenishProduct;
       const correctBoxCode = 1000000000 + (1000 * productInfo.podID) + productInfo.podSide * 100 + productInfo.shelfID * 10 + productInfo.boxID;
-      if (e.target.value === String(correctBoxCode)) {
+      if (value === String(correctBoxCode)) {
         this.logInfo('[SCAN BOX] Box correct');
-        this.setState({ boxBarcode: e.target.value }, () => {
+        this.setState({ boxBarcode: value }, () => {
           this.setFocusToProductScanInput();
         });
       } else {
-        this.logInfo('[SCAN BOX] Wrong box!');
-        this.setState({ openＷarningModal: true, warningMessage: this.wrongBoxWarningMessage });
-        setTimeout(() => {
-          this.closeWrongBoxModal();
-        }, 3000);
+        const podId = parseInt(value.substring(1, 6), 10);
+        const podSide = parseInt(value.substring(7, 8), 10);
+        if (podId !== productInfo.podID || podSide !== productInfo.podSide) {
+          toast.warn('Wrong pod or pod side. Please make sure again.');
+          this.setFocusToBoxScanInput();
+          return;
+        }
+        this.logInfo('[SCAN BOX] Different Box');
+        this.setState({ openChangeLocationModal: true, boxBarcode: value });
       }
     }
   }
@@ -434,7 +442,7 @@ class ReplenishOperationPage extends Component {
               headerText: 'Warning',
               contentText: result.message,
             };
-            this.setState({ openＷarningModal: true, warningMessage });
+            this.setState({ openWrongProductModal: true, warningMessage });
           }
         });
       } else if (this.businessMode === 'ecommerce') {
@@ -445,7 +453,7 @@ class ReplenishOperationPage extends Component {
           this.setState({ barcodeList: [{ barcode: e.target.value, scanned: true }] });
         } else {
           this.logInfo('[SCAN PRODUCT] Wrong product!');
-          this.setState({ openＷarningModal: true, warningMessage: this.wrongProductWarningMessage });
+          this.setState({ openWrongProductModal: true, warningMessage: this.wrongProductWarningMessage });
           setTimeout(() => {
             this.closeWrongProductModal();
           }, 3000);
@@ -473,21 +481,37 @@ class ReplenishOperationPage extends Component {
   }
 
   handleWrongProductBtnClick() {
-    this.setState({ openＷarningModal: true });
+    this.setState({ openWrongProductModal: true });
   }
 
-  closeWrongBoxModal() {
-    this.setState({ openＷarningModal: false });
-    this.setFocusToBoxScanInput();
+  closeWrongBoxModal(result) {
+    this.setState({ openChangeLocationModal: false });
+    if (result) { // change box
+      // check if new box is used
+      const { boxBarcode } = this.state;
+      api.pick.getProductByLocationCode(boxBarcode).then((res) => {
+        if (res.data) {
+          if (res.data.length > 0) {
+            toast.warn(`${boxBarcode} is already registered. Please either use the suggested box or choose a empty box.`);
+            this.setFocusToBoxScanInput();
+          } else {
+            toast.success(`${boxBarcode} is free. Please scan product.`);
+            this.setFocusToProductScanInput();
+          }
+        }
+      }).catch(() => toast.error('[SERVER ERROR] Cannot get product by location code.'));
+    } else { // dont change box
+      this.setFocusToBoxScanInput();
+    }
   }
 
   closeWrongProductModal() {
-    this.setState({ openＷarningModal: false });
+    this.setState({ openWrongProductModal: false });
     this.setFocusToProductScanInput();
   }
 
   closeWarningModal() {
-    this.setState({ openＷarningModal: false });
+    this.setState({ openWrongProductModal: false });
   }
 
   handleTaskFinishClose() {
@@ -496,7 +520,7 @@ class ReplenishOperationPage extends Component {
   }
 
   render() {
-    const { podInfo, currentReplenishProduct, replenishedAmount, barcodeList, boxBarcode, warningMessage } = this.state;
+    const { podInfo, currentReplenishProduct, replenishedAmount, barcodeList, boxBarcode, warningMessage, openChangeLocationModal } = this.state;
     const highlightBox = {
       row: currentReplenishProduct ? parseInt(currentReplenishProduct.shelfID, 10) : 0,
       column: currentReplenishProduct ? parseInt(currentReplenishProduct.boxID, 10) : 0,
@@ -548,7 +572,7 @@ class ReplenishOperationPage extends Component {
                     <Input
                       type="text"
                       placeholder="Enter or Scan Box Barcode"
-                      value={boxBarcode}
+                      // value={boxBarcode}
                       ref={this.scanBoxInputRef}
                       onKeyPress={this.handleBoxScanKeyPress}
                     />
@@ -593,10 +617,18 @@ class ReplenishOperationPage extends Component {
         </Grid>
 
         <WarningModal
-          open={this.state.openＷarningModal}
+          open={this.state.openWrongProductModal}
           onClose={warningMessage.onCloseFunc.bind(this)} // eslint-disable-line
           headerText={warningMessage.headerText}
           contentText={warningMessage.contentText}
+        />
+
+        <ConfirmDialogModal
+          size="small"
+          open={openChangeLocationModal}
+          close={this.closeWrongBoxModal}
+          header="Change Location"
+          content="You scanned a different location! Are you sure?"
         />
 
         <InfoDialogModal

@@ -230,6 +230,13 @@ const pick = {
       String(stationId),
     ],
   }),
+
+  getProductByLocationCode: location => axios.post(`${appConfig.getApiUrl()}/Pick`, {
+    name: 'GetProductByLocationCode',
+    parameter: [
+      String(location),
+    ],
+  }),
 };
 
 const replenish = {
