@@ -50,12 +50,12 @@ class BinSetupModal extends Component {
         style={{ marginTop: '10%', marginLeft: 'auto', marginRight: 'auto' }}
       >
         <Modal.Header>
-Bin Setup
+          Bin Setup
         </Modal.Header>
         <Modal.Content>
           <Loader indeterminate inverted active={loading} size="massive" />
           <div className="info-text">
-Please place an empty bin on correspond location and scan the barcode on it.
+            Please place an empty bin on correspond location and scan the barcode on it.
           </div>
           <BinGroup openedBinNum={location} highlightColor="#4A7AFE" size="150" />
           <Input

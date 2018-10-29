@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Form, Input, Button, Checkbox, Select, Dropdown } from 'semantic-ui-react';
+import { Form, Input, Button } from 'semantic-ui-react';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 import api from 'api';
@@ -24,6 +24,7 @@ class CreateReplenishForm extends Component {
   constructor(props) {
     super(props);
 
+    this.scancodeInputRef = React.createRef();
     this.quantityInputRef = React.createRef();
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -43,7 +44,7 @@ class CreateReplenishForm extends Component {
   handleSubmit() {
     let error = false;
 
-    if (this.state.data.quantity <= 0) {
+    if (this.state.data.quantity === '' || this.state.data.quantity <= 0) {
       this.setState({ quantityError: true });
       error = true;
     } else {
@@ -62,7 +63,7 @@ class CreateReplenishForm extends Component {
     }
 
     // add product to list
-    const { product, scancode } = this.state;
+    const { product } = this.state;
     const data = {
       itemId: CreateReplenishForm.generateLineItemNo(),
       sku: product.sku,
@@ -74,6 +75,7 @@ class CreateReplenishForm extends Component {
 
     this.props.onSubmit(data);
     this.setState({ data: this.initData, product: {}, scancode: '' });
+    this.scancodeInputRef.current.focus();
   }
 
   handleFormChange(e, { name, value }) {
@@ -102,7 +104,8 @@ class CreateReplenishForm extends Component {
           if (res.data.length > 0) { // product exist
             // filter account
             const product = res.data.find(obj => parseInt(obj.accountNo, 10) === accountNo);
-            this.setState({ loading: false, product });
+            this.setState(prevState => ({ loading: false, product, data: { ...prevState.data, quantity: '' } }));
+            this.quantityInputRef.current.focus();
           } else {
             toast.warning('Cannot find product associate to the scancode.');
             this.setState({ loading: false, scancode: '', product: {} });
@@ -115,7 +118,6 @@ class CreateReplenishForm extends Component {
         this.setState({ loading: false });
       });
     }
-
   }
 
   render() {
@@ -126,15 +128,22 @@ class CreateReplenishForm extends Component {
       <Form inverted widths="equal" size="small" onSubmit={this.handleSubmit} loading={loading}>
         <Form.Group>
           <Form.Field
-            control={Input}
-            label="Scancode"
             disabled={accountNo === 0}
-            name="scancode"
-            value={scancode}
             error={scancodeError}
-            onChange={this.handleScancodeChange}
-            onKeyPress={this.handleScancodeKeyPress}
-          />
+            required
+          >
+            <label>
+Scancode
+            </label>
+            <Input
+              disabled={accountNo === 0}
+              name="scancode"
+              value={scancode}
+              ref={this.scancodeInputRef}
+              onChange={this.handleScancodeChange}
+              onKeyPress={this.handleScancodeKeyPress}
+            />
+          </Form.Field>
           <Form.Field
             control={Input}
             required
@@ -152,7 +161,9 @@ class CreateReplenishForm extends Component {
             error={quantityError}
             disabled={accountNo === 0}
           >
-            <label>Quantity</label>
+            <label>
+Quantity
+            </label>
             <Input
               name="quantity"
               value={data.quantity}
