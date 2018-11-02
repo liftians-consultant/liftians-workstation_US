@@ -121,7 +121,12 @@ class ReplenishTaskPage extends Component {
   }
 
   handleContinueBtn() {
-    this.props.history.push('/replenish-operation');
+    const { searchedList } = this.state;
+    const sourceIdList = searchedList.map(item => item.replenishBillNo).join(',');
+    api.replenish.replenishByBillNo(this.props.stationId, this.props.username, sourceIdList, 1).then(() => {
+      console.log('Continue going into replenish operation page.');
+      this.props.history.push('/replenish-operation');
+    });
   }
 
   handleSearchChange = (e, { value }) => {
