@@ -6,8 +6,8 @@ import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import decode from 'jwt-decode';
-import { composeWithDevTools } from 'redux-devtools-extension';
-import * as log4js from 'log4js2';
+import { composeWithDevTools } from 'redux-devtools-extension'; // eslint-disable-line
+import './i18n'; // i18n support
 
 
 import App from 'containers/App';
@@ -25,10 +25,11 @@ const store = createStore(
 
 if (localStorage.liftiansJWT) {
   if (process.env.REACT_APP_ENV === 'PRODUCTION') {
-    // production
+    // production env
     localStorage.removeItem('liftiansJWT');
     setAuthorizationHeader();
   } else {
+    // development env
     // check if expired
     const payload = decode(localStorage.liftiansJWT); // {sub: "10001", exp: 1519504053}
     const nowDate = new Date();
@@ -48,6 +49,7 @@ if (localStorage.liftiansJWT) {
   }
 }
 
+/* Set api server and station info if missing */
 if (localStorage.apiHost && localStorage.apiPort) {
   appConfig.setApiUrl(localStorage.apiHost, localStorage.apiPort);
 }
@@ -62,6 +64,6 @@ ReactDOM.render(
       <Route component={App} />
     </Provider>
   </HashRouter>,
-  document.getElementById('root')
+  document.getElementById('root'),
 );
 registerServiceWorker();

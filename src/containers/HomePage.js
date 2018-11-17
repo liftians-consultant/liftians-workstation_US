@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { compose } from 'recompose';
+import { withNamespaces } from 'react-i18next';
 import { Grid, Dimmer, Loader } from 'semantic-ui-react';
 
 import * as log4js from 'log4js2';
@@ -38,7 +40,7 @@ class HomePage extends Component {
         url: `${appConfig.getApiUrl()}/logs`,
         headers: {
           'Content-Type': 'text/plain',
-          'Authorization': localStorage.liftiansJWT,
+          Authorization: localStorage.liftiansJWT,
         },
       }));
 
@@ -69,7 +71,7 @@ class HomePage extends Component {
   }
 
   render() {
-    const { stationInfo } = this.props;
+    const { stationInfo, t } = this.props;
     const stationTaskType = stationInfo ? stationInfo.taskType : null;
 
     return (
@@ -81,25 +83,25 @@ class HomePage extends Component {
         <Grid columns={3} centered>
           <Grid.Row>
             <Grid.Column>
-              <MenuButton title="Replenish" name="replenish-task" iconName="sign in" clickHandler={this.goToPage} isDisabled={stationTaskType !== 'U' && stationTaskType !== 'R' ? true : false} />
+              <MenuButton title={t('title.replenish')} name="replenish-task" iconName="sign in" clickHandler={this.goToPage} isDisabled={!!(stationTaskType !== 'U' && stationTaskType !== 'R')} />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Pick" name="pick-task" iconName="sign out" clickHandler={this.goToPage} isDisabled={stationTaskType !== 'U' && stationTaskType !== 'P' ? true : false} />
+              <MenuButton title={t('title.pick')} name="pick-task" iconName="sign out" clickHandler={this.goToPage} isDisabled={!!(stationTaskType !== 'U' && stationTaskType !== 'P')} />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Inventory Check" name="" iconName="exchange" clickHandler={this.goToPage} isDisabled={stationTaskType !== 'U' && stationTaskType !== 'C' ? true : false} />
+              <MenuButton title={t('title.inventoryCheck')} name="" iconName="exchange" clickHandler={this.goToPage} isDisabled={!!(stationTaskType !== 'U' && stationTaskType !== 'C')} />
             </Grid.Column>
           </Grid.Row>
 
           <Grid.Row>
             <Grid.Column>
-              <MenuButton title="System Setting" name="system-setting" iconName="settings" clickHandler={this.goToPage} />
+              <MenuButton title={t('title.systemSetting')} name="system-setting" iconName="settings" clickHandler={this.goToPage} />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Inventory Search" name="inventory-search" iconName="search" clickHandler={this.goToPage} />
+              <MenuButton title={t('title.inventorySearch')} name="inventory-search" iconName="search" clickHandler={this.goToPage} />
             </Grid.Column>
             <Grid.Column>
-              <MenuButton title="Generate Data" name="generate-data" iconName="list alternate outline" clickHandler={this.goToPage} />
+              <MenuButton title={t('title.generateData')} name="generate-data" iconName="list alternate outline" clickHandler={this.goToPage} />
             </Grid.Column>
           </Grid.Row>
         </Grid>
@@ -107,6 +109,10 @@ class HomePage extends Component {
     );
   }
 }
+
+HomePage.defaultProps = {
+  stationInfo: {},
+};
 
 HomePage.propTypes = {
   history: PropTypes.shape({
@@ -117,7 +123,7 @@ HomePage.propTypes = {
 };
 
 function mapStateToProps(state) {
-  return { 
+  return {
     isAuthenticated: !!state.user.token,
     username: state.user.username,
     stationInfo: state.station.info,
@@ -125,9 +131,14 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps, {
+const mapDispatchToProps = {
   logout: actions.logout,
   getUserInfoById,
   activateStation,
   checkCurrentUnFinishTask,
-})(HomePage);
+};
+
+export default compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  withNamespaces(),
+)(HomePage);

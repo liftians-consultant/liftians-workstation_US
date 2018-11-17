@@ -2,9 +2,11 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { compose } from 'recompose';
 import { withRouter } from 'react-router';
 import { Button } from 'semantic-ui-react';
 import { toast } from 'react-toastify';
+import { withNamespaces } from 'react-i18next';
 import api from 'api';
 import * as actions from 'redux/actions/authAction';
 import appConfig from 'services/AppConfig';
@@ -13,7 +15,6 @@ import { showChangeBinModal, unlinkAllBinFromHolder } from 'redux/actions/operat
 import './SideNavigation.css';
 
 class SideNavigation extends Component {
-
   stationId = appConfig.getStationId()
 
   constructor() {
@@ -28,12 +29,12 @@ class SideNavigation extends Component {
     console.log('[WINDOW CLOSE EVENT] Triggered');
 
     if (this.props.taskType !== 'U' && this.props.taskCount > 0) {
-      toast.error('Please finish all the tasks first! \nPlease go to menu to refresh if you think you finished all tasks');
+      toast.error(this.props.t('message.finishAllTask'));
       event.returnValue = false;
       return false;
-    } else {
-      this.props.logout();
     }
+    this.props.logout();
+
     return false;
   }
 
@@ -92,7 +93,6 @@ class SideNavigation extends Component {
               toast.error('Error while stopping pick operation');
             }
           });
-          
         }
       }
     });
@@ -111,11 +111,11 @@ class SideNavigation extends Component {
       );
     }
 
-    return;
+    return (<div />);
   }
 
   render() {
-    const { taskType, location } = this.props;
+    const { taskType, location, t } = this.props;
     const currentPath = location.pathname;
     const operationUrl = taskType === 'R' ? '/replenish-operation' : '/operation';
     const taskListUrl = taskType === 'R' ? '/replenish-task' : '/pick-task';
@@ -125,18 +125,20 @@ class SideNavigation extends Component {
       <div className="side-navigation">
         <div className="nav-top">
           <div className="nav-item-container nav-station-container">
-            <span>Station #{this.stationId}</span>
+            <span>
+              {t('station.name', { id: this.stationId })}
+            </span>
           </div>
           <div className="nav-item-container">
             <Link to="/" replace={currentPath === '/'}>
               <Button className="nav-btn">
-                Main Menu
+                {t('label.mainMenu')}
               </Button>
             </Link>
           </div>
           <div className="nav-item-container">
             <Button className="nav-btn" onClick={() => this.handleOperationBtnClicked(operationUrl)}>
-              Operation
+              {t('label.operation')}
             </Button>
           </div>
           <div className="nav-item-container">
@@ -157,7 +159,7 @@ class SideNavigation extends Component {
       </div>
     );
   }
-};
+}
 
 SideNavigation.propTypes = {
   history: PropTypes.shape({
@@ -165,8 +167,8 @@ SideNavigation.propTypes = {
   }).isRequired,
   logout: PropTypes.func.isRequired,
   stationId: PropTypes.string.isRequired,
-  taskType: PropTypes.oneOf(['R', 'P', 'U']),
-  location: PropTypes.object,
+  taskType: PropTypes.oneOf(['R', 'P', 'U']).isRequired,
+  location: PropTypes.object.isRequired,
 };
 
 function mapStateToProps(state) {
@@ -178,9 +180,15 @@ function mapStateToProps(state) {
   };
 }
 
-export default withRouter(connect(mapStateToProps, {
+const mapDispatchToProps = {
   logout: actions.logout,
   checkCurrentUnFinishTask,
   showChangeBinModal,
   unlinkAllBinFromHolder,
-})(SideNavigation));
+};
+
+export default compose(
+  withRouter,
+  connect(mapStateToProps, mapDispatchToProps),
+  withNamespaces(),
+)(SideNavigation);
