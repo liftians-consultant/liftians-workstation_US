@@ -450,8 +450,8 @@ class PickOperationPage extends Component {
 
   getBarcode(data) {
     api.pick.getProductSerialNum(data).then((res) => {
-      const barCodeIndex = res.data[0].barcode ? 0 : 1; // sometimes there will have empty barcode data return...
-      this.setState({ currentBarcode: res.data[barCodeIndex].barcode });
+      const barCodeIndex = res.data[0].barCode ? 0 : 1; // sometimes there will have empty barcode data return...
+      this.setState({ currentBarcode: res.data[barCodeIndex].barCode });
     });
   }
 
@@ -615,7 +615,7 @@ class PickOperationPage extends Component {
         boxId: this.state.currentPickProduct.boxID,
       };
       api.pick.getProductSerialNum(data).then((res) => {
-        const barCodeIndex = res.data[0].barcode ? 0 : 1; // sometimes there will have empty barcode data return...
+        const barCodeIndex = res.data[0].barCode ? 0 : 1; // sometimes there will have empty barcode data return...
         this.logInfo(`[SCANNED][SIMULATE] Get barcode ${res.data[barCodeIndex].barcode}`);
         if (this.businessMode === 'pharmacy') {
           const barcode = this.state.pickedAmount === 0 ? res.data[barCodeIndex].barcode : `${this.state.barcode},${res.data[barCodeIndex].barcode}`;
