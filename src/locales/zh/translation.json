@@ -1,6 +1,6 @@
 {
   "//": "Home Page",
-  "title.replenish": "Replenish",
+  "title.replenish": "入庫",
   "title.pick": "Pick",
   "title.inventoryCheck": "Inventory Check",
   "title.systemSetting": "System Setting",
@@ -12,7 +12,7 @@
   "label.operation": "Operation",
   "message.finishAllTask": "Please finish all the tasks first! \nPlease go to menu to refresh if you think you finished all tasks",
   "//": "Pick Task Page",
-  "label.start": "Start",
-  "label.pause": "Pause",
-  "label.print": "Print"
+  "label.start": "開始",
+  "label.pause": "暫停",
+  "label.print": "列印"
 }

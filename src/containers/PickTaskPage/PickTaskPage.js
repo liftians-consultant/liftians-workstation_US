@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import moment from 'moment';
+import { compose } from 'recompose';
+import { withNamespaces } from 'react-i18next';
 import { Grid, Loader, Button } from 'semantic-ui-react';
 import { toast } from 'react-toastify';
 import api from 'api';
@@ -101,14 +103,12 @@ class PickTaskPage extends Component {
   getProcessStatusName() {
     api.menu.getProcessStatusName('P').then((res) => {
       if (res.data && res.data.length) {
-        this.processOptions[0] = res.data.map((processType, index) => {
-          return {
-            key: index,
-            text: this.locale === 'CHN' ? processType.processStatusCHN : processType.processStatus,
-            index,
-            value: processType.processStatusID,
-          }
-        });
+        this.processOptions[0] = res.data.map((processType, index) => ({
+          key: index,
+          text: this.locale === 'CHN' ? processType.processStatusCHN : processType.processStatus,
+          index,
+          value: processType.processStatusID,
+        }));
       }
     });
   }
@@ -134,7 +134,7 @@ class PickTaskPage extends Component {
     this.setState({ activeProcessType: value }, this.retrievePickOrderReocrds);
   };
 
-  handleStartBtn = (e) => {
+  handleStartBtn = () => {
     this.log.info('[HANDLE START BTN] Btn clicked');
     api.station.startStationOperation(this.props.stationId, this.props.username, 'P').then((res) => {
       // return 1 if success, 0 if failed
@@ -158,7 +158,7 @@ class PickTaskPage extends Component {
             });
           }, 2000);
         });
-      }).catch((error) => {
+      }).catch(() => {
         this.log.info('[HANDLE START BTN] GenPickTask FAILED');
         toast.error('Error while server generate pick task. Please contact system admin.');
       });
@@ -168,13 +168,11 @@ class PickTaskPage extends Component {
       this.setState({ loading: false });
       console.error(e);
     });
-
-
   }
 
-  handlePauseBtn = (e) => {
+  handlePauseBtn = () => {
     this.log.info('[PAUSE BTN] Clicked. Calling stopPickOperation');
-    api.pick.stopPickOperation(this.props.stationId, this.props.username, 'P').then((res) => {
+    api.pick.stopPickOperation(this.props.stationId, this.props.username, 'P').then(() => {
       this.log.info('[PAUSE PICK OPERATION] Pick Operation Paused');
     }).catch((err) => {
       this.log.info('[PAUSE PICK OPERATION] Pause Failed:', err);
@@ -183,6 +181,7 @@ class PickTaskPage extends Component {
 
   render() {
     const { activeBillType, loading, ordersList } = this.state;
+    const { t } = this.props;
 
     return (
       <div className="ui pick-task-page-container">
@@ -210,13 +209,13 @@ class PickTaskPage extends Component {
             <Grid.Column>
               <div className="order-list-btn-group">
                 <Button size="huge" primary onClick={() => this.handleStartBtn()}>
-                  Start
+                  {t('label.start')}
                 </Button>
                 <Button size="huge" secondary onClick={() => this.handlePauseBtn()}>
-                  Pause
+                  {t('label.pause')}
                 </Button>
                 <Button size="huge" secondary>
-                  Print
+                  {t('label.print')}
                 </Button>
               </div>
             </Grid.Column>
@@ -243,4 +242,7 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps, { setStationTaskType, checkCurrentUnFinishTask })(PickTaskPage);
+export default compose(
+  connect(mapStateToProps, { setStationTaskType, checkCurrentUnFinishTask }),
+  withNamespaces(),
+)(PickTaskPage);
