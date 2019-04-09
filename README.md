@@ -31,6 +31,16 @@ Under directory there will be a `.env` file for setting environement parameter
 | REACT_APP_TABLE_DATE_FORMAT_NO_SEC  | Same as aboe, just no second |
 | REACT_APP_PICKING_IDLE_TIME  | Idel time for picking |
 
+## WMS API Key
+If you want to use the data generate feature. Create a `apiKey.json` file under `src` directory.
+
+```json
+{
+  "key": "c9Dof3-CC0De-Ev9ap",
+  "secret": "2ewo9-edoe0-De8eV-y2CGB3"
+}
+```
+
 ## Starting Dev server:
 Both web and desktop build are using the same code base. 
 
