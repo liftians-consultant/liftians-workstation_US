@@ -23,7 +23,7 @@ const template = [
             if (r === null) {
               console.log('user cancelled');
             } else {
-              if (r === '1433ebener') {
+              if (r === '599seaport') {
                 if (focusedWindow) focusedWindow.webContents.toggleDevTools();
               }
             }
