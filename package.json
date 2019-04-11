@@ -91,6 +91,7 @@
     "start-js": "cross-env NODE_PATH=src react-scripts start",
     "build-js": "cross-env NODE_PATH=src react-scripts build",
     "build": "npm-run-all build-css build-js",
+    "build-web": "yarn build && cp package.server.json build/package.json && cp server.js build/server.js",
     "test": "cross-env NODE_PATH=src react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "electron-pack": "electron-builder -w -c.extraMetadata.main=build/electron.js",

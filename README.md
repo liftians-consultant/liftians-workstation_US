@@ -55,10 +55,12 @@ Both web and desktop build are using the same code base.
 
 ## Build
 - Web version build:
-`yarn build`
+`yarn build-web`
 
 The build will be under `/build` under project directory.
 Open `index.html` file to run the application. 
+
+*NOTE:* Always remember to clean cache. 
 
 *NOTE:* Always remember to clean cache. 
 
