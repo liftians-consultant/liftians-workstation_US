@@ -51,6 +51,9 @@ You don't need to worry about proxy after build.
 Both web and desktop build are using the same code base. 
 
 - Just browser: `yarn react-start`
+
+**NOTE:** If your browser page after the commend, please check the debugger tool console. If there is an error message about `require is not defined`. Try to install `sockjs-client` by execute  `yarn add sockjs-client@1.1.5`
+
 - Both browser and Electron: `yarn start`
 
 ## Build
